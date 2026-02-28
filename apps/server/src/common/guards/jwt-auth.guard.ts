@@ -1,24 +1,34 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { Request } from "express";
+import { AuthRepository } from "src/repositories/auth.repository";
 
 import { COOKIE_PARAM } from "../constants/cookie-param";
 import { verifyAccessToken } from "../utils/jwt";
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
+  constructor(private readonly authRepository: AuthRepository) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
     const cookies = (request as Request).cookies as Record<string, string>;
-    const token = cookies[COOKIE_PARAM.accessToken];
+    const accessToken = cookies[COOKIE_PARAM.accessToken];
+    const sessionId = cookies[COOKIE_PARAM.sessionId];
 
-    if (!token) {
+    if (!accessToken) {
       throw new UnauthorizedException("Missing token");
     }
 
     try {
-      const payload = verifyAccessToken(token);
+      const payload = verifyAccessToken(accessToken);
+
+      const userSession = await this.authRepository.findSessionById(sessionId);
+
+      if (!userSession || new Date(userSession.expiresAt) < new Date()) {
+        throw new UnauthorizedException("Invalid or expired token");
+      }
 
       request.userId = payload.userId;
       return true;

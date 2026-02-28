@@ -1,8 +1,10 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Res } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res, UseGuards } from "@nestjs/common";
 import { Response } from "express";
 import { COOKIE_PARAM } from "src/common/constants/cookie-param";
 import { RefreshToken } from "src/common/decorators/refresh-token.decorator";
 import { SessionId } from "src/common/decorators/session-id.decorator";
+import { UserId } from "src/common/decorators/user-id.decorator";
+import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
 import { isProduction } from "src/common/utils/node-env";
 
 import { LoginDto, RegisterDto } from "./auth.dto";
@@ -28,6 +30,13 @@ export class AuthController {
     this.setCookie(res, COOKIE_PARAM.accessToken, accessToken, true);
     this.setCookie(res, COOKIE_PARAM.refreshToken, refreshToken);
     this.setCookie(res, COOKIE_PARAM.sessionId, sessionId);
+  }
+
+  @Get("me")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  async getMe(@UserId() userId: string) {
+    return await this.authService.getMe(userId);
   }
 
   @Post("refresh")

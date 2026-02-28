@@ -1,5 +1,5 @@
 import "./App.css";
-import AppRouterProvider from "./providers/routerProvider";
+import AppRouterProvider from "./providers/router/routerProvider";
 
 function App() {
   return <AppRouterProvider />;

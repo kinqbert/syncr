@@ -5,23 +5,32 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import bcrypt from "bcrypt";
-import { eq } from "drizzle-orm";
-import { sha256 } from "js-sha256";
 import { TokenPayload } from "src/common/types/token";
-import { generateAccessToken, generateRefreshToken } from "src/common/utils/jwt";
-import db from "src/db/drizzle";
-import { users, userSessions } from "src/db/schema";
+import { hash } from "src/common/utils/hash";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "src/common/utils/jwt";
+import { AuthRepository } from "src/repositories/auth.repository";
+import { UserRepository } from "src/repositories/user.repository";
 
 import { LoginDto, RegisterDto } from "./auth.dto";
 
 @Injectable()
 export class AuthService {
-  private readonly SALT_ROUNS = 10;
+  private readonly SALT_ROUNDS = 10;
+
+  constructor(
+    private readonly userRepository: UserRepository,
+
+    private readonly authRepository: AuthRepository,
+  ) {}
 
   async register(registerDto: RegisterDto) {
     const { email, password } = registerDto;
 
-    const emailDuplicateUsersAmount = await db.$count(users, eq(users.email, email));
+    const emailDuplicateUsersAmount = await this.userRepository.countByEmail(email);
 
     if (emailDuplicateUsersAmount > 0) {
       throw new ConflictException("User with such email already exists.");
@@ -29,18 +38,15 @@ export class AuthService {
 
     const hashedPassword = await this.hashPassword(password);
 
-    await db.insert(users).values({ email, password: hashedPassword });
+    await this.userRepository.createUser(email, hashedPassword);
   }
 
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
+
     const error = new NotFoundException("Wrong email or password.");
 
-    const [existingUser] = await db
-      .select({ id: users.id, password: users.password })
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
+    const existingUser = await this.userRepository.findAuthUserByEmail(email);
 
     if (!existingUser) {
       throw error;
@@ -57,25 +63,36 @@ export class AuthService {
     const tokenPayload = { userId };
 
     const { accessToken, refreshToken } = this.generateTokens(tokenPayload);
+
     const sessionId = await this.createSessionForUser(userId, refreshToken);
 
     return { accessToken, refreshToken, sessionId };
   }
 
+  async getMe(userId: string) {}
+
   async refreshTokens(refreshToken: string, sessionId: string) {
     const error = new UnauthorizedException("Refresh token expired.");
 
-    const userSession = await this.getSessionById(sessionId);
+    try {
+      verifyRefreshToken(refreshToken);
+    } catch {
+      throw error;
+    }
+
+    const userSession = await this.authRepository.findSessionById(sessionId);
 
     if (!userSession) {
       throw error;
     }
 
     const hashedRefreshToken = this.hashRefreshToken(refreshToken);
-    const hashesMatch = userSession.refreshTokenHash === hashedRefreshToken;
-    const isExpired = new Date() > new Date(userSession.expiresAt);
 
-    if (!hashesMatch || isExpired) {
+    const hashesMatch = userSession.refreshTokenHash === hashedRefreshToken;
+
+    const isSessionExpired = new Date() > new Date(userSession.expiresAt);
+
+    if (!hashesMatch || isSessionExpired) {
       throw error;
     }
 
@@ -89,57 +106,43 @@ export class AuthService {
   }
 
   async logout(sessionId: string) {
-    await this.deleteSession(sessionId);
+    await this.authRepository.deleteSession(sessionId);
   }
 
   // HELPERS
+
   private generateTokens(payload: TokenPayload) {
     const accessToken = generateAccessToken(payload);
+
     const refreshToken = generateRefreshToken(payload);
 
     return { accessToken, refreshToken };
   }
 
   private async createSessionForUser(userId: number, refreshToken: string) {
-    const refreshTokenHash = sha256(refreshToken);
+    const refreshTokenHash = this.hashRefreshToken(refreshToken);
 
     const now = new Date();
+
     const expiresAt = new Date(now.setDate(now.getDate() + 7));
 
-    const [session] = await db
-      .insert(userSessions)
-      .values({ userId, refreshTokenHash, expiresAt })
-      .returning();
+    const session = await this.authRepository.createSession(userId, refreshTokenHash, expiresAt);
 
     return session.id;
-  }
-
-  private async getSessionById(sessionId: string) {
-    const [userSession] = await db
-      .select()
-      .from(userSessions)
-      .where(eq(userSessions.id, sessionId))
-      .limit(1);
-
-    return userSession;
-  }
-
-  private async deleteSession(sessionId: string) {
-    await db.delete(userSessions).where(eq(userSessions.id, sessionId));
   }
 
   private async updateRefreshTokenForSession(sessionId: string, refreshToken: string) {
     const refreshTokenHash = this.hashRefreshToken(refreshToken);
 
-    await db.update(userSessions).set({ refreshTokenHash }).where(eq(userSessions.id, sessionId));
+    await this.authRepository.updateRefreshTokenHash(sessionId, refreshTokenHash);
   }
 
   private hashRefreshToken(refreshToken: string) {
-    return sha256(refreshToken);
+    return hash(refreshToken);
   }
 
   private async hashPassword(password: string) {
-    return bcrypt.hash(password, this.SALT_ROUNS);
+    return bcrypt.hash(password, this.SALT_ROUNDS);
   }
 
   private async comparePassword(inputPassword: string, hashedPassword: string) {
