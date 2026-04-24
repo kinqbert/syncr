@@ -8,7 +8,9 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
     "paths": {
-      "@syncr-packages/*": ["../../packages/src/*"]
+      "@/*": ["./src/*"],
+      "@syncr/packages": ["../../packages/src/index.ts"],
+      "@syncr/packages/*": ["../../packages/src/*"]
     },
 
     /* Bundler mode */
