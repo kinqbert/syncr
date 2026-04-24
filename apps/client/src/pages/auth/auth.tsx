@@ -3,7 +3,7 @@ import { Stack, Typography } from "@mui/material";
 export const AuthPage = () => {
   return (
     <Stack>
-      <Typography variant="h3">Auth Page</Typography>
+      <Typography variant="h1">Auth Page</Typography>
     </Stack>
   );
 };
