@@ -5,11 +5,17 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:server": "pnpm --filter @apps/server dev",
-    "dev:client": "pnpm --filter @apps/client dev"
+    "dev:server": "npm run dev -w @apps/server",
+    "dev:client": "npm run dev -w @apps/client",
+    "build:shared": "npm run build -w @packages/shared",
+    "build": "npm run build --workspaces --if-present"
   },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.28.2"
+  "packageManager": "npm@11.12.1"
 }
