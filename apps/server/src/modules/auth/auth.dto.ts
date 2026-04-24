@@ -1,4 +1,4 @@
-import { RegisterBody } from "@syncr/packages";
+import type { LoginBody, RegisterBody } from "@syncr/packages";
 import { IsEmail, IsString, Matches, MinLength } from "class-validator";
 
 export class RegisterDto implements RegisterBody {
@@ -14,7 +14,7 @@ export class RegisterDto implements RegisterBody {
   password: string;
 }
 
-export class LoginDto {
+export class LoginDto implements LoginBody {
   @IsEmail({}, { message: "Email has to be valid." })
   email: string;
 

@@ -6,6 +6,7 @@
     "module": "ESNext",
     "types": ["node"],
     "skipLibCheck": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@syncr/packages": ["../../packages/src/index.ts"],
