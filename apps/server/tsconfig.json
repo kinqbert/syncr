@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "moduleResolution": "node16",
-    "module": "Node16",
+    "moduleResolution": "node",
+    "module": "commonjs",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -20,7 +20,8 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "src/*": ["./src/*"],
-      "@shared": ["../../packages/src"]
+      "@syncr-packages": ["../../packages/src/index.ts"],
+      "@syncr-packages/*": ["../../packages/src/*"]
     }
   }
 }
