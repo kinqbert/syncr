@@ -10,16 +10,9 @@
     "typescript",
     "typescriptreact"
   ],
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.suggest.autoImports": true,
-  "javascript.suggest.autoImports": true,
-  "typescript.preferences.includePackageJsonAutoImports": "on",
-  "javascript.preferences.includePackageJsonAutoImports": "on",
-  "typescript.preferences.autoImportFileExcludePatterns": [
-    "**/packages/dist/**"
-  ],
-  "javascript.preferences.autoImportFileExcludePatterns": [
-    "**/packages/dist/**"
-  ]
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "js/ts.suggest.autoImports": true,
+  "js/ts.preferences.includePackageJsonAutoImports": "on",
+  "js/ts.preferences.autoImportFileExcludePatterns": ["**/packages/dist/**"]
 }
