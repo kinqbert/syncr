@@ -7,12 +7,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:server": "npm run dev -w @apps/server",
     "dev:client": "npm run dev -w @apps/client",
-    "build:shared": "npm run build -w @packages/shared",
+    "build:shared": "npm run build -w @syncr/packages",
     "build": "npm run build --workspaces --if-present"
   },
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages"
   ],
   "keywords": [],
   "author": "",
