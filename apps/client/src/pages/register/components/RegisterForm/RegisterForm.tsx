@@ -1,4 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Link, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -13,19 +12,12 @@ import { StepRenderer } from "./components/StepRenderer";
 import { Link as RouterLink } from "react-router";
 import { useRegister } from "@/api";
 
-const stepFields: RegisterSchemaTypeKeys[][] = [
-  ["email"],
-  ["password", "passwordConfirmation"],
-  ["name", "surname"],
-];
-
 export const RegisterForm = () => {
   const { mutateAsync: register, isPending } = useRegister();
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
 
   const methods = useForm<RegisterSchemaType>({
-    resolver: zodResolver(registerSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -35,54 +27,74 @@ export const RegisterForm = () => {
     },
   });
 
-  const onNextStep = () => {
-    const currentStepFields = stepFields[step];
-    const currentStepSchema = registerStepSchemas[step];
+  const setValidationErrors = (
+    issues: { path: PropertyKey[]; message: string }[],
+  ) => {
+    issues.forEach((issue) => {
+      const field = issue.path[0] as RegisterSchemaTypeKeys | undefined;
 
-    methods.clearErrors(currentStepFields);
+      if (!field) return;
+
+      methods.setError(field, {
+        type: "manual",
+        message: issue.message,
+      });
+    });
+  };
+
+  const onNextStep = () => {
+    methods.clearErrors();
+
+    const currentStepSchema = registerStepSchemas[step];
 
     const result = currentStepSchema.safeParse(methods.getValues());
 
     if (!result.success) {
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as RegisterSchemaTypeKeys | undefined;
-
-        if (!field) return;
-
-        methods.setError(field, {
-          type: "manual",
-          message: issue.message,
-        });
-      });
+      setValidationErrors(result.error.issues);
 
       return;
     }
 
-    setStep((prev) => Math.min(prev + 1, stepFields.length - 1));
+    setStep((prev) => Math.min(prev + 1, registerStepSchemas.length - 1));
   };
 
-  const onSubmit = async (data: RegisterSchemaType) => {
-    const { passwordConfirmation, ...payload } = data;
+  const onSubmit = async () => {
+    methods.clearErrors();
+
+    const result = registerSchema.safeParse(methods.getValues());
+
+    if (!result.success) {
+      setValidationErrors(result.error.issues);
+
+      return;
+    }
+
+    const { passwordConfirmation, ...payload } = result.data;
 
     await register(payload);
   };
 
-  const isLastStep = step === stepFields.length - 1;
+  const isLastStep = step === registerStepSchemas.length - 1;
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)}>
+      <form>
         <Stack gap={2.5}>
           <Stack gap={0.5}>
             <Typography color="text.secondary">
-              Step {step + 1} of {stepFields.length}
+              Step {step + 1} of {registerStepSchemas.length}
             </Typography>
           </Stack>
 
           <StepRenderer step={step} />
 
           {isLastStep ? (
-            <Button type="submit" variant="contained" loading={isPending}>
+            <Button
+              type="button"
+              variant="contained"
+              loading={isPending}
+              onClick={onSubmit}
+            >
               Finish
             </Button>
           ) : (
