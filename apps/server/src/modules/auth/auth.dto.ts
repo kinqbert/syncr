@@ -12,6 +12,12 @@ export class RegisterDto implements RegisterBody {
       "Password must contain at least one uppercase letter, one lowercase letter, and one number.",
   })
   password: string;
+
+  @IsString()
+  name: string;
+
+  @IsString()
+  surname: string;
 }
 
 export class LoginDto implements LoginBody {

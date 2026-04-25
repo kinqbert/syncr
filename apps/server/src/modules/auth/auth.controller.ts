@@ -10,7 +10,7 @@ import { isProduction } from "src/common/utils/node-env";
 import { LoginDto, RegisterDto } from "./auth.dto";
 import { AuthService } from "./auth.service";
 
-@Controller("auth")
+@Controller()
 export class AuthController {
   private readonly cookieTTL = 1000 * 60 * 60 * 24 * 365;
 
