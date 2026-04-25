@@ -69,7 +69,12 @@ export const RegisterForm = () => {
       return;
     }
 
-    const { passwordConfirmation, ...payload } = result.data;
+    const payload = {
+      email: result.data.email,
+      password: result.data.password,
+      name: result.data.name,
+      surname: result.data.surname,
+    };
 
     await register(payload);
   };

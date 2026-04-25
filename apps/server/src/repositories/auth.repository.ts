@@ -7,11 +7,8 @@ import { userSessions } from "src/db/schema";
 export class AuthRepository {
   async createSession(userId: number, refreshTokenHash: string, expiresAt: Date) {
     const [session] = await db
-
       .insert(userSessions)
-
       .values({ userId, refreshTokenHash, expiresAt })
-
       .returning();
 
     return session;
@@ -19,13 +16,9 @@ export class AuthRepository {
 
   async findSessionById(sessionId: string) {
     const [session] = await db
-
       .select()
-
       .from(userSessions)
-
       .where(eq(userSessions.id, sessionId))
-
       .limit(1);
 
     return session;

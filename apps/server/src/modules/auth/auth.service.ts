@@ -16,6 +16,7 @@ import { AuthRepository } from "src/repositories/auth.repository";
 import { UserRepository } from "src/repositories/user.repository";
 
 import { LoginDto, RegisterDto } from "./auth.dto";
+import { mapMeResponseDto } from "./auth.mapper";
 
 @Injectable()
 export class AuthService {
@@ -33,7 +34,7 @@ export class AuthService {
     const emailDuplicateUser = await this.userRepository.findUserByEmail(email);
 
     if (emailDuplicateUser) {
-      throw new ConflictException("User with such email already exists.");
+      throw new ConflictException("User with such email already exists");
     }
 
     const hashedPassword = await this.hashPassword(password);
@@ -49,7 +50,7 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    const error = new NotFoundException("Wrong email or password.");
+    const error = new NotFoundException("Wrong email or password");
 
     const existingUser = await this.userRepository.findUserByEmail(email);
 
@@ -73,11 +74,17 @@ export class AuthService {
   }
 
   async getMe(userId: number) {
-    return this.userRepository.findUserById(userId);
+    const user = await this.userRepository.findUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    return mapMeResponseDto(user);
   }
 
   async refreshTokens(refreshToken: string, sessionId: string) {
-    const error = new UnauthorizedException("Refresh token expired.");
+    const error = new UnauthorizedException("Refresh token expired");
 
     try {
       verifyRefreshToken(refreshToken);
