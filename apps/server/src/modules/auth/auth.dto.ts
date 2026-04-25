@@ -1,5 +1,6 @@
 import type { LoginBody, RegisterBody } from "@syncr/packages";
-import { IsEmail, IsString, Matches, MinLength } from "class-validator";
+import { IsEmail, IsNumber, IsString, Matches, MinLength } from "class-validator";
+import { users } from "src/db/schema";
 
 export class RegisterDto implements RegisterBody {
   @IsEmail({}, { message: "Email has to be valid." })
@@ -26,4 +27,22 @@ export class LoginDto implements LoginBody {
 
   @IsString()
   password: string;
+}
+
+type User = typeof users.$inferSelect;
+export class UserDto implements User {
+  @IsNumber()
+  id: number;
+
+  @IsEmail({}, { message: "Email has to be valid." })
+  email: string;
+
+  @IsString()
+  password: string;
+
+  @IsString()
+  name: string;
+
+  @IsString()
+  surname: string;
 }

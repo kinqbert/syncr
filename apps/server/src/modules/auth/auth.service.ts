@@ -72,7 +72,9 @@ export class AuthService {
     return { accessToken, refreshToken, sessionId };
   }
 
-  async getMe(userId: string) {}
+  async getMe(userId: number) {
+    return this.userRepository.findUserById(userId);
+  }
 
   async refreshTokens(refreshToken: string, sessionId: string) {
     const error = new UnauthorizedException("Refresh token expired.");
