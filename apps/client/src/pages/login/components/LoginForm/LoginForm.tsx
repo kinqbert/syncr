@@ -37,6 +37,7 @@ export const LoginForm = () => {
         error={Boolean(errors.email)}
         helperText={errors.email?.message}
       />
+
       <TextField
         {...register("password")}
         label="Password"
@@ -44,10 +45,13 @@ export const LoginForm = () => {
         error={Boolean(errors.password)}
         helperText={errors.password?.message}
       />
+
       {error && <Typography color="error">{error}</Typography>}
+
       <Button type="submit" variant="contained">
         Login
       </Button>
+
       <Typography color="text.secondary" textAlign="center">
         New here?{" "}
         <Link component={RouterLink} to="/register">

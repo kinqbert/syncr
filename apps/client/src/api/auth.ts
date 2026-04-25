@@ -1,14 +1,19 @@
 import api from "@/lib/axios";
-import type { LoginBody, RegisterBody } from "@syncr/packages";
+import type { LoginBody, MeResponse, RegisterBody } from "@syncr/packages";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-const keys = {
+export const authKeys = {
   me: ["me"],
 };
 
-const register = (body: RegisterBody) => api.post("register", body);
-const login = (body: LoginBody) => api.post("login", body);
-const me = () => api.get("me");
+const register = async (body: RegisterBody) => await api.post("register", body);
+const login = async (body: LoginBody) => await api.post("login", body);
+
+const me = async () => {
+  const response = await api.get<MeResponse>("me");
+
+  return response.data;
+};
 
 export const useRegister = () => {
   return useMutation({
@@ -25,6 +30,7 @@ export const useLogin = () => {
 export const useMe = () => {
   return useQuery({
     queryFn: me,
-    queryKey: keys.me,
+    queryKey: authKeys.me,
+    retry: false,
   });
 };
