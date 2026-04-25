@@ -5,9 +5,10 @@ import { useState } from "react";
 import { useLogin } from "@/api";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { Button, Link, Stack, TextField, Typography } from "@mui/material";
-import { Link as RouterLink } from "react-router";
+import { Link as RouterLink, useNavigate } from "react-router";
 
 export const LoginForm = () => {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -22,6 +23,7 @@ export const LoginForm = () => {
     try {
       setError(null);
       await login(data);
+      navigate("/");
     } catch (error) {
       setError(getErrorMessage(error));
     }
@@ -34,14 +36,14 @@ export const LoginForm = () => {
         label="Email"
         error={Boolean(errors.email)}
         helperText={errors.email?.message}
-      ></TextField>
+      />
       <TextField
         {...register("password")}
         label="Password"
         type="password"
         error={Boolean(errors.password)}
         helperText={errors.password?.message}
-      ></TextField>
+      />
       {error && <Typography color="error">{error}</Typography>}
       <Button type="submit" variant="contained">
         Login

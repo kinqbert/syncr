@@ -1,4 +1,4 @@
-import { Button, Link, Stack, Typography } from "@mui/material";
+import { Alert, Button, Link, Snackbar, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -9,13 +9,16 @@ import {
   type RegisterSchemaTypeKeys,
 } from "./validation";
 import { StepRenderer } from "./components/StepRenderer";
-import { Link as RouterLink } from "react-router";
+import { Link as RouterLink, useNavigate } from "react-router";
 import { useRegister } from "@/api";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 export const RegisterForm = () => {
-  const { mutateAsync: register, isPending } = useRegister();
-
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { mutateAsync: register, isPending } = useRegister();
 
   const methods = useForm<RegisterSchemaType>({
     defaultValues: {
@@ -60,6 +63,7 @@ export const RegisterForm = () => {
 
   const onSubmit = async () => {
     methods.clearErrors();
+    setErrorMessage(null);
 
     const result = registerSchema.safeParse(methods.getValues());
 
@@ -76,10 +80,16 @@ export const RegisterForm = () => {
       surname: result.data.surname,
     };
 
-    await register(payload);
+    try {
+      await register(payload);
+      navigate("/login");
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error, "Failed to create account."));
+    }
   };
 
   const isLastStep = step === registerStepSchemas.length - 1;
+  const isErrorSnackbarOpen = Boolean(errorMessage);
 
   return (
     <FormProvider {...methods}>
@@ -116,6 +126,20 @@ export const RegisterForm = () => {
           </Typography>
         </Stack>
       </form>
+      <Snackbar
+        open={isErrorSnackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setErrorMessage(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity="error"
+          variant="filled"
+          onClose={() => setErrorMessage(null)}
+        >
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </FormProvider>
   );
 };
