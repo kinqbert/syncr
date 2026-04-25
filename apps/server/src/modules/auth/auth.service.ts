@@ -30,9 +30,9 @@ export class AuthService {
   async register(registerDto: RegisterDto) {
     const { email, password, name, surname } = registerDto;
 
-    const emailDuplicateUsersAmount = await this.userRepository.countByEmail(email);
+    const emailDuplicateUser = await this.userRepository.findUserByEmail(email);
 
-    if (emailDuplicateUsersAmount > 0) {
+    if (emailDuplicateUser) {
       throw new ConflictException("User with such email already exists.");
     }
 
@@ -51,7 +51,7 @@ export class AuthService {
 
     const error = new NotFoundException("Wrong email or password.");
 
-    const existingUser = await this.userRepository.findAuthUserByEmail(email);
+    const existingUser = await this.userRepository.findUserByEmail(email);
 
     if (!existingUser) {
       throw error;
