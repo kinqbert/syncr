@@ -28,7 +28,7 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const { email, password } = registerDto;
+    const { email, password, name, surname } = registerDto;
 
     const emailDuplicateUsersAmount = await this.userRepository.countByEmail(email);
 
@@ -38,7 +38,12 @@ export class AuthService {
 
     const hashedPassword = await this.hashPassword(password);
 
-    await this.userRepository.createUser(email, hashedPassword);
+    await this.userRepository.createUser({
+      email,
+      password: hashedPassword,
+      name,
+      surname,
+    });
   }
 
   async login(loginDto: LoginDto) {
@@ -61,9 +66,7 @@ export class AuthService {
     const userId = existingUser.id;
 
     const tokenPayload = { userId };
-
     const { accessToken, refreshToken } = this.generateTokens(tokenPayload);
-
     const sessionId = await this.createSessionForUser(userId, refreshToken);
 
     return { accessToken, refreshToken, sessionId };
@@ -113,7 +116,6 @@ export class AuthService {
 
   private generateTokens(payload: TokenPayload) {
     const accessToken = generateAccessToken(payload);
-
     const refreshToken = generateRefreshToken(payload);
 
     return { accessToken, refreshToken };
@@ -123,7 +125,6 @@ export class AuthService {
     const refreshTokenHash = this.hashRefreshToken(refreshToken);
 
     const now = new Date();
-
     const expiresAt = new Date(now.setDate(now.getDate() + 7));
 
     const session = await this.authRepository.createSession(userId, refreshTokenHash, expiresAt);

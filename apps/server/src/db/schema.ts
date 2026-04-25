@@ -4,6 +4,8 @@ import { integer, pgTable, serial, text, timestamp, unique, uuid } from "drizzle
 export const users = pgTable("users", {
   id: serial().primaryKey(),
   email: text().notNull().unique(),
+  name: text().notNull(),
+  surname: text().notNull(),
   password: text().notNull(),
 });
 

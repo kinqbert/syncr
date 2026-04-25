@@ -8,6 +8,13 @@
       "when": 1763813530128,
       "tag": "0000_early_elektra",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1777121426156,
+      "tag": "0001_perfect_starbolt",
+      "breakpoints": true
     }
   ]
 }

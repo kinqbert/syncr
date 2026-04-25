@@ -9,8 +9,8 @@ export class UserRepository {
     return db.$count(users, eq(users.email, email));
   }
 
-  async createUser(email: string, password: string) {
-    await db.insert(users).values({ email, password });
+  async createUser(data: typeof users.$inferInsert) {
+    await db.insert(users).values(data);
   }
 
   async findAuthUserByEmail(email: string) {
