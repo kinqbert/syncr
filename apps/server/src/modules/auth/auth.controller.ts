@@ -7,7 +7,7 @@ import { UserId } from "src/common/decorators/user-id.decorator";
 import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
 import { isProduction } from "src/common/utils/node-env";
 
-import { LoginDto, RegisterDto } from "./auth.dto";
+import { LoginDto, MeResponseDto, RegisterDto } from "./auth.dto";
 import { AuthService } from "./auth.service";
 
 @Controller()
@@ -35,7 +35,7 @@ export class AuthController {
   @Get("me")
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
-  async getMe(@UserId() userId: number) {
+  async getMe(@UserId() userId: number): Promise<MeResponseDto> {
     return await this.authService.getMe(userId);
   }
 
