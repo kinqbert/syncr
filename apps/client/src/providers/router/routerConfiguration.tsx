@@ -1,11 +1,11 @@
 import { createBrowserRouter } from "react-router";
 import { DashboardPage, LoginPage, RegisterPage } from "@/pages";
-import { AuthenticatedLayout } from "@/providers/auth";
+import { AppLayout } from "@/components/AppLayout";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <AuthenticatedLayout />,
+    element: <AppLayout />,
     children: [
       {
         index: true,

@@ -2,7 +2,7 @@ import { useMe } from "@/api";
 import { useAuthStore, type StoreUser } from "@/store/useAuthStore";
 import { CircularProgress, Stack } from "@mui/material";
 import type { MeResponse } from "@syncr/packages";
-import { Navigate, Outlet, useLocation } from "react-router";
+import { Navigate, useLocation } from "react-router";
 
 const buildStoreUserFromMe = (response: MeResponse): StoreUser => {
   return {
@@ -11,7 +11,11 @@ const buildStoreUserFromMe = (response: MeResponse): StoreUser => {
   };
 };
 
-export const AuthenticatedLayout = () => {
+export const AuthenticatedLayout = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const location = useLocation();
   const setUser = useAuthStore((state) => state.setUser);
   const { data: user, isPending, isSuccess } = useMe();
@@ -34,5 +38,5 @@ export const AuthenticatedLayout = () => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return <Outlet />;
+  return children;
 };
