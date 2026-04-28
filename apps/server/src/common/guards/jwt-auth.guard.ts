@@ -13,7 +13,7 @@ export class JwtAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    const cookies = (request as Request).cookies as Record<string, string>;
+    const cookies = (request as Request).cookies;
     const accessToken = cookies[COOKIE_PARAM.accessToken];
     const sessionId = cookies[COOKIE_PARAM.sessionId];
 
