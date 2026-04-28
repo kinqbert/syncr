@@ -4,7 +4,7 @@ import { CONFIG } from "src/config/configuration";
 import { TokenPayload } from "../types/token";
 
 export const generateAccessToken = (data: any) => {
-  return jwt.sign(data, CONFIG.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
+  return jwt.sign(data, CONFIG.ACCESS_TOKEN_SECRET, { expiresIn: "10m" });
 };
 
 export const generateRefreshToken = (data: any) => {
