@@ -46,9 +46,7 @@ export const rolePermissions = pgTable(
       .notNull()
       .references(() => permissions.id, { onDelete: "cascade" }),
   },
-  (table) => ({
-    rolePermissionUnique: unique().on(table.roleId, table.permissionId),
-  }),
+  (table) => [unique().on(table.roleId, table.permissionId)],
 );
 
 export const userCompanyRoles = pgTable(
@@ -64,5 +62,5 @@ export const userCompanyRoles = pgTable(
       .notNull()
       .references(() => roles.id, { onDelete: "cascade" }),
   },
-  (table) => ({ userCompanyUnique: unique().on(table.userId, table.companyId) }),
+  (table) => [unique().on(table.userId, table.companyId)],
 );
