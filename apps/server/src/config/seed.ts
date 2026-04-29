@@ -3,6 +3,7 @@ import { PermissionKey, RoleKey } from "@syncr/packages";
 import db from "src/db/drizzle";
 import { permissions, rolePermissions, roles } from "src/db/schema";
 
+// CONSTANTS
 const INITIAL_ROLE_RECORDS: Record<RoleKey, typeof roles.$inferInsert> = {
   [RoleKey.Owner]: {
     key: RoleKey.Owner,
@@ -79,10 +80,15 @@ const ROLE_PERMISSION_RECORDS: Record<RoleKey, PermissionKey[]> = {
   ],
 };
 
+// HELPERS
 const initialRoles: (typeof roles.$inferInsert)[] = Object.values(INITIAL_ROLE_RECORDS);
 const initialPermissions: (typeof permissions.$inferInsert)[] = Object.values(
   INITIAL_PERMISSION_RECORDS,
 );
+
+const keyIdMap = <T extends { key: string; id: number }>(rows: T[]) => {
+  return new Map(rows.map((row) => [row.key, row.id]));
+};
 
 const getInitialRolePermissions = (
   dbRoles: (typeof roles.$inferSelect)[],
@@ -90,21 +96,13 @@ const getInitialRolePermissions = (
 ): (typeof rolePermissions.$inferInsert)[] => {
   const result: (typeof rolePermissions.$inferInsert)[] = [];
 
-  const dbRolesIdsMap: Map<RoleKey, number> = new Map();
-  const dbPermissionsIdsMap: Map<PermissionKey, number> = new Map();
+  const dbRolesIdsMap = keyIdMap(dbRoles);
+  const dbPermissionsIdsMap = keyIdMap(dbPermissions);
 
-  for (const role of dbRoles) {
-    dbRolesIdsMap.set(role.key as RoleKey, role.id);
-  }
-
-  for (const permission of dbPermissions) {
-    dbPermissionsIdsMap.set(permission.key, permission.id);
-  }
-
-  for (const role of Object.keys(ROLE_PERMISSION_RECORDS)) {
-    for (const permission of ROLE_PERMISSION_RECORDS[role]) {
-      const roleId = dbRolesIdsMap.get(role as RoleKey);
-      const permissionId = dbPermissionsIdsMap.get(permission as PermissionKey);
+  for (const [role, permissions] of Object.entries(ROLE_PERMISSION_RECORDS)) {
+    for (const permission of permissions) {
+      const roleId = dbRolesIdsMap.get(role);
+      const permissionId = dbPermissionsIdsMap.get(permission);
 
       if (!roleId || !permissionId) {
         Logger.error(`Error pushing role with role ${role} and permission ${permission}`);
@@ -118,22 +116,24 @@ const getInitialRolePermissions = (
   return result;
 };
 
+// SEEDERS
 const seedRoles = async () => {
+  await db.insert(roles).values(initialRoles).onConflictDoNothing();
+  await db.insert(permissions).values(initialPermissions).onConflictDoNothing();
+
+  const dbRoles = await db.select().from(roles);
+  const dbPermissions = await db.select().from(permissions);
+
+  const rolePermissionsInserts = getInitialRolePermissions(dbRoles, dbPermissions);
+
+  await db.insert(rolePermissions).values(rolePermissionsInserts).onConflictDoNothing();
+};
+
+export const seedDb = async () => {
   try {
-    const dbRoles = await db.insert(roles).values(initialRoles).onConflictDoNothing().returning();
-    const dbPermissions = await db
-      .insert(permissions)
-      .values(initialPermissions)
-      .onConflictDoNothing()
-      .returning();
+    await seedRoles();
 
-    const rolePermissionsInserts = getInitialRolePermissions(dbRoles, dbPermissions);
-
-    await db
-      .insert(rolePermissions)
-      .values(rolePermissionsInserts)
-      .onConflictDoNothing()
-      .returning();
+    Logger.log("Roles seeded successfully!");
   } catch (error) {
     Logger.error("Error happened during roles seeding:", error);
   }
