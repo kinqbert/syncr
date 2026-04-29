@@ -5,7 +5,7 @@ export const DashboardPage = () => {
   const user = useAuthStore((state) => state.user);
 
   return (
-    <Stack>
+    <Stack sx={{ width: "100%", alignItems: "center" }}>
       <Typography variant="h3">Welcome to dashboard!</Typography>
       <Typography>Logged in as {user?.email}</Typography>
     </Stack>

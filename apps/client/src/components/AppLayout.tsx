@@ -1,17 +1,17 @@
 import { AuthenticatedLayout } from "@/providers/auth";
 import { Outlet } from "react-router";
 import { Header } from "./Header";
-import { useGetMyCompanies } from "@/api/company";
+import { Sidebar } from "./Sidebar";
+import { Box } from "@mui/material";
 
 export const AppLayout = () => {
-  const { data } = useGetMyCompanies();
-
-  console.log(data);
-
   return (
     <AuthenticatedLayout>
       <Header />
-      <Outlet />
+      <Box display="flex">
+        <Sidebar />
+        <Outlet />
+      </Box>
     </AuthenticatedLayout>
   );
 };

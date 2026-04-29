@@ -1,6 +1,7 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 
 import { useAuthStore } from "@/store/useAuthStore";
+import { useCompanyStore } from "@/store/useCompanyStore";
 import { env } from "./env";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
@@ -17,10 +18,21 @@ const refreshApi = axios.create({
   withCredentials: true,
 });
 
+api.interceptors.request.use((config) => {
+  const selectedCompanyId = useCompanyStore.getState().selectedCompanyId;
+
+  if (selectedCompanyId) {
+    config.headers.set("X-Company-Id", String(selectedCompanyId));
+  }
+
+  return config;
+});
+
 let refreshPromise: Promise<unknown> | null = null;
 
 const clearAndRedirect = () => {
   useAuthStore.getState().clearUser();
+  useCompanyStore.getState().clearSelectedCompany();
 
   if (window.location.pathname !== "/login") {
     window.location.replace("/login");
