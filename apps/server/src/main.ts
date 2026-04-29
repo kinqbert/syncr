@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 
 import { AppModule } from "./app.module";
 import { CONFIG } from "./config/configuration";
+import { seedDb } from "./config/seed";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +18,8 @@ async function bootstrap() {
     origin: CONFIG.CLIENT_URL,
     credentials: true,
   });
+
+  await seedDb();
 
   await app.listen(process.env.PORT ?? 3000);
 }
