@@ -1,4 +1,14 @@
-import { integer, pgTable, serial, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { ProjectStatus } from "@syncr/packages";
+import {
+  integer,
+  pgEnum,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 // CORE TABLES
 export const users = pgTable("users", {
@@ -64,3 +74,26 @@ export const userCompanyRoles = pgTable(
   },
   (table) => [unique().on(table.userId, table.companyId)],
 );
+
+// PROJECTS
+
+export const projectStatusEnum = pgEnum("project_status", enumToPgEnum(ProjectStatus));
+
+export const projects = pgTable("projects", {
+  id: serial().primaryKey(),
+  name: text().notNull(),
+  description: text().notNull(),
+  managerId: integer().references(() => users.id, { onDelete: "set null" }),
+  companyId: integer()
+    .notNull()
+    .references(() => companies.id, { onDelete: "cascade" }),
+  projectStatus: projectStatusEnum().notNull().default("active"),
+  startDate: timestamp().notNull(),
+  endDate: timestamp(),
+});
+
+// HELPERS
+
+function enumToPgEnum<T extends Record<string, string>>(obj: T) {
+  return Object.values(obj) as [T[keyof T], ...T[keyof T][]];
+}
