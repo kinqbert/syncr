@@ -12,10 +12,7 @@ export class CompanyService {
     return await this.companyRepository.getUserCompanies(userId);
   }
 
-  async createUserCompany(
-    userId: number,
-    createCompanyDto: CreateCompanyDto,
-  ): Promise<CompanyDto> {
+  async createUserCompany(userId: number, createCompanyDto: CreateCompanyDto): Promise<CompanyDto> {
     const companyName = createCompanyDto.name.trim();
 
     if (companyName.length < 2) {
@@ -36,11 +33,6 @@ export class CompanyService {
   }
 
   private isUniqueViolation(error: unknown) {
-    return (
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      error.code === "23505"
-    );
+    return typeof error === "object" && error !== null && "code" in error && error.code === "23505";
   }
 }

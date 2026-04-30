@@ -21,6 +21,7 @@ export class CompanyController {
   @HttpCode(HttpStatus.CREATED)
   async createCompany(
     @UserId() userId: number,
+
     @Body() createCompanyDto: CreateCompanyDto,
   ): Promise<CompanyDto> {
     return await this.companyService.createUserCompany(userId, createCompanyDto);

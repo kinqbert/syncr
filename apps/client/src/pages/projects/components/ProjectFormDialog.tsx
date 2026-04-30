@@ -1,0 +1,232 @@
+import { useState } from "react";
+import { getErrorMessage } from "@/utils/getErrorMessage";
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Box,
+  Stack,
+  TextField,
+} from "@mui/material";
+import type {
+  CreateProjectBody,
+  Project,
+  ProjectManagerCandidate,
+} from "@syncr/packages";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { useAuthStore } from "@/store/useAuthStore";
+
+type ProjectFormState = {
+  name: string;
+  description: string;
+  managerId: string;
+  startDate: string;
+  endDate: string;
+};
+
+type ProjectFormDialogProps = {
+  isManagersLoading: boolean;
+  isOpen: boolean;
+  isSaving: boolean;
+  managerCandidates: ProjectManagerCandidate[];
+  onClose: () => void;
+  onSave: (projectId: number | null, body: CreateProjectBody) => Promise<void>;
+  project: Project | null;
+};
+
+const toDateInputValue = (date: Date) => {
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+
+  return localDate.toISOString().slice(0, 10);
+};
+
+const createInitialFormState = (
+  project?: Project | null,
+): ProjectFormState => ({
+  name: project?.name ?? "",
+  description: project?.description ?? "",
+  managerId: project?.managerId ? String(project.managerId) : "",
+  startDate: project?.startDate
+    ? toDateInputValue(new Date(project.startDate))
+    : toDateInputValue(new Date()),
+  endDate: project?.endDate ? toDateInputValue(new Date(project.endDate)) : "",
+});
+
+export const ProjectFormDialog = ({
+  isManagersLoading,
+  isOpen,
+  isSaving,
+  managerCandidates,
+  onClose,
+  onSave,
+  project,
+}: ProjectFormDialogProps) => {
+  const currentUserId = useAuthStore((state) => state.user?.id ?? null);
+
+  const {
+    control,
+    handleSubmit,
+    register,
+    setValue,
+    formState: { errors },
+  } = useForm<ProjectFormState>({
+    defaultValues: createInitialFormState(project),
+  });
+  const [formError, setFormError] = useState<string | null>(null);
+  const selectedManagerId = useWatch({ control, name: "managerId" });
+  const currentUserCandidate = managerCandidates.find(
+    (manager) => manager.id === currentUserId,
+  );
+
+  const isCurrentUserSelected =
+    currentUserId !== null && selectedManagerId === String(currentUserId);
+  const canAssignCurrentUser =
+    Boolean(currentUserCandidate) && !isSaving && !isManagersLoading;
+
+  const handleSubmitProject = async (formState: ProjectFormState) => {
+    setFormError(null);
+
+    try {
+      await onSave(project?.id ?? null, {
+        name: formState.name.trim(),
+        description: formState.description.trim() || null,
+        managerId: formState.managerId ? Number(formState.managerId) : null,
+        startDate: formState.startDate,
+        endDate: formState.endDate || null,
+      });
+    } catch (error) {
+      setFormError(getErrorMessage(error, "Could not save project."));
+    }
+  };
+
+  const handleAssignCurrentUser = () => {
+    if (!currentUserId) {
+      return;
+    }
+
+    setValue("managerId", String(currentUserId), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
+  return (
+    <Dialog fullWidth maxWidth="sm" onClose={onClose} open={isOpen}>
+      <DialogTitle>{project ? "Update project" : "Create project"}</DialogTitle>
+      <DialogContent>
+        <Stack
+          component="form"
+          gap={2}
+          id="project-form"
+          onSubmit={handleSubmit(handleSubmitProject)}
+          pt={1}
+        >
+          {formError && <Alert severity="error">{formError}</Alert>}
+          <TextField
+            {...register("name", {
+              required: "Project name is required.",
+              validate: (value) =>
+                value.trim().length >= 2 ||
+                "Project name must be at least 2 characters long.",
+            })}
+            autoFocus
+            disabled={isSaving}
+            error={Boolean(errors.name)}
+            fullWidth
+            helperText={errors.name?.message}
+            label="Project name"
+          />
+          <TextField
+            {...register("description")}
+            disabled={isSaving}
+            fullWidth
+            label="Description"
+            minRows={3}
+            multiline
+          />
+          <TextField
+            {...register("startDate", {
+              required: "Start date is required.",
+            })}
+            disabled={isSaving}
+            error={Boolean(errors.startDate)}
+            fullWidth
+            helperText={errors.startDate?.message}
+            label="Start date"
+            slotProps={{ inputLabel: { shrink: true } }}
+            type="date"
+          />
+          <TextField
+            {...register("endDate")}
+            disabled={isSaving}
+            fullWidth
+            label="Deadline"
+            slotProps={{ inputLabel: { shrink: true } }}
+            type="date"
+          />
+          <Box
+            sx={{
+              display: "grid",
+              gap: 1,
+              gridTemplateColumns: { xs: "1fr", sm: "1fr auto" },
+            }}
+          >
+            <Controller
+              control={control}
+              name="managerId"
+              render={({ field }) => (
+                <FormControl fullWidth>
+                  <InputLabel id="project-manager-label">
+                    Project manager
+                  </InputLabel>
+                  <Select
+                    {...field}
+                    disabled={isSaving || isManagersLoading}
+                    label="Project manager"
+                    labelId="project-manager-label"
+                  >
+                    <MenuItem value="">Unassigned</MenuItem>
+                    {managerCandidates.map((manager) => (
+                      <MenuItem key={manager.id} value={String(manager.id)}>
+                        {manager.name} {manager.surname}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            />
+            <Button
+              disabled={!canAssignCurrentUser || isCurrentUserSelected}
+              onClick={handleAssignCurrentUser}
+              sx={{ minHeight: 56, whiteSpace: "nowrap" }}
+              type="button"
+              variant="outlined"
+            >
+              Set me
+            </Button>
+          </Box>
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button disabled={isSaving} onClick={onClose}>
+          Cancel
+        </Button>
+        <Button
+          disabled={isSaving}
+          form="project-form"
+          type="submit"
+          variant="contained"
+        >
+          {project ? "Update" : "Create"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
