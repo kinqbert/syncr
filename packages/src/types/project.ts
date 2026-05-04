@@ -13,7 +13,7 @@ export type Project = {
   description: string | null;
   managerId: number | null;
   companyId: number;
-  projectStatus: ProjectStatus;
+  status: ProjectStatus;
   startDate: string;
   endDate: string | null;
 };
@@ -27,7 +27,7 @@ export type CreateProjectBody = {
 };
 
 export type UpdateProjectBody = Partial<CreateProjectBody> & {
-  projectStatus?: ProjectStatus;
+  status?: ProjectStatus;
 };
 
 export type ProjectManagerCandidate = {

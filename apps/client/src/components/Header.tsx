@@ -1,8 +1,9 @@
+import MenuIcon from "@mui/icons-material/Menu";
 import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
-import { CompanySwitcher } from "./CompanySwitcher";
+
 import { useSidebarStore } from "@/store/useSidebarStore";
 
-import MenuIcon from "@mui/icons-material/Menu";
+import { CompanySwitcher } from "./CompanySwitcher";
 
 export const HEADER_HEIGHT = 64;
 

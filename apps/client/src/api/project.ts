@@ -1,4 +1,3 @@
-import api from "@/lib/axios";
 import type {
   CreateProjectBody,
   Project,
@@ -6,6 +5,8 @@ import type {
   UpdateProjectBody,
 } from "@syncr/packages";
 import { useMutation, useQuery } from "@tanstack/react-query";
+
+import api from "@/lib/axios";
 
 export const projectKeys = {
   projects: ["projects"],

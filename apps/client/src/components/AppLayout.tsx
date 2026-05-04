@@ -1,10 +1,12 @@
-import { AuthenticatedLayout } from "@/providers/auth";
-import { useGetMyCompanies } from "@/api/company";
-import { useCompanyStore } from "@/store/useCompanyStore";
-import { Outlet } from "react-router";
-import { Header } from "./Header";
-import { Sidebar } from "./Sidebar";
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Outlet } from "react-router";
+
+import { useGetMyCompanies } from "@/api/company";
+import { AuthenticatedLayout } from "@/providers/auth";
+import { useCompanyStore } from "@/store/useCompanyStore";
+
+import { Header, HEADER_HEIGHT } from "./Header";
+import { Sidebar } from "./Sidebar";
 
 const CompanyRequiredPlaceholder = () => {
   return (
@@ -13,7 +15,7 @@ const CompanyRequiredPlaceholder = () => {
       component="main"
       gap={1}
       justifyContent="center"
-      minHeight="calc(100vh - 72px)"
+      minHeight={`calc(100vh - ${HEADER_HEIGHT}px)`}
       sx={{ width: "100%", p: 3, textAlign: "center" }}
     >
       <Typography variant="h5">Please select a company</Typography>
@@ -40,14 +42,22 @@ const CompanyContent = () => {
     return <CompanyRequiredPlaceholder />;
   }
 
-  return <Outlet />;
+  return (
+    <Box
+      height={`calc(100vh - ${HEADER_HEIGHT}px)`}
+      minWidth={0}
+      sx={{ flex: 1, overflow: "hidden" }}
+    >
+      <Outlet />
+    </Box>
+  );
 };
 
 export const AppLayout = () => {
   return (
     <AuthenticatedLayout>
       <Header />
-      <Box display="flex">
+      <Box display="flex" sx={{ overflow: "hidden" }}>
         <Sidebar />
         <CompanyContent />
       </Box>

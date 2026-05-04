@@ -1,6 +1,13 @@
 import { createBrowserRouter } from "react-router";
-import { DashboardPage, LoginPage, ProjectsPage, RegisterPage } from "@/pages";
+
 import { AppLayout } from "@/components/AppLayout";
+import {
+  DashboardPage,
+  LoginPage,
+  ProjectsPage,
+  RegisterPage,
+  TasksPage,
+} from "@/pages";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +21,10 @@ const router = createBrowserRouter([
       {
         path: "projects",
         element: <ProjectsPage />,
+      },
+      {
+        path: "project/:projectId/tasks",
+        element: <TasksPage />,
       },
     ],
   },

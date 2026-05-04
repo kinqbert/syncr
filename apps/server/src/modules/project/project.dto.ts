@@ -26,7 +26,7 @@ export class ProjectDto implements Project {
   companyId: number;
 
   @IsEnum(ProjectStatus)
-  projectStatus: ProjectStatus;
+  status: ProjectStatus;
 
   @IsDateString()
   startDate: string;
@@ -75,7 +75,7 @@ export class UpdateProjectDto implements UpdateProjectBody {
 
   @IsEnum(ProjectStatus)
   @IsOptional()
-  projectStatus?: ProjectStatus;
+  status?: ProjectStatus;
 
   @IsDateString()
   @IsOptional()

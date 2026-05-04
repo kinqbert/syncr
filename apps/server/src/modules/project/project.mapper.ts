@@ -9,7 +9,7 @@ export const mapProjectToDto = (project: typeof projects.$inferSelect): ProjectD
     description: project.description,
     managerId: project.managerId ?? null,
     companyId: project.companyId,
-    projectStatus: project.projectStatus,
+    status: project.status,
     startDate: project.startDate.toISOString(),
     endDate: project.endDate ? project.endDate.toISOString() : null,
   };

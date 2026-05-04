@@ -1,4 +1,4 @@
-import { ProjectStatus } from "@syncr/packages";
+import { ProjectStatus, TaskPriority, TaskStatus } from "@syncr/packages";
 import {
   integer,
   pgEnum,
@@ -87,8 +87,38 @@ export const projects = pgTable("projects", {
   companyId: integer()
     .notNull()
     .references(() => companies.id, { onDelete: "cascade" }),
-  projectStatus: projectStatusEnum().notNull().default("active"),
+  status: projectStatusEnum().notNull().default("active"),
   startDate: timestamp().notNull(),
+  endDate: timestamp(),
+});
+
+export const projectUsers = pgTable("project_users", {
+  userId: integer()
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  projectId: integer()
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+});
+
+// TASKS
+
+export const taskStatusEnum = pgEnum("task_status", enumToPgEnum(TaskStatus));
+export const taskPriorityEnum = pgEnum("task_priority", enumToPgEnum(TaskPriority));
+
+export const tasks = pgTable("tasks", {
+  id: serial().primaryKey(),
+  name: text().notNull(),
+  description: text().notNull(),
+  projectId: integer()
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  assigneeId: integer()
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  status: taskStatusEnum().notNull().default("backlog"),
+  priority: taskPriorityEnum().notNull().default("medium"),
+  position: integer().notNull().default(0),
   endDate: timestamp(),
 });
 

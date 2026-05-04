@@ -28,7 +28,7 @@ export class ProjectService {
       companyId,
       managerId,
       description: createProjectDto.description?.trim() ?? "",
-      projectStatus: ProjectStatus.Active,
+      status: ProjectStatus.Active,
       startDate: this.getValidDate(createProjectDto.startDate, "Start date"),
       endDate: createProjectDto.endDate
         ? this.getValidDate(createProjectDto.endDate, "End date")
@@ -57,8 +57,8 @@ export class ProjectService {
       updateData.startDate = this.getValidDate(updateProjectDto.startDate, "Start date");
     }
 
-    if (updateProjectDto.projectStatus !== undefined) {
-      updateData.projectStatus = updateProjectDto.projectStatus;
+    if (updateProjectDto.status !== undefined) {
+      updateData.status = updateProjectDto.status;
     }
 
     if (updateProjectDto.endDate !== undefined) {

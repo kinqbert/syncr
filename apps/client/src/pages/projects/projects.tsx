@@ -1,14 +1,6 @@
-import { useMemo, useState } from "react";
-import {
-  projectKeys,
-  useCreateProject,
-  useGetMyProjects,
-  useGetProjectManagerCandidates,
-  useUpdateProject,
-} from "@/api/project";
-import { queryClient } from "@/lib/react-query";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import {
   Box,
   Button,
@@ -23,6 +15,17 @@ import {
   Typography,
 } from "@mui/material";
 import type { CreateProjectBody, Project } from "@syncr/packages";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router";
+
+import {
+  projectKeys,
+  useCreateProject,
+  useGetMyProjects,
+  useGetProjectManagerCandidates,
+  useUpdateProject,
+} from "@/api/project";
+import { queryClient } from "@/lib/react-query";
 
 import { NoProjectsCard, ProjectFormDialog } from "./components";
 
@@ -35,6 +38,8 @@ const formatDate = (value: string) => {
 };
 
 export const ProjectsPage = () => {
+  const navigate = useNavigate();
+
   const { data: projects = [], isLoading: areProjectsLoading } =
     useGetMyProjects();
   const { data: managerCandidates = [], isLoading: areManagersLoading } =
@@ -58,6 +63,10 @@ export const ProjectsPage = () => {
   const handleOpenCreateDialog = () => {
     setDialogProject(null);
     setIsDialogOpen(true);
+  };
+
+  const handleClickTasksButton = (project: Project) => {
+    navigate(`/project/${project.id}/tasks`);
   };
 
   const handleOpenEditDialog = (project: Project) => {
@@ -148,7 +157,7 @@ export const ProjectsPage = () => {
                   <Typography variant="h6">{project.name}</Typography>
                   <Chip
                     color="success"
-                    label={project.projectStatus}
+                    label={project.status}
                     size="small"
                     variant="outlined"
                   />
@@ -175,6 +184,14 @@ export const ProjectsPage = () => {
                 </Stack>
               </CardContent>
               <CardActions sx={{ justifyContent: "flex-end", px: 2, pb: 2 }}>
+                <Tooltip title="Open tasks">
+                  <IconButton
+                    aria-label="Edit project"
+                    onClick={() => handleClickTasksButton(project)}
+                  >
+                    <TaskAltIcon />
+                  </IconButton>
+                </Tooltip>
                 <Tooltip title="Edit project">
                   <IconButton
                     aria-label="Edit project"
