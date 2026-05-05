@@ -48,7 +48,7 @@ const formatDate = (value: string | null) => {
   }).format(new Date(value));
 };
 
-export const MIN_TASK_CARD_WIDTH = 280;
+export const TASK_CARD_WIDTH = 280;
 
 export const TaskCard = ({ task }: TaskCardProps) => {
   const priorityColor = priorityColorByValue[task.priority];
@@ -57,8 +57,8 @@ export const TaskCard = ({ task }: TaskCardProps) => {
     <Card
       variant="outlined"
       sx={{
-        minWidth: MIN_TASK_CARD_WIDTH,
-        maxWidth: MIN_TASK_CARD_WIDTH,
+        minWidth: TASK_CARD_WIDTH,
+        maxWidth: TASK_CARD_WIDTH,
         borderColor: "divider",
         borderRadius: 3,
         boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",

@@ -52,6 +52,7 @@ export const Kanban = ({ projectId }: KanbanProps) => {
   const createTask = useCreateTask();
   const {
     activeTask,
+    dragOverStatus,
     handleDragCancel,
     handleDragEnd,
     handleDragOver,
@@ -92,11 +93,12 @@ export const Kanban = ({ projectId }: KanbanProps) => {
       onDragStart={handleDragStart}
       sensors={sensors}
     >
-      <Stack direction="row" gap={1}>
+      <Stack direction="row" gap={4}>
         {columns.map((column) => (
           <KanbanColumn
             key={column.status}
             column={column}
+            isDragOver={dragOverStatus === column.status}
             isCreating={createTask.isPending}
             onCreateTask={handleCreateTask}
           >
@@ -104,9 +106,11 @@ export const Kanban = ({ projectId }: KanbanProps) => {
               items={tasksByStatus[column.status].map((task) => task.id)}
               strategy={verticalListSortingStrategy}
             >
-              {tasksByStatus[column.status].map((task) => (
-                <SortableTaskCard key={task.id} task={task} />
-              ))}
+              <Stack gap={2}>
+                {tasksByStatus[column.status].map((task) => (
+                  <SortableTaskCard key={task.id} task={task} />
+                ))}
+              </Stack>
             </SortableContext>
           </KanbanColumn>
         ))}

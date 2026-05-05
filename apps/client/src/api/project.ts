@@ -10,11 +10,18 @@ import api from "@/lib/axios";
 
 export const projectKeys = {
   projects: ["projects"],
+  project: (projectId: number) => ["projects", projectId],
   managerCandidates: ["project-manager-candidates"],
 };
 
 const getMyProjects = async () => {
   const response = await api.get<Project[]>("project");
+
+  return response.data;
+};
+
+const getProject = async (projectId: number) => {
+  const response = await api.get<Project>(`project/${projectId}`);
 
   return response.data;
 };
@@ -50,6 +57,14 @@ export const useGetMyProjects = (enabled = true) => {
     enabled,
     queryFn: getMyProjects,
     queryKey: projectKeys.projects,
+  });
+};
+
+export const useGetProject = (projectId: number, enabled = true) => {
+  return useQuery({
+    enabled,
+    queryFn: () => getProject(projectId),
+    queryKey: projectKeys.project(projectId),
   });
 };
 

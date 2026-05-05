@@ -66,7 +66,7 @@ export const ProjectsPage = () => {
   };
 
   const handleClickTasksButton = (project: Project) => {
-    navigate(`/project/${project.id}/tasks`);
+    navigate(`/projects/${project.id}/tasks`);
   };
 
   const handleOpenEditDialog = (project: Project) => {

@@ -46,6 +46,17 @@ export class ProjectController {
     return await this.projectService.getProjectManagerCandidates(companyId);
   }
 
+  @Get(":projectId")
+  @RequirePermission(PermissionKey.ProjectView)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async getProject(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+  ): Promise<ProjectDto> {
+    return await this.projectService.getCompanyProject(companyId, projectId);
+  }
+
   @Post()
   @RequirePermission(PermissionKey.ProjectCreate)
   @UseGuards(JwtAuthGuard, PermissionGuard)

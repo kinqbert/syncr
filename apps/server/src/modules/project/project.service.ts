@@ -15,6 +15,12 @@ export class ProjectService {
     return projects.map(mapProjectToDto);
   }
 
+  async getCompanyProject(companyId: number, projectId: number) {
+    const project = await this.projectRepository.getCompanyProject(companyId, projectId);
+
+    return mapProjectToDto(project);
+  }
+
   async getProjectManagerCandidates(companyId: number) {
     return await this.projectRepository.getProjectManagerCandidates(companyId);
   }

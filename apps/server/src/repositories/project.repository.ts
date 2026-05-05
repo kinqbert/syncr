@@ -14,6 +14,16 @@ export class ProjectRepository {
       .orderBy(asc(projects.startDate), asc(projects.name));
   }
 
+  async getCompanyProject(companyId: number, projectId: number) {
+    const [project] = await db
+      .select()
+      .from(projects)
+      .where(and(eq(projects.companyId, companyId), eq(projects.id, projectId)))
+      .orderBy(asc(projects.startDate), asc(projects.name));
+
+    return project;
+  }
+
   async getProjectManagerCandidates(companyId: number) {
     const candidates = await db
       .select({

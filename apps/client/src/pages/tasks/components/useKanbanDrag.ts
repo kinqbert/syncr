@@ -155,13 +155,10 @@ export const useKanbanDrag = ({
   const reorderTasks = useReorderTasks();
   const dragStartTasksRef = useRef<Task[] | null>(null);
   const [activeTaskId, setActiveTaskId] = useState<number | null>(null);
+  const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null);
   const taskQueryKey = taskKeys.projectTasks(projectId);
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 6,
-      },
-    }),
+    useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
@@ -207,7 +204,21 @@ export const useKanbanDrag = ({
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
 
-    if (!over || active.id === over.id) return;
+    if (!over) {
+      setDragOverStatus(null);
+
+      return;
+    }
+
+    const targetStatus = getTaskStatusById(
+      tasksByStatus,
+      over.id,
+      columnStatuses,
+    );
+
+    setDragOverStatus(targetStatus);
+
+    if (active.id === over.id) return;
 
     const nextTasksByStatus = moveTask(
       tasksByStatus,
@@ -233,6 +244,7 @@ export const useKanbanDrag = ({
 
     dragStartTasksRef.current = null;
     setActiveTaskId(null);
+    setDragOverStatus(null);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -284,11 +296,13 @@ export const useKanbanDrag = ({
     } finally {
       dragStartTasksRef.current = null;
       setActiveTaskId(null);
+      setDragOverStatus(null);
     }
   };
 
   return {
     activeTask,
+    dragOverStatus,
     handleDragCancel,
     handleDragEnd,
     handleDragOver,

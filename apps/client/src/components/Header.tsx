@@ -15,7 +15,7 @@ export const Header = () => {
       color="default"
       elevation={1}
       position="sticky"
-      sx={{ height: HEADER_HEIGHT }}
+      sx={{ height: HEADER_HEIGHT, backgroundColor: "background.paper" }}
     >
       <Toolbar sx={{ gap: 2, justifyContent: "start" }}>
         <IconButton onClick={toggleSidebar}>

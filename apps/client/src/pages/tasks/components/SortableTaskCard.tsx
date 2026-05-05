@@ -23,7 +23,6 @@ export const SortableTaskCard = ({ task }: SortableTaskCardProps) => {
       {...listeners}
       sx={{
         cursor: isDragging ? "grabbing" : "grab",
-        mt: 1.5,
         transform: CSS.Transform.toString(transform),
         transition: "none",
         touchAction: "none",
