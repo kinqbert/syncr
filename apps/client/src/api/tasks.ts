@@ -3,14 +3,14 @@ import type {
   ReorderTasksBody,
   Task,
   UpdateTaskBody,
-  UpdateTaskStatusBody,
 } from "@syncr/packages";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
 
 export const taskKeys = {
-  projectTasks: (projectId: number) => ["projects", projectId, "tasks"] as const,
+  projectTasks: (projectId: number) =>
+    ["projects", projectId, "tasks"] as const,
 };
 
 const getProjectTasks = async (projectId: number) => {
@@ -42,23 +42,6 @@ const updateTask = async ({
 }) => {
   const response = await api.patch<Task>(
     `projects/${projectId}/tasks/${taskId}`,
-    body,
-  );
-
-  return response.data;
-};
-
-const updateTaskStatus = async ({
-  projectId,
-  taskId,
-  body,
-}: {
-  projectId: number;
-  taskId: number;
-  body: UpdateTaskStatusBody;
-}) => {
-  const response = await api.patch<Task>(
-    `projects/${projectId}/tasks/${taskId}/status`,
     body,
   );
 
@@ -107,12 +90,6 @@ export const useCreateTask = () => {
 export const useUpdateTask = () => {
   return useMutation({
     mutationFn: updateTask,
-  });
-};
-
-export const useUpdateTaskStatus = () => {
-  return useMutation({
-    mutationFn: updateTaskStatus,
   });
 };
 

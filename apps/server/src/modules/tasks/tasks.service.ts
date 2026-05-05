@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { TaskPriority, TaskStatus } from "@syncr/packages";
 
 import { TasksRepository } from "../../repositories/tasks.repository";
-import { CreateTaskDto, ReorderTasksDto, UpdateTaskDto, UpdateTaskStatusDto } from "./tasks.dto";
+import { CreateTaskDto, ReorderTasksDto, UpdateTaskDto } from "./tasks.dto";
 import { mapTaskToDto } from "./tasks.mapper";
 
 @Injectable()
@@ -87,25 +87,6 @@ export class TasksService {
     }
 
     const task = await this.taskRepository.updateTask(taskId, updateData);
-
-    return mapTaskToDto(task);
-  }
-
-  async updateTaskStatus(
-    companyId: number,
-    projectId: number,
-    taskId: number,
-    updateTaskStatusDto: UpdateTaskStatusDto,
-  ) {
-    await this.ensureTaskExists(taskId, projectId, companyId);
-
-    const task = await this.taskRepository.updateTask(taskId, {
-      status: updateTaskStatusDto.status,
-
-      ...(updateTaskStatusDto.position !== undefined
-        ? { position: updateTaskStatusDto.position }
-        : {}),
-    });
 
     return mapTaskToDto(task);
   }

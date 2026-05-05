@@ -6,7 +6,6 @@ import {
   TaskPriority,
   TaskStatus,
   UpdateTaskBody,
-  UpdateTaskStatusBody,
 } from "@syncr/packages";
 import { Type } from "class-transformer";
 import {
@@ -110,16 +109,6 @@ export class UpdateTaskDto implements UpdateTaskBody {
   endDate?: string | null;
 }
 
-export class UpdateTaskStatusDto implements UpdateTaskStatusBody {
-  @IsEnum(TaskStatus)
-  status: TaskStatus;
-
-  @IsInt()
-  @Min(0)
-  @IsOptional()
-  position?: number;
-}
-
 export class ReorderTaskItemDto implements ReorderTaskItem {
   @IsInt()
   id: number;
@@ -133,6 +122,13 @@ export class ReorderTaskItemDto implements ReorderTaskItem {
 }
 
 export class ReorderTasksDto implements ReorderTasksBody {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ReorderTaskItemDto)
+  tasks: ReorderTaskItemDto[];
+}
+
+export class SetTaskAssigneeDto implements ReorderTasksBody {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ReorderTaskItemDto)

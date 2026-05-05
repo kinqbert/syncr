@@ -62,11 +62,6 @@ export type UpdateTaskBody = {
   endDate?: string | null;
 };
 
-export type UpdateTaskStatusBody = {
-  status: TaskStatus;
-  position?: number;
-};
-
 export type ReorderTaskItem = {
   id: number;
   status: TaskStatus;

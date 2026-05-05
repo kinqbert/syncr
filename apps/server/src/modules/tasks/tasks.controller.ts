@@ -17,13 +17,7 @@ import { CompanyId } from "../../common/decorators/company-id.decorator";
 import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { PermissionGuard } from "../../common/guards/permission-guard.guard";
-import {
-  CreateTaskDto,
-  ReorderTasksDto,
-  TaskDto,
-  UpdateTaskDto,
-  UpdateTaskStatusDto,
-} from "./tasks.dto";
+import { CreateTaskDto, ReorderTasksDto, TaskDto, UpdateTaskDto } from "./tasks.dto";
 import { TasksService } from "./tasks.service";
 
 @Controller("projects/:projectId/tasks")
@@ -76,24 +70,6 @@ export class TasksController {
     @Body() updateTaskDto: UpdateTaskDto,
   ): Promise<TaskDto> {
     return await this.taskService.updateTask(companyId, projectId, taskId, updateTaskDto);
-  }
-
-  @Patch(":taskId/status")
-  @RequirePermission(PermissionKey.TaskUpdateStatus)
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @HttpCode(HttpStatus.OK)
-  async updateTaskStatus(
-    @CompanyId() companyId: number,
-    @Param("projectId", ParseIntPipe) projectId: number,
-    @Param("taskId", ParseIntPipe) taskId: number,
-    @Body() updateTaskStatusDto: UpdateTaskStatusDto,
-  ): Promise<TaskDto> {
-    return await this.taskService.updateTaskStatus(
-      companyId,
-      projectId,
-      taskId,
-      updateTaskStatusDto,
-    );
   }
 
   @Delete(":taskId")
