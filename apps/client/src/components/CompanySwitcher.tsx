@@ -14,9 +14,14 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { type FormEvent,useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
-import { companiesKeys, useCreateCompany, useGetMyCompanies } from "@/api/companies";
+import {
+  companiesKeys,
+  useCreateCompany,
+  useGetMyCompanies,
+} from "@/api/companies";
 import { queryClient, removeCompanyScopedCache } from "@/lib/react-query";
 import { useCompanyStore } from "@/store/useCompanyStore";
 import { getErrorMessage } from "@/utils/getErrorMessage";
@@ -24,6 +29,8 @@ import { getErrorMessage } from "@/utils/getErrorMessage";
 const CREATE_COMPANY_VALUE = "__create_company__";
 
 export const CompanySwitcher = () => {
+  const navigate = useNavigate();
+
   const { data: companies = [], isPending } = useGetMyCompanies();
   const createCompany = useCreateCompany();
   const selectedCompanyId = useCompanyStore((state) => state.selectedCompanyId);
@@ -73,6 +80,8 @@ export const CompanySwitcher = () => {
       return;
     }
 
+    navigate("/");
+
     setSelectedCompanyId(nextCompanyId);
     removeCompanyScopedCache();
   };
@@ -108,6 +117,8 @@ export const CompanySwitcher = () => {
         queryKey: companiesKeys.companies,
       });
 
+      navigate("/dashboard");
+
       setSelectedCompanyId(company.id);
       removeCompanyScopedCache();
       handleCreateDialogClose();
@@ -116,7 +127,10 @@ export const CompanySwitcher = () => {
     }
   };
 
-  const selectedValue = selectedCompanyId ? String(selectedCompanyId) : "";
+  const selectedCompany = companies.find(
+    (company) => company.id === selectedCompanyId,
+  );
+  const selectedValue = selectedCompany ? String(selectedCompany.id) : "";
 
   return (
     <>
