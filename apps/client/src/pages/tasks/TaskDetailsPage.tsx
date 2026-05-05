@@ -94,7 +94,7 @@ export const TaskDetailsPage = () => {
         <MuiLink component={Link} to={`/projects/${projectId}/tasks`}>
           Back to Task Board
         </MuiLink>
-        <Typography variant="h5">Task not found</Typography>
+        <Typography variant="h5">Task could not be found</Typography>
       </Stack>
     );
   }
