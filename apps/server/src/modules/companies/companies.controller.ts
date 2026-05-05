@@ -2,12 +2,12 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from "@n
 import { UserId } from "src/common/decorators/user-id.decorator";
 import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
 
-import { CompanyDto, CreateCompanyDto } from "./company.dto";
-import { CompanyService } from "./company.service";
+import { CompanyDto, CreateCompanyDto } from "./companies.dto";
+import { CompaniesService } from "./companies.service";
 
-@Controller("company")
-export class CompanyController {
-  constructor(private readonly companyService: CompanyService) {}
+@Controller("companies")
+export class CompaniesController {
+  constructor(private readonly companyService: CompaniesService) {}
 
   @Get()
   @UseGuards(JwtAuthGuard)

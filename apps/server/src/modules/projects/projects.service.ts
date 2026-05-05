@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ProjectStatus } from "@syncr/packages";
-import { ProjectRepository } from "src/repositories/project.repository";
+import { ProjectsRepository } from "src/repositories/projects.repository";
 
-import { CreateProjectDto, UpdateProjectDto } from "./project.dto";
-import { mapProjectToDto } from "./project.mapper";
+import { CreateProjectDto, UpdateProjectDto } from "./projects.dto";
+import { mapProjectToDto } from "./projects.mapper";
 
 @Injectable()
-export class ProjectService {
-  constructor(private readonly projectRepository: ProjectRepository) {}
+export class ProjectsService {
+  constructor(private readonly projectRepository: ProjectsRepository) {}
 
   async getCompanyProjects(companyId: number) {
     const projects = await this.projectRepository.getCompanyProjects(companyId);
@@ -45,7 +45,7 @@ export class ProjectService {
   }
 
   async updateProject(companyId: number, projectId: number, updateProjectDto: UpdateProjectDto) {
-    const updateData: Parameters<ProjectRepository["updateProject"]>[2] = {};
+    const updateData: Parameters<ProjectsRepository["updateProject"]>[2] = {};
 
     if (updateProjectDto.name !== undefined) {
       updateData.name = this.getValidName(updateProjectDto.name);

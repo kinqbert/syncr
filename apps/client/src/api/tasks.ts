@@ -10,11 +10,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
 export const taskKeys = {
-  projectTasks: (projectId: number) => ["project", projectId, "tasks"] as const,
+  projectTasks: (projectId: number) => ["projects", projectId, "tasks"] as const,
 };
 
 const getProjectTasks = async (projectId: number) => {
-  const response = await api.get<Task[]>(`project/${projectId}/tasks`);
+  const response = await api.get<Task[]>(`projects/${projectId}/tasks`);
 
   return response.data;
 };
@@ -26,7 +26,7 @@ const createTask = async ({
   projectId: number;
   body: CreateTaskBody;
 }) => {
-  const response = await api.post<Task>(`project/${projectId}/tasks`, body);
+  const response = await api.post<Task>(`projects/${projectId}/tasks`, body);
 
   return response.data;
 };
@@ -41,7 +41,7 @@ const updateTask = async ({
   body: UpdateTaskBody;
 }) => {
   const response = await api.patch<Task>(
-    `project/${projectId}/tasks/${taskId}`,
+    `projects/${projectId}/tasks/${taskId}`,
     body,
   );
 
@@ -58,7 +58,7 @@ const updateTaskStatus = async ({
   body: UpdateTaskStatusBody;
 }) => {
   const response = await api.patch<Task>(
-    `project/${projectId}/tasks/${taskId}/status`,
+    `projects/${projectId}/tasks/${taskId}/status`,
     body,
   );
 
@@ -73,7 +73,7 @@ const reorderTasks = async ({
   body: ReorderTasksBody;
 }) => {
   const response = await api.patch<Task[]>(
-    `project/${projectId}/tasks/reorder`,
+    `projects/${projectId}/tasks/reorder`,
     body,
   );
 
@@ -87,7 +87,7 @@ const deleteTask = async ({
   projectId: number;
   taskId: number;
 }) => {
-  await api.delete(`project/${projectId}/tasks/${taskId}`);
+  await api.delete(`projects/${projectId}/tasks/${taskId}`);
 };
 
 export const useGetProjectTasks = (projectId: number, enabled = true) => {

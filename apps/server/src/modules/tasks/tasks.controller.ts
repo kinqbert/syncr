@@ -23,12 +23,12 @@ import {
   TaskDto,
   UpdateTaskDto,
   UpdateTaskStatusDto,
-} from "./task.dto";
-import { TaskService } from "./task.service";
+} from "./tasks.dto";
+import { TasksService } from "./tasks.service";
 
-@Controller("project/:projectId/tasks")
-export class TaskController {
-  constructor(private readonly taskService: TaskService) {}
+@Controller("projects/:projectId/tasks")
+export class TasksController {
+  constructor(private readonly taskService: TasksService) {}
 
   @Get()
   @RequirePermission(PermissionKey.TaskView)

@@ -1,6 +1,6 @@
 import { tasks } from "src/db/schema";
 
-import { TaskDto } from "./task.dto";
+import { TaskDto } from "./tasks.dto";
 
 export const mapTaskToDto = (task: typeof tasks.$inferSelect): TaskDto => {
   return {

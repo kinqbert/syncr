@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { TaskPriority, TaskStatus } from "@syncr/packages";
-import { TaskRepository } from "src/repositories/task.repository";
+import { TasksRepository } from "src/repositories/tasks.repository";
 
-import { CreateTaskDto, ReorderTasksDto, UpdateTaskDto, UpdateTaskStatusDto } from "./task.dto";
-import { mapTaskToDto } from "./task.mapper";
+import { CreateTaskDto, ReorderTasksDto, UpdateTaskDto, UpdateTaskStatusDto } from "./tasks.dto";
+import { mapTaskToDto } from "./tasks.mapper";
 
 @Injectable()
-export class TaskService {
-  constructor(private readonly taskRepository: TaskRepository) {}
+export class TasksService {
+  constructor(private readonly taskRepository: TasksRepository) {}
 
   async getProjectTasks(companyId: number, projectId: number) {
     await this.ensureProjectExists(projectId, companyId);
@@ -48,7 +48,7 @@ export class TaskService {
   ) {
     await this.ensureTaskExists(taskId, projectId, companyId);
 
-    const updateData: Parameters<TaskRepository["updateTask"]>[1] = {};
+    const updateData: Parameters<TasksRepository["updateTask"]>[1] = {};
 
     if (updateTaskDto.name !== undefined) {
       updateData.name = this.getValidName(updateTaskDto.name);

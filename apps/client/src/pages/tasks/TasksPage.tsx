@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { useParams } from "react-router";
 
-import { useGetProject } from "@/api/project";
+import { useGetProject } from "@/api/projects";
 
 import { Kanban } from "./components/Kanban";
 

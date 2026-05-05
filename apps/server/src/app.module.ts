@@ -3,12 +3,12 @@ import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./modules/auth/auth.module";
-import { CompanyModule } from "./modules/company/company.module";
-import { ProjectModule } from "./modules/project/project.module";
-import { TaskModule } from "./modules/task/task.module";
+import { CompaniesModule } from "./modules/companies/companies.module";
+import { ProjectsModule } from "./modules/projects/projects.module";
+import { TasksModule } from "./modules/tasks/tasks.module";
 
 @Module({
-  imports: [AuthModule, CompanyModule, ProjectModule, TaskModule],
+  imports: [AuthModule, CompaniesModule, ProjectsModule, TasksModule],
   controllers: [AppController],
   providers: [AppService],
 })

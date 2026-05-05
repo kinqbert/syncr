@@ -1,6 +1,6 @@
 import { projects } from "src/db/schema";
 
-import { ProjectDto } from "./project.dto";
+import { ProjectDto } from "./projects.dto";
 
 export const mapProjectToDto = (project: typeof projects.$inferSelect): ProjectDto => {
   return {

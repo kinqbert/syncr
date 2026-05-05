@@ -21,12 +21,12 @@ import {
   ProjectDto,
   ProjectManagerCandidateDto,
   UpdateProjectDto,
-} from "./project.dto";
-import { ProjectService } from "./project.service";
+} from "./projects.dto";
+import { ProjectsService } from "./projects.service";
 
-@Controller("project")
-export class ProjectController {
-  constructor(private readonly projectService: ProjectService) {}
+@Controller("projects")
+export class ProjectsController {
+  constructor(private readonly projectService: ProjectsService) {}
 
   @Get()
   @RequirePermission(PermissionKey.ProjectView)

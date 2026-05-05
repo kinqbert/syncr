@@ -1,7 +1,7 @@
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { Outlet } from "react-router";
 
-import { useGetMyCompanies } from "@/api/company";
+import { useGetMyCompanies } from "@/api/companies";
 import { AuthenticatedLayout } from "@/providers/auth";
 import { useCompanyStore } from "@/store/useCompanyStore";
 

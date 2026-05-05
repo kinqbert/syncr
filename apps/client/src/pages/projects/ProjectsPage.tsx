@@ -19,12 +19,12 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
 import {
-  projectKeys,
+  projectsKeys,
   useCreateProject,
   useGetMyProjects,
   useGetProjectManagerCandidates,
   useUpdateProject,
-} from "@/api/project";
+} from "@/api/projects";
 import { queryClient } from "@/lib/react-query";
 
 import { NoProjectsCard, ProjectFormDialog } from "./components";
@@ -93,7 +93,7 @@ export const ProjectsPage = () => {
       await createProject.mutateAsync(body);
     }
 
-    await queryClient.invalidateQueries({ queryKey: projectKeys.projects });
+    await queryClient.invalidateQueries({ queryKey: projectsKeys.projects });
     handleCloseDialog();
   };
 

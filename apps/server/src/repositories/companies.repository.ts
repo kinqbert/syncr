@@ -9,7 +9,7 @@ const OWNER_ROLE = {
 };
 
 @Injectable()
-export class CompanyRepository {
+export class CompaniesRepository {
   async getUserCompanies(userId: number) {
     const userCompanies = await db
       .select()

@@ -5,7 +5,7 @@ import db from "src/db/drizzle";
 import { projects, roles, userCompanyRoles, users } from "src/db/schema";
 
 @Injectable()
-export class ProjectRepository {
+export class ProjectsRepository {
   async getCompanyProjects(companyId: number) {
     return await db
       .select()

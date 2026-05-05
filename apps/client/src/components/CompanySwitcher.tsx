@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { companyKeys, useCreateCompany, useGetMyCompanies } from "@/api/company";
+import { companiesKeys, useCreateCompany, useGetMyCompanies } from "@/api/companies";
 import { queryClient, removeCompanyScopedCache } from "@/lib/react-query";
 import { useCompanyStore } from "@/store/useCompanyStore";
 import { getErrorMessage } from "@/utils/getErrorMessage";
@@ -104,7 +104,7 @@ export const CompanySwitcher = () => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: companyKeys.companies,
+        queryKey: companiesKeys.companies,
       });
 
       setSelectedCompanyId(company.id);

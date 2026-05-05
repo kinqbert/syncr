@@ -8,34 +8,34 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
 
-export const projectKeys = {
+export const projectsKeys = {
   projects: ["projects"],
   project: (projectId: number) => ["projects", projectId],
-  managerCandidates: ["project-manager-candidates"],
+  managerCandidates: ["projects-manager-candidates"],
 };
 
 const getMyProjects = async () => {
-  const response = await api.get<Project[]>("project");
+  const response = await api.get<Project[]>("projects");
 
   return response.data;
 };
 
 const getProject = async (projectId: number) => {
-  const response = await api.get<Project>(`project/${projectId}`);
+  const response = await api.get<Project>(`projects/${projectId}`);
 
   return response.data;
 };
 
 const getProjectManagerCandidates = async () => {
   const response = await api.get<ProjectManagerCandidate[]>(
-    "project/manager-candidates",
+    "projects/manager-candidates",
   );
 
   return response.data;
 };
 
 const createProject = async (body: CreateProjectBody) => {
-  const response = await api.post<Project>("project", body);
+  const response = await api.post<Project>("projects", body);
 
   return response.data;
 };
@@ -47,7 +47,7 @@ const updateProject = async ({
   projectId: number;
   body: UpdateProjectBody;
 }) => {
-  const response = await api.patch<Project>(`project/${projectId}`, body);
+  const response = await api.patch<Project>(`projects/${projectId}`, body);
 
   return response.data;
 };
@@ -56,7 +56,7 @@ export const useGetMyProjects = (enabled = true) => {
   return useQuery({
     enabled,
     queryFn: getMyProjects,
-    queryKey: projectKeys.projects,
+    queryKey: projectsKeys.projects,
   });
 };
 
@@ -64,7 +64,7 @@ export const useGetProject = (projectId: number, enabled = true) => {
   return useQuery({
     enabled,
     queryFn: () => getProject(projectId),
-    queryKey: projectKeys.project(projectId),
+    queryKey: projectsKeys.project(projectId),
   });
 };
 
@@ -72,7 +72,7 @@ export const useGetProjectManagerCandidates = (enabled = true) => {
   return useQuery({
     enabled,
     queryFn: getProjectManagerCandidates,
-    queryKey: projectKeys.managerCandidates,
+    queryKey: projectsKeys.managerCandidates,
   });
 };
 
