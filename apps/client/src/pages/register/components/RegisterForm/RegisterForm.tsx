@@ -1,17 +1,18 @@
 import { Alert, Button, Link, Snackbar, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-
-import {
-  registerSchema,
-  registerStepSchemas,
-  type RegisterSchemaType,
-  type RegisterSchemaTypeKeys,
-} from "./validation";
-import { StepRenderer } from "./components/StepRenderer";
 import { Link as RouterLink, useNavigate } from "react-router";
+
 import { useRegister } from "@/api";
 import { getErrorMessage } from "@/utils/getErrorMessage";
+
+import { StepRenderer } from "./components/StepRenderer";
+import {
+  registerSchema,
+  type RegisterSchemaType,
+  type RegisterSchemaTypeKeys,
+  registerStepSchemas,
+} from "./validation";
 
 export const RegisterForm = () => {
   const navigate = useNavigate();

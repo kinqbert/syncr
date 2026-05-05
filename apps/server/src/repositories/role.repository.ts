@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { PermissionKey } from "@syncr/packages";
 import { and, eq } from "drizzle-orm";
-import db from "src/db/drizzle";
-import { permissions, rolePermissions, roles, userCompanyRoles } from "src/db/schema";
+
+import db from "../db/drizzle";
+import { permissions, rolePermissions, roles, userCompanyRoles } from "../db/schema";
 
 @Injectable()
 export class RoleRepository {

@@ -3,8 +3,8 @@ import { BadRequestException, CanActivate, ExecutionContext, Injectable } from "
 import { Reflector } from "@nestjs/core";
 import { PermissionKey } from "@syncr/packages";
 import { Request } from "express";
-import { RoleRepository } from "src/repositories/role.repository";
 
+import { RoleRepository } from "../../repositories/role.repository";
 import { REQUIRED_PERMISSION_KEY } from "../decorators/require-permission.decorator";
 
 @Injectable()

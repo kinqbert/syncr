@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { User } from "@syncr/packages";
 import { eq } from "drizzle-orm";
-import db from "src/db/drizzle";
-import { users } from "src/db/schema";
+
+import db from "../db/drizzle";
+import { users } from "../db/schema";
 
 @Injectable()
 export class UserRepository {

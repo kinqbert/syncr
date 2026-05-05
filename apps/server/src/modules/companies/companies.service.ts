@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
-import { CompaniesRepository } from "src/repositories/companies.repository";
 
+import { CompaniesRepository } from "../../repositories/companies.repository";
 import { CompanyDto, CreateCompanyDto } from "./companies.dto";
 import { mapCompanyToDto } from "./companies.mapper";
 

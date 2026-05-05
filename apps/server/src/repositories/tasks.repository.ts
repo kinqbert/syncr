@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { and, asc, count, eq, inArray } from "drizzle-orm";
-import db from "src/db/drizzle";
-import { projects, tasks, userCompanyRoles } from "src/db/schema";
+
+import db from "../db/drizzle";
+import { projects, tasks, userCompanyRoles } from "../db/schema";
 
 @Injectable()
 export class TasksRepository {

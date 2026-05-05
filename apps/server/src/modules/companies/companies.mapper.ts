@@ -1,5 +1,4 @@
-import { companies } from "src/db/schema";
-
+import { companies } from "../../db/schema";
 import { CompanyDto } from "./companies.dto";
 
 export const mapCompanyToDto = (company: typeof companies.$inferSelect): CompanyDto => {

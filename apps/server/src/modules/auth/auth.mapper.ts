@@ -1,5 +1,4 @@
-import { users } from "src/db/schema";
-
+import { users } from "../../db/schema";
 import { MeResponseDto } from "./auth.dto";
 
 export const mapMeResponseDto = (user: typeof users.$inferSelect): MeResponseDto => {

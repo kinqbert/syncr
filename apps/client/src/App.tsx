@@ -1,6 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import AppRouterProvider from "./providers/router/routerProvider";
+
 import { queryClient } from "./lib/react-query";
+import AppRouterProvider from "./providers/router/routerProvider";
 
 function App() {
   return (

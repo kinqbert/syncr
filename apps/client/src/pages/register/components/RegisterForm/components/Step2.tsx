@@ -1,10 +1,10 @@
-import { useFormContext } from "react-hook-form";
-import type { RegisterSchemaType } from "../validation";
-import { IconButton, Stack, TextField } from "@mui/material";
-
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { IconButton, Stack, TextField } from "@mui/material";
 import { useState } from "react";
+import { useFormContext } from "react-hook-form";
+
+import type { RegisterSchemaType } from "../validation";
 
 export const Step2 = () => {
   const {

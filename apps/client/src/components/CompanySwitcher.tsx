@@ -1,8 +1,3 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { companiesKeys, useCreateCompany, useGetMyCompanies } from "@/api/companies";
-import { queryClient, removeCompanyScopedCache } from "@/lib/react-query";
-import { useCompanyStore } from "@/store/useCompanyStore";
-import { getErrorMessage } from "@/utils/getErrorMessage";
 import {
   Alert,
   Button,
@@ -15,10 +10,16 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  type SelectChangeEvent,
   Stack,
   TextField,
-  type SelectChangeEvent,
 } from "@mui/material";
+import { type FormEvent,useEffect, useState } from "react";
+
+import { companiesKeys, useCreateCompany, useGetMyCompanies } from "@/api/companies";
+import { queryClient, removeCompanyScopedCache } from "@/lib/react-query";
+import { useCompanyStore } from "@/store/useCompanyStore";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 const CREATE_COMPANY_VALUE = "__create_company__";
 

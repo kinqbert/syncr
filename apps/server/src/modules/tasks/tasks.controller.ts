@@ -12,11 +12,11 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { PermissionKey } from "@syncr/packages";
-import { CompanyId } from "src/common/decorators/company-id.decorator";
-import { RequirePermission } from "src/common/decorators/require-permission.decorator";
-import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
-import { PermissionGuard } from "src/common/guards/permission-guard.guard";
 
+import { CompanyId } from "../../common/decorators/company-id.decorator";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
+import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
+import { PermissionGuard } from "../../common/guards/permission-guard.guard";
 import {
   CreateTaskDto,
   ReorderTasksDto,

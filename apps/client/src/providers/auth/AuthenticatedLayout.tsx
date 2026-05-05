@@ -1,9 +1,10 @@
-import { useMe } from "@/api";
-import { useAuthStore, type StoreUser } from "@/store/useAuthStore";
 import { CircularProgress, Stack } from "@mui/material";
 import type { MeResponse } from "@syncr/packages";
 import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router";
+
+import { useMe } from "@/api";
+import { type StoreUser, useAuthStore } from "@/store/useAuthStore";
 
 const buildStoreUserFromMe = (response: MeResponse): StoreUser => {
   return {

@@ -1,6 +1,7 @@
-import api from "@/lib/axios";
 import type { Company, CreateCompanyBody } from "@syncr/packages";
 import { useMutation, useQuery } from "@tanstack/react-query";
+
+import api from "@/lib/axios";
 
 export const companiesKeys = {
   companies: ["companies"],

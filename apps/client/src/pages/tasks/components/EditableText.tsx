@@ -1,5 +1,5 @@
 import { Box, TextField, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
@@ -23,12 +23,6 @@ export const EditableText = ({
   const [draft, setDraft] = useState(value);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isEditing) {
-      setDraft(value);
-    }
-  }, [isEditing, value]);
 
   const handleSave = async () => {
     const nextValue = draft.trim();
@@ -80,7 +74,11 @@ export const EditableText = ({
 
   return (
     <Box
-      onClick={() => setIsEditing(true)}
+      onClick={() => {
+        setDraft(value);
+        setError(null);
+        setIsEditing(true);
+      }}
       sx={{
         borderRadius: 1,
         cursor: "text",

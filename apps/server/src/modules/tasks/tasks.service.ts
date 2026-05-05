@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { TaskPriority, TaskStatus } from "@syncr/packages";
-import { TasksRepository } from "src/repositories/tasks.repository";
 
+import { TasksRepository } from "../../repositories/tasks.repository";
 import { CreateTaskDto, ReorderTasksDto, UpdateTaskDto, UpdateTaskStatusDto } from "./tasks.dto";
 import { mapTaskToDto } from "./tasks.mapper";
 

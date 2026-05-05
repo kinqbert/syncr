@@ -1,7 +1,6 @@
-import { useState } from "react";
-import { getErrorMessage } from "@/utils/getErrorMessage";
 import {
   Alert,
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -11,7 +10,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Box,
   Stack,
   TextField,
 } from "@mui/material";
@@ -20,8 +18,11 @@ import type {
   Project,
   ProjectManagerCandidate,
 } from "@syncr/packages";
+import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
+
 import { useAuthStore } from "@/store/useAuthStore";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 type ProjectFormState = {
   name: string;

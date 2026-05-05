@@ -2,6 +2,7 @@ import axios, { type InternalAxiosRequestConfig } from "axios";
 
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCompanyStore } from "@/store/useCompanyStore";
+
 import { env } from "./env";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {

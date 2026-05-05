@@ -5,16 +5,16 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import bcrypt from "bcrypt";
-import { TokenPayload } from "src/common/types/token";
-import { hash } from "src/common/utils/hash";
+
+import { TokenPayload } from "../../common/types/token";
+import { hash } from "../../common/utils/hash";
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
-} from "src/common/utils/jwt";
-import { AuthRepository } from "src/repositories/auth.repository";
-import { UserRepository } from "src/repositories/user.repository";
-
+} from "../../common/utils/jwt";
+import { AuthRepository } from "../../repositories/auth.repository";
+import { UserRepository } from "../../repositories/user.repository";
 import { LoginDto, RegisterDto } from "./auth.dto";
 import { mapMeResponseDto } from "./auth.mapper";
 

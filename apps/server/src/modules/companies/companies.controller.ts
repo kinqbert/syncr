@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
-import { UserId } from "src/common/decorators/user-id.decorator";
-import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
 
+import { UserId } from "../../common/decorators/user-id.decorator";
+import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { CompanyDto, CreateCompanyDto } from "./companies.dto";
 import { CompaniesService } from "./companies.service";
 

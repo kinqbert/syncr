@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { eq } from "drizzle-orm";
-import db from "src/db/drizzle";
-import { companies, roles, userCompanyRoles } from "src/db/schema";
+
+import db from "../db/drizzle";
+import { companies, roles, userCompanyRoles } from "../db/schema";
 
 const OWNER_ROLE = {
   key: "owner",

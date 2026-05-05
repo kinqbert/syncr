@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ProjectStatus } from "@syncr/packages";
-import { ProjectsRepository } from "src/repositories/projects.repository";
 
+import { ProjectsRepository } from "../../repositories/projects.repository";
 import { CreateProjectDto, UpdateProjectDto } from "./projects.dto";
 import { mapProjectToDto } from "./projects.mapper";
 

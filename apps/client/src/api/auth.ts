@@ -1,6 +1,7 @@
-import api from "@/lib/axios";
 import type { LoginBody, MeResponse, RegisterBody } from "@syncr/packages";
 import { useMutation, useQuery } from "@tanstack/react-query";
+
+import api from "@/lib/axios";
 
 export const authKeys = {
   me: ["me"],

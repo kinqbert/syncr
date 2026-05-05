@@ -1,12 +1,12 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res, UseGuards } from "@nestjs/common";
 import { Response } from "express";
-import { COOKIE_PARAM } from "src/common/constants/cookie-param";
-import { RefreshToken } from "src/common/decorators/refresh-token.decorator";
-import { SessionId } from "src/common/decorators/session-id.decorator";
-import { UserId } from "src/common/decorators/user-id.decorator";
-import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
-import { isProduction } from "src/common/utils/node-env";
 
+import { COOKIE_PARAM } from "../../common/constants/cookie-param";
+import { RefreshToken } from "../../common/decorators/refresh-token.decorator";
+import { SessionId } from "../../common/decorators/session-id.decorator";
+import { UserId } from "../../common/decorators/user-id.decorator";
+import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
+import { isProduction } from "../../common/utils/node-env";
 import { LoginDto, MeResponseDto, RegisterDto } from "./auth.dto";
 import { AuthService } from "./auth.service";
 

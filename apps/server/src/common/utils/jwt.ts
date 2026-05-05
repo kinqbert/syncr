@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import { CONFIG } from "src/config/configuration";
 
+import { CONFIG } from "../../config/configuration";
 import { TokenPayload } from "../types/token";
 
 export const generateAccessToken = (data: any) => {

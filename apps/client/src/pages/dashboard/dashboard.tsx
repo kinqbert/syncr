@@ -1,5 +1,6 @@
-import { useAuthStore } from "@/store/useAuthStore";
 import { Stack, Typography } from "@mui/material";
+
+import { useAuthStore } from "@/store/useAuthStore";
 
 export const DashboardPage = () => {
   const user = useAuthStore((state) => state.user);

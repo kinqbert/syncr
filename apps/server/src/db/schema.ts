@@ -1,4 +1,4 @@
-import { ProjectStatus, TaskPriority, TaskStatus } from "@syncr/packages";
+import { InvitationStatus, ProjectStatus, TaskPriority, TaskStatus } from "@syncr/packages";
 import {
   integer,
   pgEnum,
@@ -103,8 +103,8 @@ export const projectUsers = pgTable("project_users", {
 
 // TASKS
 
-export const taskStatusEnum = pgEnum("task_status", enumToPgEnum(TaskStatus));
-export const taskPriorityEnum = pgEnum("task_priority", enumToPgEnum(TaskPriority));
+const taskStatusEnum = pgEnum("task_status", enumToPgEnum(TaskStatus));
+const taskPriorityEnum = pgEnum("task_priority", enumToPgEnum(TaskPriority));
 
 export const tasks = pgTable("tasks", {
   id: serial().primaryKey(),
@@ -120,6 +120,25 @@ export const tasks = pgTable("tasks", {
   priority: taskPriorityEnum().notNull().default("medium"),
   position: integer().notNull().default(0),
   endDate: timestamp(),
+});
+
+// INVITATIONS
+
+export const invitationStatusEnum = pgEnum("invitation_status", enumToPgEnum(InvitationStatus));
+
+export const invitations = pgTable("invitations", {
+  id: serial().primaryKey(),
+  status: invitationStatusEnum().default("active"),
+  companyId: integer()
+    .notNull()
+    .references(() => companies.id, { onDelete: "cascade" }),
+  userId: integer()
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  inviteeEmail: text().notNull(),
+  roleId: integer()
+    .notNull()
+    .references(() => roles.id, { onDelete: "cascade" }),
 });
 
 // HELPERS

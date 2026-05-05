@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { Request } from "express";
-import { AuthRepository } from "src/repositories/auth.repository";
 
+import { AuthRepository } from "../../repositories/auth.repository";
 import { COOKIE_PARAM } from "../constants/cookie-param";
 import { verifyAccessToken } from "../utils/jwt";
 

@@ -1,5 +1,6 @@
 import { defineConfig } from "drizzle-kit";
-import { CONFIG } from "src/config/configuration";
+
+import { CONFIG } from "../config/configuration";
 
 export default defineConfig({
   out: "./drizzle",
