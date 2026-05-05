@@ -6,10 +6,14 @@ import type { Task } from "@syncr/packages";
 import { TaskCard } from "./TaskCard";
 
 type SortableTaskCardProps = {
+  projectId: number;
   task: Task;
 };
 
-export const SortableTaskCard = ({ task }: SortableTaskCardProps) => {
+export const SortableTaskCard = ({
+  projectId,
+  task,
+}: SortableTaskCardProps) => {
   const { attributes, isDragging, listeners, setNodeRef, transform } =
     useSortable({
       animateLayoutChanges: () => false,
@@ -29,7 +33,10 @@ export const SortableTaskCard = ({ task }: SortableTaskCardProps) => {
         visibility: isDragging ? "hidden" : "visible",
       }}
     >
-      <TaskCard task={task} />
+      <TaskCard
+        detailsPath={`/projects/${projectId}/tasks/${task.id}`}
+        task={task}
+      />
     </Box>
   );
 };

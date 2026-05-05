@@ -6,6 +6,7 @@ import {
   LoginPage,
   ProjectsPage,
   RegisterPage,
+  TaskDetailsPage,
   TasksPage,
 } from "@/pages";
 
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
       {
         path: "projects/:projectId/tasks",
         element: <TasksPage />,
+      },
+      {
+        path: "projects/:projectId/tasks/:taskId",
+        element: <TaskDetailsPage />,
       },
     ],
   },

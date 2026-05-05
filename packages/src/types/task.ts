@@ -8,6 +8,14 @@ export const TaskStatus = {
 
 export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus];
 
+export const TASK_STATUS_LABEL: Record<TaskStatus, string> = {
+  [TaskStatus.Backlog]: "Backlog",
+  [TaskStatus.Todo]: "Todo",
+  [TaskStatus.InProgress]: "In Progress",
+  [TaskStatus.Review]: "Review",
+  [TaskStatus.Done]: "Done",
+};
+
 export const TaskPriority = {
   Low: "low",
   Medium: "medium",
@@ -15,6 +23,12 @@ export const TaskPriority = {
 } as const;
 
 export type TaskPriority = (typeof TaskPriority)[keyof typeof TaskPriority];
+
+export const TASK_PRIORITY_LABEL: Record<TaskPriority, string> = {
+  [TaskPriority.Low]: "Low",
+  [TaskPriority.Medium]: "Medium",
+  [TaskPriority.High]: "High",
+};
 
 export type Task = {
   id: number;

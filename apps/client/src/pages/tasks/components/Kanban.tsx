@@ -108,7 +108,11 @@ export const Kanban = ({ projectId }: KanbanProps) => {
             >
               <Stack gap={2}>
                 {tasksByStatus[column.status].map((task) => (
-                  <SortableTaskCard key={task.id} task={task} />
+                  <SortableTaskCard
+                    key={task.id}
+                    projectId={projectId}
+                    task={task}
+                  />
                 ))}
               </Stack>
             </SortableContext>

@@ -15,7 +15,7 @@ export const TasksPage = () => {
   }
 
   return (
-    <Stack height="100%" minWidth={0} width="100%" p={2}>
+    <Stack height="100%" minWidth={0} width="100%" p={3}>
       <Stack mb={2}>
         <Typography variant="h5">{project?.name}</Typography>
         <Typography variant="subtitle1" color="text.secondary">

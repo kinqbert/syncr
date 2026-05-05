@@ -56,7 +56,9 @@ export const KanbanColumn = ({
       }}
     >
       <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Typography>{column.label}</Typography>
+        <Typography variant="subtitle1" fontWeight={600}>
+          {column.label}
+        </Typography>
         <Tooltip title={isFormOpen ? "Close form" : "Create task"}>
           <IconButton
             aria-label={isFormOpen ? "Close task form" : "Create task"}

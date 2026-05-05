@@ -2,6 +2,7 @@ import { useMe } from "@/api";
 import { useAuthStore, type StoreUser } from "@/store/useAuthStore";
 import { CircularProgress, Stack } from "@mui/material";
 import type { MeResponse } from "@syncr/packages";
+import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router";
 
 const buildStoreUserFromMe = (response: MeResponse): StoreUser => {
@@ -20,18 +21,22 @@ export const AuthenticatedLayout = ({
   const setUser = useAuthStore((state) => state.setUser);
   const { data: user, isPending, isSuccess } = useMe();
 
+  useEffect(() => {
+    if (!isSuccess || !user) {
+      return;
+    }
+
+    const storeUser = buildStoreUserFromMe(user);
+
+    setUser(storeUser);
+  }, [isSuccess, setUser, user]);
+
   if (isPending) {
     return (
       <Stack minHeight="100vh" alignItems="center" justifyContent="center">
         <CircularProgress />
       </Stack>
     );
-  }
-
-  if (isSuccess && user) {
-    const storeUser = buildStoreUserFromMe(user);
-
-    setUser(storeUser);
   }
 
   if (!user) {

@@ -5,13 +5,16 @@ import {
   Card,
   Chip,
   IconButton,
+  Link as MuiLink,
   Stack,
   Tooltip,
   Typography,
 } from "@mui/material";
 import type { Task } from "@syncr/packages";
+import { Link as RouterLink } from "react-router";
 
 type TaskCardProps = {
+  detailsPath?: string;
   task: Task;
 };
 
@@ -48,9 +51,9 @@ const formatDate = (value: string | null) => {
   }).format(new Date(value));
 };
 
-export const TASK_CARD_WIDTH = 280;
+export const TASK_CARD_WIDTH = 320;
 
-export const TaskCard = ({ task }: TaskCardProps) => {
+export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
   const priorityColor = priorityColorByValue[task.priority];
 
   return (
@@ -63,6 +66,7 @@ export const TaskCard = ({ task }: TaskCardProps) => {
         borderRadius: 3,
         boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
         p: 2,
+        transition: "border-color 160ms ease, box-shadow 160ms ease",
       }}
     >
       <Stack gap={2}>
@@ -72,7 +76,36 @@ export const TaskCard = ({ task }: TaskCardProps) => {
           justifyContent="space-between"
           gap={1}
         >
-          <Typography variant="button">{task.name}</Typography>
+          {detailsPath ? (
+            <MuiLink
+              component={RouterLink}
+              to={detailsPath}
+              underline="none"
+              onPointerDown={(event) => {
+                event.stopPropagation();
+              }}
+              sx={{
+                borderRadius: 1,
+                color: "inherit",
+                cursor: "pointer",
+                minWidth: 0,
+                textDecoration: "none",
+                "&:hover": {
+                  color: "primary.main",
+                },
+                "&:focus-visible": {
+                  outline: "2px solid",
+                  outlineColor: "primary.main",
+                  outlineOffset: 2,
+                },
+              }}
+              variant="button"
+            >
+              {task.name}
+            </MuiLink>
+          ) : (
+            <Typography variant="button">{task.name}</Typography>
+          )}
           <Tooltip title="Task actions">
             <IconButton
               aria-label="Task actions"
