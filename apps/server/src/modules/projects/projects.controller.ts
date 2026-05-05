@@ -18,6 +18,7 @@ import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { PermissionGuard } from "../../common/guards/permission-guard.guard";
 import {
   CreateProjectDto,
+  ProjectAssigneeDto,
   ProjectDto,
   ProjectManagerCandidateDto,
   UpdateProjectDto,
@@ -55,6 +56,17 @@ export class ProjectsController {
     @Param("projectId", ParseIntPipe) projectId: number,
   ): Promise<ProjectDto> {
     return await this.projectService.getCompanyProject(companyId, projectId);
+  }
+
+  @Get(":projectId/assignees")
+  @RequirePermission(PermissionKey.ProjectView)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async getProjectAssignees(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+  ): Promise<ProjectAssigneeDto[]> {
+    return await this.projectService.getProjectAssignees(companyId, projectId);
   }
 
   @Post()

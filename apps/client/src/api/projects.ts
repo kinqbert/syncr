@@ -1,6 +1,7 @@
 import type {
   CreateProjectBody,
   Project,
+  ProjectAssignee,
   ProjectManagerCandidate,
   UpdateProjectBody,
 } from "@syncr/packages";
@@ -11,6 +12,8 @@ import api from "@/lib/axios";
 export const projectsKeys = {
   projects: ["projects"],
   project: (projectId: number) => ["projects", projectId],
+  projectAssignees: (projectId: number) =>
+    ["projects", projectId, "assignees"] as const,
   managerCandidates: ["projects-manager-candidates"],
 };
 
@@ -29,6 +32,14 @@ const getProject = async (projectId: number) => {
 const getProjectManagerCandidates = async () => {
   const response = await api.get<ProjectManagerCandidate[]>(
     "projects/manager-candidates",
+  );
+
+  return response.data;
+};
+
+const getProjectAssignees = async (projectId: number) => {
+  const response = await api.get<ProjectAssignee[]>(
+    `projects/${projectId}/assignees`,
   );
 
   return response.data;
@@ -73,6 +84,14 @@ export const useGetProjectManagerCandidates = (enabled = true) => {
     enabled,
     queryFn: getProjectManagerCandidates,
     queryKey: projectsKeys.managerCandidates,
+  });
+};
+
+export const useGetProjectAssignees = (projectId: number, enabled = true) => {
+  return useQuery({
+    enabled,
+    queryFn: () => getProjectAssignees(projectId),
+    queryKey: projectsKeys.projectAssignees(projectId),
   });
 };
 

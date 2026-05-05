@@ -3,7 +3,7 @@ import { RoleKey } from "@syncr/packages";
 import { and, asc, eq, inArray } from "drizzle-orm";
 
 import db from "../db/drizzle";
-import { projects, roles, userCompanyRoles, users } from "../db/schema";
+import { projects, projectUsers, roles, userCompanyRoles, users } from "../db/schema";
 
 @Injectable()
 export class ProjectsRepository {
@@ -49,6 +49,21 @@ export class ProjectsRepository {
     return candidates;
   }
 
+  async getProjectAssignees(companyId: number, projectId: number) {
+    return await db
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        surname: users.surname,
+      })
+      .from(projectUsers)
+      .innerJoin(projects, eq(projectUsers.projectId, projects.id))
+      .innerJoin(users, eq(projectUsers.userId, users.id))
+      .where(and(eq(projects.companyId, companyId), eq(projectUsers.projectId, projectId)))
+      .orderBy(asc(users.name), asc(users.surname));
+  }
+
   async isProjectManagerCandidate(companyId: number, userId: number) {
     const [candidate] = await db
       .select({ id: users.id })
@@ -68,9 +83,15 @@ export class ProjectsRepository {
   }
 
   async createProject(data: typeof projects.$inferInsert) {
-    const [project] = await db.insert(projects).values(data).returning();
+    return await db.transaction(async (tx) => {
+      const [project] = await tx.insert(projects).values(data).returning();
 
-    return project;
+      if (data.managerId) {
+        await tx.insert(projectUsers).values({ userId: data.managerId, projectId: project.id });
+      }
+
+      return project;
+    });
   }
 
   async updateProject(

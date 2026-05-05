@@ -2,7 +2,9 @@ import {
   CreateTaskBody,
   ReorderTaskItem,
   ReorderTasksBody,
+  SetTaskAssigneeBody,
   Task,
+  TaskAssignee,
   TaskPriority,
   TaskStatus,
   UpdateTaskBody,
@@ -19,6 +21,20 @@ import {
   ValidateNested,
 } from "class-validator";
 
+class TaskAssigneeDto implements TaskAssignee {
+  @IsInt()
+  id: number;
+
+  @IsString()
+  email: string;
+
+  @IsString()
+  name: string;
+
+  @IsString()
+  surname: string;
+}
+
 export class TaskDto implements Task {
   @IsInt()
   id: number;
@@ -32,8 +48,9 @@ export class TaskDto implements Task {
   @IsInt()
   projectId: number;
 
-  @IsInt()
-  assigneeId: number;
+  @ValidateNested()
+  @Type(() => TaskAssigneeDto)
+  assignee: TaskAssigneeDto;
 
   @IsEnum(TaskStatus)
   status: TaskStatus;
@@ -128,9 +145,7 @@ export class ReorderTasksDto implements ReorderTasksBody {
   tasks: ReorderTaskItemDto[];
 }
 
-export class SetTaskAssigneeDto implements ReorderTasksBody {
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ReorderTaskItemDto)
-  tasks: ReorderTaskItemDto[];
+export class SetTaskAssigneeDto implements SetTaskAssigneeBody {
+  @IsInt()
+  assigneeId: number;
 }

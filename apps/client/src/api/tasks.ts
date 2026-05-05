@@ -1,6 +1,7 @@
 import type {
   CreateTaskBody,
   ReorderTasksBody,
+  SetTaskAssigneeBody,
   Task,
   UpdateTaskBody,
 } from "@syncr/packages";
@@ -63,6 +64,23 @@ const reorderTasks = async ({
   return response.data;
 };
 
+const setTaskAssignee = async ({
+  projectId,
+  taskId,
+  body,
+}: {
+  projectId: number;
+  taskId: number;
+  body: SetTaskAssigneeBody;
+}) => {
+  const response = await api.patch<Task>(
+    `projects/${projectId}/tasks/${taskId}/set-assignee`,
+    body,
+  );
+
+  return response.data;
+};
+
 const deleteTask = async ({
   projectId,
   taskId,
@@ -96,6 +114,12 @@ export const useUpdateTask = () => {
 export const useReorderTasks = () => {
   return useMutation({
     mutationFn: reorderTasks,
+  });
+};
+
+export const useSetTaskAssignee = () => {
+  return useMutation({
+    mutationFn: setTaskAssignee,
   });
 };
 

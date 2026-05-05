@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { TaskPriority, TaskStatus } from "@syncr/packages";
 
 import { TasksRepository } from "../../repositories/tasks.repository";
-import { CreateTaskDto, ReorderTasksDto, UpdateTaskDto } from "./tasks.dto";
+import { CreateTaskDto, ReorderTasksDto, SetTaskAssigneeDto, UpdateTaskDto } from "./tasks.dto";
 import { mapTaskToDto } from "./tasks.mapper";
 
 @Injectable()
@@ -19,7 +19,7 @@ export class TasksService {
 
   async createTask(companyId: number, projectId: number, createTaskDto: CreateTaskDto) {
     await this.ensureProjectExists(projectId, companyId);
-    await this.ensureAssigneeInCompany(createTaskDto.assigneeId, companyId);
+    await this.ensureAssigneeInProject(createTaskDto.assigneeId, projectId, companyId);
 
     const status = createTaskDto.status ?? TaskStatus.Backlog;
 
@@ -59,7 +59,7 @@ export class TasksService {
     }
 
     if (updateTaskDto.assigneeId !== undefined) {
-      await this.ensureAssigneeInCompany(updateTaskDto.assigneeId, companyId);
+      await this.ensureAssigneeInProject(updateTaskDto.assigneeId, projectId, companyId);
 
       updateData.assigneeId = updateTaskDto.assigneeId;
     }
@@ -115,6 +115,22 @@ export class TasksService {
     return tasks.map(mapTaskToDto);
   }
 
+  async setAssignee(
+    companyId: number,
+    projectId: number,
+    taskId: number,
+    setTaskAssigneeDto: SetTaskAssigneeDto,
+  ) {
+    await this.ensureTaskExists(taskId, projectId, companyId);
+    await this.ensureAssigneeInProject(setTaskAssigneeDto.assigneeId, projectId, companyId);
+
+    const task = await this.taskRepository.updateTask(taskId, {
+      assigneeId: setTaskAssigneeDto.assigneeId,
+    });
+
+    return mapTaskToDto(task);
+  }
+
   async deleteTask(companyId: number, projectId: number, taskId: number) {
     await this.ensureTaskExists(taskId, projectId, companyId);
 
@@ -144,6 +160,20 @@ export class TasksService {
 
     if (!isUserInCompany) {
       throw new BadRequestException("Task assignee must belong to the company");
+    }
+  }
+
+  private async ensureAssigneeInProject(assigneeId: number, projectId: number, companyId: number) {
+    await this.ensureAssigneeInCompany(assigneeId, companyId);
+
+    const isUserAssignedToProject = await this.taskRepository.isUserAssignedToProject(
+      assigneeId,
+      projectId,
+      companyId,
+    );
+
+    if (!isUserAssignedToProject) {
+      throw new BadRequestException("Task assignee must be assigned to the project");
     }
   }
 

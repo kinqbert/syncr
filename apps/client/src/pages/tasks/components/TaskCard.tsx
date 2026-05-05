@@ -51,6 +51,14 @@ const formatDate = (value: string | null) => {
   }).format(new Date(value));
 };
 
+const getUserInitials = (name: string, surname: string) => {
+  return `${name.charAt(0)}${surname.charAt(0)}`.toUpperCase();
+};
+
+const getUserName = (name: string, surname: string) => {
+  return `${name} ${surname}`.trim();
+};
+
 export const TASK_CARD_WIDTH = 320;
 
 export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
@@ -134,10 +142,10 @@ export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
                 width: 34,
               }}
             >
-              U{task.assigneeId}
+              {getUserInitials(task.assignee.name, task.assignee.surname)}
             </Avatar>
             <Typography color="text.secondary" noWrap variant="caption">
-              User {task.assigneeId}
+              {getUserName(task.assignee.name, task.assignee.surname)}
             </Typography>
           </Stack>
 

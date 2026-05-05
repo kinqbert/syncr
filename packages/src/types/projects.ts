@@ -38,3 +38,10 @@ export type ProjectManagerCandidate = {
   roleKey: string;
   roleName: string;
 };
+
+export type ProjectAssignee = {
+  id: number;
+  email: string;
+  name: string;
+  surname: string;
+};

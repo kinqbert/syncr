@@ -25,7 +25,13 @@ import {
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 
-import { taskKeys, useGetProjectTasks, useUpdateTask } from "@/api/tasks";
+import { useGetProjectAssignees } from "@/api/projects";
+import {
+  taskKeys,
+  useGetProjectTasks,
+  useSetTaskAssignee,
+  useUpdateTask,
+} from "@/api/tasks";
 import { queryClient } from "@/lib/react-query";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
@@ -44,6 +50,14 @@ const updateTaskInCache = (projectId: number, updatedTask: Task) => {
   );
 };
 
+const getUserInitials = (name: string, surname: string) => {
+  return `${name.charAt(0)}${surname.charAt(0)}`.toUpperCase();
+};
+
+const getUserName = (name: string, surname: string) => {
+  return `${name} ${surname}`.trim();
+};
+
 export const TaskDetailsPage = () => {
   const { projectId, taskId } = useParams();
   const numericProjectId = Number(projectId);
@@ -52,9 +66,13 @@ export const TaskDetailsPage = () => {
     numericProjectId,
     Boolean(projectId),
   );
+  const { data: projectAssignees = [], isPending: areAssigneesPending } =
+    useGetProjectAssignees(numericProjectId, Boolean(projectId));
   const updateTask = useUpdateTask();
+  const setTaskAssignee = useSetTaskAssignee();
   const [error, setError] = useState<string | null>(null);
   const task = tasks.find((item) => item.id === numericTaskId);
+  const assignee = projectAssignees.find((user) => user.id === task?.assignee.id);
 
   const saveTask = async (body: UpdateTaskBody) => {
     if (!task) {
@@ -73,6 +91,26 @@ export const TaskDetailsPage = () => {
       updateTaskInCache(numericProjectId, updatedTask);
     } catch (saveError) {
       setError(getErrorMessage(saveError, "Could not update task."));
+    }
+  };
+
+  const saveAssignee = async (assigneeId: number) => {
+    if (!task || task.assignee.id === assigneeId) {
+      return;
+    }
+
+    setError(null);
+
+    try {
+      const updatedTask = await setTaskAssignee.mutateAsync({
+        projectId: numericProjectId,
+        taskId: task.id,
+        body: { assigneeId },
+      });
+
+      updateTaskInCache(numericProjectId, updatedTask);
+    } catch (saveError) {
+      setError(getErrorMessage(saveError, "Could not update task assignee."));
     }
   };
 
@@ -275,24 +313,43 @@ export const TaskDetailsPage = () => {
                 <Typography color="text.secondary" variant="caption">
                   Assigned To
                 </Typography>
-                <Stack
-                  alignItems="center"
-                  direction="row"
-                  gap={1.25}
-                  sx={{
-                    bgcolor: "action.hover",
-                    borderRadius: 1.5,
-                    px: 1.25,
-                    py: 1,
-                  }}
+                <TextField
+                  disabled={areAssigneesPending || setTaskAssignee.isPending}
+                  helperText={
+                    projectAssignees.length === 0
+                      ? "No users are assigned to this project."
+                      : undefined
+                  }
+                  onChange={(event) =>
+                    void saveAssignee(Number(event.target.value))
+                  }
+                  select
+                  size="small"
+                  value={task.assignee.id}
                 >
-                  <Avatar sx={{ height: 28, width: 28 }}>
-                    U{task.assigneeId}
-                  </Avatar>
-                  <Typography variant="body2">
-                    User {task.assigneeId}
-                  </Typography>
-                </Stack>
+                  {assignee ? null : (
+                    <MenuItem disabled value={task.assignee.id}>
+                      {getUserName(task.assignee.name, task.assignee.surname)}
+                    </MenuItem>
+                  )}
+                  {projectAssignees.map((user) => (
+                    <MenuItem key={user.id} value={user.id}>
+                      <Stack alignItems="center" direction="row" gap={1.25}>
+                        <Avatar sx={{ height: 28, width: 28 }}>
+                          {getUserInitials(user.name, user.surname)}
+                        </Avatar>
+                        <Stack minWidth={0}>
+                          <Typography variant="body2">
+                            {getUserName(user.name, user.surname)}
+                          </Typography>
+                          <Typography color="text.secondary" variant="caption">
+                            {user.email}
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Stack>
 
               <TextField

@@ -1,6 +1,7 @@
 import {
   CreateProjectBody,
   Project,
+  ProjectAssignee,
   ProjectManagerCandidate,
   ProjectStatus,
   UpdateProjectBody,
@@ -100,4 +101,18 @@ export class ProjectManagerCandidateDto implements ProjectManagerCandidate {
 
   @IsString()
   roleName: string;
+}
+
+export class ProjectAssigneeDto implements ProjectAssignee {
+  @IsNumber()
+  id: number;
+
+  @IsString()
+  email: string;
+
+  @IsString()
+  name: string;
+
+  @IsString()
+  surname: string;
 }

@@ -30,12 +30,19 @@ export const TASK_PRIORITY_LABEL: Record<TaskPriority, string> = {
   [TaskPriority.High]: "High",
 };
 
+export type TaskAssignee = {
+  id: number;
+  email: string;
+  name: string;
+  surname: string;
+};
+
 export type Task = {
   id: number;
   name: string;
   description: string;
   projectId: number;
-  assigneeId: number;
+  assignee: TaskAssignee;
   status: TaskStatus;
   priority: TaskPriority;
   position: number;
@@ -70,4 +77,8 @@ export type ReorderTaskItem = {
 
 export type ReorderTasksBody = {
   tasks: ReorderTaskItem[];
+};
+
+export type SetTaskAssigneeBody = {
+  assigneeId: number;
 };

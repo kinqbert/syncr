@@ -17,7 +17,13 @@ import { CompanyId } from "../../common/decorators/company-id.decorator";
 import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { PermissionGuard } from "../../common/guards/permission-guard.guard";
-import { CreateTaskDto, ReorderTasksDto, TaskDto, UpdateTaskDto } from "./tasks.dto";
+import {
+  CreateTaskDto,
+  ReorderTasksDto,
+  SetTaskAssigneeDto,
+  TaskDto,
+  UpdateTaskDto,
+} from "./tasks.dto";
 import { TasksService } from "./tasks.service";
 
 @Controller("projects/:projectId/tasks")
@@ -70,6 +76,19 @@ export class TasksController {
     @Body() updateTaskDto: UpdateTaskDto,
   ): Promise<TaskDto> {
     return await this.taskService.updateTask(companyId, projectId, taskId, updateTaskDto);
+  }
+
+  @Patch(":taskId/set-assignee")
+  @RequirePermission(PermissionKey.TaskAssign)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async setAssignee(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+    @Param("taskId", ParseIntPipe) taskId: number,
+    @Body() setTaskAssigneeDto: SetTaskAssigneeDto,
+  ): Promise<TaskDto> {
+    return await this.taskService.setAssignee(companyId, projectId, taskId, setTaskAssigneeDto);
   }
 
   @Delete(":taskId")

@@ -25,6 +25,12 @@ export class ProjectsService {
     return await this.projectRepository.getProjectManagerCandidates(companyId);
   }
 
+  async getProjectAssignees(companyId: number, projectId: number) {
+    await this.ensureProjectExists(companyId, projectId);
+
+    return await this.projectRepository.getProjectAssignees(companyId, projectId);
+  }
+
   async createProject(companyId: number, createProjectDto: CreateProjectDto) {
     const name = this.getValidName(createProjectDto.name);
     const managerId = await this.getValidManagerId(companyId, createProjectDto.managerId ?? null);
@@ -121,5 +127,13 @@ export class ProjectsService {
     }
 
     return managerId;
+  }
+
+  private async ensureProjectExists(companyId: number, projectId: number) {
+    const project = await this.projectRepository.getCompanyProject(companyId, projectId);
+
+    if (!project) {
+      throw new NotFoundException("Project not found");
+    }
   }
 }
