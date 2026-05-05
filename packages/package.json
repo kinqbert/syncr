@@ -4,21 +4,25 @@
   "description": "",
   "type": "commonjs",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.mjs"
     }
   },
   "scripts": {
     "lint": "eslint \"src/**/*.ts\"",
-    "build": "tsc"
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc --emitDeclarationOnly --outDir dist && esbuild src/index.ts --bundle --format=esm --platform=neutral --outfile=dist/index.mjs && esbuild src/index.ts --bundle --format=cjs --platform=node --outfile=dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "esbuild": "^0.25.12",
     "typescript": "~5.9.3"
   }
 }
