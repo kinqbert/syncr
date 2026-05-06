@@ -88,7 +88,7 @@ export const TaskDetailsPage = () => {
 
           <TaskAttachmentsPanel />
 
-          <TaskCommentsPanel />
+          <TaskCommentsPanel projectId={numericProjectId} taskId={task.id} />
         </Stack>
 
         <Stack gap={2.25} minWidth={0}>

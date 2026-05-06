@@ -43,6 +43,13 @@
       "when": 1778070863102,
       "tag": "0006_massive_purple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1778077270025,
+      "tag": "0006_simple_squirrel_girl",
+      "breakpoints": true
     }
   ]
 }

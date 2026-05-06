@@ -1,25 +1,89 @@
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import {
+  Alert,
   Avatar,
   Button,
+  CircularProgress,
   Divider,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
+import type { TaskComment } from "@syncr/packages";
+import { useState } from "react";
+
+import {
+  taskKeys,
+  useCreateTaskComment,
+  useGetTaskComments,
+} from "@/api/tasks";
+import { queryClient } from "@/lib/react-query";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { Panel } from "../../../components/Panel";
 
-const comments = [
-  "This looks great! Let's make sure we test all edge cases.",
-  "I've completed the initial implementation. Ready for review.",
-  "Do we need to update the documentation for this change?",
-];
+type TaskCommentsPanelProps = {
+  projectId: number;
+  taskId: number;
+};
 
-const commentAuthors = ["Sarah Chen", "Mike Johnson", "Emily Davis"];
-const commentInitials = ["SC", "MJ", "ED"];
+const getInitials = (author: TaskComment["author"]) => {
+  if (!author) {
+    return "?";
+  }
 
-export const TaskCommentsPanel = () => {
+  return `${author.name.at(0) ?? ""}${author.surname.at(0) ?? ""}`.toUpperCase();
+};
+
+const getAuthorName = (author: TaskComment["author"]) => {
+  return author ? `${author.name} ${author.surname}`.trim() : "Deleted user";
+};
+
+const formatCreatedAt = (value: string) => {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+};
+
+export const TaskCommentsPanel = ({
+  projectId,
+  taskId,
+}: TaskCommentsPanelProps) => {
+  const { data: comments = [], isPending } = useGetTaskComments(
+    projectId,
+    taskId,
+  );
+  const createTaskComment = useCreateTaskComment();
+  const [comment, setComment] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const createComment = async () => {
+    const content = comment.trim();
+
+    if (!content) {
+      return;
+    }
+
+    setError(null);
+
+    try {
+      const createdComment = await createTaskComment.mutateAsync({
+        projectId,
+        taskId,
+        body: { content },
+      });
+
+      queryClient.setQueryData<TaskComment[]>(
+        taskKeys.taskComments(projectId, taskId),
+        (currentComments = []) => [...currentComments, createdComment],
+      );
+      setComment("");
+    } catch (createError) {
+      setError(getErrorMessage(createError, "Could not post comment."));
+    }
+  };
+
   return (
     <Panel>
       <Stack gap={2}>
@@ -27,36 +91,81 @@ export const TaskCommentsPanel = () => {
           <ChatBubbleOutlineIcon fontSize="small" />
           <Typography variant="subtitle1">Comments</Typography>
         </Stack>
-        {comments.map((comment, index) => (
+
+        {error ? <Alert severity="error">{error}</Alert> : null}
+
+        {isPending ? (
+          <Stack alignItems="center" py={1}>
+            <CircularProgress size={24} />
+          </Stack>
+        ) : null}
+
+        {!isPending && comments.length === 0 ? (
+          <Typography color="text.secondary" variant="body2">
+            No comments yet.
+          </Typography>
+        ) : null}
+
+        {comments.map((item) => (
           <Stack
             alignItems="flex-start"
             direction="row"
             gap={1.25}
-            key={comment}
+            key={item.id}
           >
             <Avatar sx={{ height: 24, width: 24 }}>
-              {commentInitials[index]}
+              {getInitials(item.author)}
             </Avatar>
-            <Stack>
-              <Typography variant="caption">{commentAuthors[index]}</Typography>
-              <Typography variant="body2">{comment}</Typography>
+            <Stack minWidth={0}>
+              <Stack
+                alignItems="baseline"
+                direction="row"
+                flexWrap="wrap"
+                gap={0.75}
+              >
+                <Typography variant="caption">
+                  {getAuthorName(item.author)}
+                </Typography>
+                <Typography color="text.secondary" variant="caption">
+                  {formatCreatedAt(item.createdAt)}
+                </Typography>
+              </Stack>
+              <Typography sx={{ whiteSpace: "pre-wrap" }} variant="body2">
+                {item.content}
+              </Typography>
             </Stack>
           </Stack>
         ))}
+
         <Divider />
-        <Stack direction="row" gap={1.25}>
-          <Avatar sx={{ height: 28, width: 28 }}>JD</Avatar>
+        <Stack
+          component="form"
+          direction="row"
+          gap={1.25}
+          onSubmit={(event) => {
+            event.preventDefault();
+            void createComment();
+          }}
+        >
           <TextField
+            disabled={createTaskComment.isPending}
             fullWidth
             minRows={2}
             multiline
+            onChange={(event) => setComment(event.target.value)}
             placeholder="Add a comment..."
             size="small"
+            value={comment}
           />
+          <Button
+            disabled={createTaskComment.isPending || !comment.trim()}
+            sx={{ alignSelf: "flex-start", whiteSpace: "nowrap" }}
+            type="submit"
+            variant="contained"
+          >
+            Post
+          </Button>
         </Stack>
-        <Button sx={{ alignSelf: "flex-end" }} variant="contained">
-          Post Comment
-        </Button>
       </Stack>
     </Panel>
   );

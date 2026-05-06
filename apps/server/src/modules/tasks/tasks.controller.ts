@@ -11,7 +11,8 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
-import { PermissionKey } from "@syncr/packages";
+import { PermissionKey, TaskComment } from "@syncr/packages";
+import { UserId } from "src/common/decorators/user-id.decorator";
 
 import { CompanyId } from "../../common/decorators/company-id.decorator";
 import { RequirePermission } from "../../common/decorators/require-permission.decorator";
@@ -19,6 +20,7 @@ import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { PermissionGuard } from "../../common/guards/permission-guard.guard";
 import {
   CreateTaskAcceptanceCriterionDto,
+  CreateTaskCommentDto,
   CreateTaskDto,
   ReorderTasksDto,
   SetTaskAssigneeDto,
@@ -78,6 +80,38 @@ export class TasksController {
     @Body() updateTaskDto: UpdateTaskDto,
   ): Promise<TaskDto> {
     return await this.taskService.updateTask(companyId, projectId, taskId, updateTaskDto);
+  }
+
+  @Get(":taskId/comments")
+  @RequirePermission(PermissionKey.TaskAssign)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async getTaskComments(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+    @Param("taskId", ParseIntPipe) taskId: number,
+  ): Promise<TaskComment[]> {
+    return await this.taskService.getTaskComments(companyId, projectId, taskId);
+  }
+
+  @Post(":taskId/comments")
+  @RequirePermission(PermissionKey.TaskAssign)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async createTaskComment(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+    @Param("taskId", ParseIntPipe) taskId: number,
+    @UserId() userId: number,
+    @Body() createTaskCommentDto: CreateTaskCommentDto,
+  ): Promise<TaskComment> {
+    return await this.taskService.createTaskComment(
+      companyId,
+      projectId,
+      taskId,
+      userId,
+      createTaskCommentDto,
+    );
   }
 
   @Patch(":taskId/set-assignee")

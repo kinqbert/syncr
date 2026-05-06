@@ -30,12 +30,14 @@ export const TASK_PRIORITY_LABEL: Record<TaskPriority, string> = {
   [TaskPriority.High]: "High",
 };
 
-export type TaskAssignee = {
+type TaskUserBase = {
   id: number;
   email: string;
   name: string;
   surname: string;
 };
+
+export type TaskAssignee = TaskUserBase;
 
 export type TaskAcceptanceCriterion = {
   id: number;
@@ -43,6 +45,16 @@ export type TaskAcceptanceCriterion = {
   description: string;
   isDone: boolean;
   position: number;
+};
+
+export type TaskCommentAuthor = TaskUserBase;
+
+export type TaskComment = {
+  id: number;
+  taskId: number;
+  author: TaskCommentAuthor | null;
+  content: string;
+  createdAt: string;
 };
 
 export type Task = {
@@ -102,4 +114,8 @@ export type UpdateTaskAcceptanceCriterionBody = {
   description?: string;
   isDone?: boolean;
   position?: number;
+};
+
+export type CreateTaskCommentBody = {
+  content: string;
 };

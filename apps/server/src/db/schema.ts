@@ -131,6 +131,16 @@ export const taskAcceptanceCriteria = pgTable("task_acceptance_criteria", {
   position: integer().notNull().default(0),
 });
 
+export const taskComments = pgTable("task_comments", {
+  id: serial().primaryKey(),
+  taskId: integer()
+    .notNull()
+    .references(() => tasks.id, { onDelete: "cascade" }),
+  userId: integer().references(() => users.id, { onDelete: "set null" }),
+  content: text().notNull(),
+  createdAt: timestamp().notNull().defaultNow(),
+});
+
 // INVITATIONS
 
 export const invitationStatusEnum = pgEnum("invitation_status", enumToPgEnum(InvitationStatus));

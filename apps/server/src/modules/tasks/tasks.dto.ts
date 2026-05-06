@@ -1,6 +1,7 @@
 import {
   CreateTaskAcceptanceCriterionBody,
   CreateTaskBody,
+  CreateTaskCommentBody,
   ReorderTaskItem,
   ReorderTasksBody,
   SetTaskAssigneeBody,
@@ -176,6 +177,11 @@ export class SetTaskAssigneeDto implements SetTaskAssigneeBody {
   @IsInt()
   @IsOptional()
   assigneeId: number | null;
+}
+
+export class CreateTaskCommentDto implements CreateTaskCommentBody {
+  @IsString()
+  content: string;
 }
 
 export class CreateTaskAcceptanceCriterionDto implements CreateTaskAcceptanceCriterionBody {

@@ -1,9 +1,11 @@
 import type {
   CreateTaskAcceptanceCriterionBody,
   CreateTaskBody,
+  CreateTaskCommentBody,
   ReorderTasksBody,
   SetTaskAssigneeBody,
   Task,
+  TaskComment,
   UpdateTaskAcceptanceCriterionBody,
   UpdateTaskBody,
 } from "@syncr/packages";
@@ -14,6 +16,8 @@ import api from "@/lib/axios";
 export const taskKeys = {
   projectTasks: (projectId: number) =>
     ["projects", projectId, "tasks"] as const,
+  taskComments: (projectId: number, taskId: number) =>
+    ["projects", projectId, "tasks", taskId, "comments"] as const,
 };
 
 const getProjectTasks = async (projectId: number) => {
@@ -145,6 +149,37 @@ const deleteTaskAcceptanceCriterion = async ({
   return response.data;
 };
 
+const createTaskComment = async ({
+  projectId,
+  taskId,
+  body,
+}: {
+  projectId: number;
+  taskId: number;
+  body: CreateTaskCommentBody;
+}) => {
+  const response = await api.post<TaskComment>(
+    `projects/${projectId}/tasks/${taskId}/comments`,
+    body,
+  );
+
+  return response.data;
+};
+
+const getTaskComments = async ({
+  projectId,
+  taskId,
+}: {
+  projectId: number;
+  taskId: number;
+}) => {
+  const response = await api.get<TaskComment[]>(
+    `projects/${projectId}/tasks/${taskId}/comments`,
+  );
+
+  return response.data;
+};
+
 export const useGetProjectTasks = (projectId: number, enabled = true) => {
   return useQuery({
     enabled,
@@ -198,5 +233,23 @@ export const useUpdateTaskAcceptanceCriterion = () => {
 export const useDeleteTaskAcceptanceCriterion = () => {
   return useMutation({
     mutationFn: deleteTaskAcceptanceCriterion,
+  });
+};
+
+export const useGetTaskComments = (
+  projectId: number,
+  taskId: number,
+  enabled = true,
+) => {
+  return useQuery({
+    enabled,
+    queryFn: () => getTaskComments({ projectId, taskId }),
+    queryKey: taskKeys.taskComments(projectId, taskId),
+  });
+};
+
+export const useCreateTaskComment = () => {
+  return useMutation({
+    mutationFn: createTaskComment,
   });
 };

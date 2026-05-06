@@ -1,22 +1,25 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { TaskPriority, TaskStatus } from "@syncr/packages";
+import { TaskCommentsRepository } from "src/repositories/task-comments.repository";
 
 import { AcceptanceCriteriaRepository } from "../../repositories/acceptance-criteria.repository";
 import { TasksRepository } from "../../repositories/tasks.repository";
 import {
   CreateTaskAcceptanceCriterionDto,
+  CreateTaskCommentDto,
   CreateTaskDto,
   ReorderTasksDto,
   SetTaskAssigneeDto,
   UpdateTaskAcceptanceCriterionDto,
   UpdateTaskDto,
 } from "./tasks.dto";
-import { mapTaskToDto } from "./tasks.mapper";
+import { mapTaskCommentToDto, mapTaskToDto } from "./tasks.mapper";
 
 @Injectable()
 export class TasksService {
   constructor(
     private readonly taskRepository: TasksRepository,
+    private readonly taskCommentsRepository: TaskCommentsRepository,
     private readonly acceptanceCriteriaRepository: AcceptanceCriteriaRepository,
   ) {}
 
@@ -132,6 +135,32 @@ export class TasksService {
     const tasksWithCriteria = await this.withAcceptanceCriteria(tasks);
 
     return tasksWithCriteria.map(mapTaskToDto);
+  }
+
+  async getTaskComments(companyId: number, projectId: number, taskId: number) {
+    await this.ensureTaskExists(taskId, projectId, companyId);
+
+    const comments = await this.taskCommentsRepository.getTaskComments(taskId);
+
+    return comments.map(mapTaskCommentToDto);
+  }
+
+  async createTaskComment(
+    companyId: number,
+    projectId: number,
+    taskId: number,
+    userId: number,
+    createTaskCommentDto: CreateTaskCommentDto,
+  ) {
+    await this.ensureTaskExists(taskId, projectId, companyId);
+
+    const comment = await this.taskCommentsRepository.createTaskComment({
+      taskId,
+      userId,
+      content: createTaskCommentDto.content,
+    });
+
+    return mapTaskCommentToDto(comment);
   }
 
   async setAssignee(

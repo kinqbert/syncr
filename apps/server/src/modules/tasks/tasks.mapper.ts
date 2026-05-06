@@ -1,26 +1,16 @@
+import { TaskComment } from "@syncr/packages";
+import { taskAcceptanceCriteria, taskComments, tasks } from "src/db/schema";
+
 import { TaskDto } from "./tasks.dto";
 
-type TaskRecord = {
-  id: number;
-  name: string;
-  description: string;
-  projectId: number;
+type TaskRecord = Omit<typeof tasks.$inferSelect, "assigneeId" | "endDate"> & {
   assignee: {
     id: number | null;
     email: string | null;
     name: string | null;
     surname: string | null;
   } | null;
-  acceptanceCriteria: {
-    id: number;
-    taskId: number;
-    description: string;
-    isDone: boolean;
-    position: number;
-  }[];
-  status: TaskDto["status"];
-  priority: TaskDto["priority"];
-  position: number;
+  acceptanceCriteria: (typeof taskAcceptanceCriteria.$inferSelect)[];
   endDate: Date | null;
 };
 
@@ -47,5 +37,31 @@ export const mapTaskToDto = (task: TaskRecord): TaskDto => {
     priority: task.priority,
     position: task.position,
     endDate: task.endDate ? task.endDate.toISOString() : null,
+  };
+};
+
+type TaskCommentRecord = typeof taskComments.$inferSelect & {
+  user: {
+    id: number;
+    email: string;
+    name: string;
+    surname: string;
+  } | null;
+};
+
+export const mapTaskCommentToDto = (task: TaskCommentRecord): TaskComment => {
+  return {
+    id: task.id,
+    taskId: task.taskId,
+    content: task.content,
+    author: task.user
+      ? {
+          id: task.user.id,
+          email: task.user.email,
+          name: task.user.name,
+          surname: task.user.surname,
+        }
+      : null,
+    createdAt: task.createdAt.toISOString(),
   };
 };
