@@ -50,6 +50,13 @@
       "when": 1778077270025,
       "tag": "0006_simple_squirrel_girl",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1778078882411,
+      "tag": "0007_slow_forge",
+      "breakpoints": true
     }
   ]
 }

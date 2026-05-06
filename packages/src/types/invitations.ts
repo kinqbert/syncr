@@ -1,5 +1,6 @@
 export const InvitationStatus = {
   Cancelled: "cancelled",
+  Declined: "declined",
   Accepted: "accepted",
   Expired: "expired",
   Active: "active",
