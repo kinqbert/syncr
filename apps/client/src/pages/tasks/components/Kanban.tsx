@@ -13,7 +13,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { KanbanColumn } from "./KanbanColumn";
 import { SortableTaskCard } from "./SortableTaskCard";
 import { TaskCard } from "./TaskCard";
-import { useKanbanDrag } from "./useKanbanDrag";
+import { useKanbanDrag } from "../hooks/useKanbanDrag";
 
 const columns: KanbanColumn[] = [
   {

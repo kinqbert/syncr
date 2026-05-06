@@ -23,10 +23,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import type {
-  ProjectAssignee,
-  ProjectMemberCandidate,
-} from "@syncr/packages";
+import type { ProjectAssignee, ProjectMemberCandidate } from "@syncr/packages";
 import { useMemo, useState } from "react";
 
 import { getErrorMessage } from "@/utils/getErrorMessage";
@@ -116,7 +113,9 @@ export const ProjectMembersDialog = ({
             <FormControl fullWidth size="small">
               <InputLabel id="project-member-label">Add person</InputLabel>
               <Select
-                disabled={isLoading || isAdding || addableCandidates.length === 0}
+                disabled={
+                  isLoading || isAdding || addableCandidates.length === 0
+                }
                 label="Add person"
                 labelId="project-member-label"
                 onChange={(event) => setSelectedUserId(event.target.value)}

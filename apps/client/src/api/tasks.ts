@@ -1,8 +1,10 @@
 import type {
+  CreateTaskAcceptanceCriterionBody,
   CreateTaskBody,
   ReorderTasksBody,
   SetTaskAssigneeBody,
   Task,
+  UpdateTaskAcceptanceCriterionBody,
   UpdateTaskBody,
 } from "@syncr/packages";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -91,6 +93,58 @@ const deleteTask = async ({
   await api.delete(`projects/${projectId}/tasks/${taskId}`);
 };
 
+const createTaskAcceptanceCriterion = async ({
+  projectId,
+  taskId,
+  body,
+}: {
+  projectId: number;
+  taskId: number;
+  body: CreateTaskAcceptanceCriterionBody;
+}) => {
+  const response = await api.post<Task>(
+    `projects/${projectId}/tasks/${taskId}/acceptance-criteria`,
+    body,
+  );
+
+  return response.data;
+};
+
+const updateTaskAcceptanceCriterion = async ({
+  projectId,
+  taskId,
+  criterionId,
+  body,
+}: {
+  projectId: number;
+  taskId: number;
+  criterionId: number;
+  body: UpdateTaskAcceptanceCriterionBody;
+}) => {
+  const response = await api.patch<Task>(
+    `projects/${projectId}/tasks/${taskId}/acceptance-criteria/${criterionId}`,
+    body,
+  );
+
+  return response.data;
+};
+
+const deleteTaskAcceptanceCriterion = async ({
+  projectId,
+  taskId,
+  criterionId,
+}: {
+  projectId: number;
+  taskId: number;
+  criterionId: number;
+}) => {
+  const response = await api.delete<Task>(
+    `projects/${projectId}/tasks/${taskId}/acceptance-criteria/${criterionId}`,
+  );
+
+  return response.data;
+};
+
 export const useGetProjectTasks = (projectId: number, enabled = true) => {
   return useQuery({
     enabled,
@@ -126,5 +180,23 @@ export const useSetTaskAssignee = () => {
 export const useDeleteTask = () => {
   return useMutation({
     mutationFn: deleteTask,
+  });
+};
+
+export const useCreateTaskAcceptanceCriterion = () => {
+  return useMutation({
+    mutationFn: createTaskAcceptanceCriterion,
+  });
+};
+
+export const useUpdateTaskAcceptanceCriterion = () => {
+  return useMutation({
+    mutationFn: updateTaskAcceptanceCriterion,
+  });
+};
+
+export const useDeleteTaskAcceptanceCriterion = () => {
+  return useMutation({
+    mutationFn: deleteTaskAcceptanceCriterion,
   });
 };

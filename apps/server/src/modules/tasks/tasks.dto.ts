@@ -1,17 +1,21 @@
 import {
+  CreateTaskAcceptanceCriterionBody,
   CreateTaskBody,
   ReorderTaskItem,
   ReorderTasksBody,
   SetTaskAssigneeBody,
   Task,
+  TaskAcceptanceCriterion,
   TaskAssignee,
   TaskPriority,
   TaskStatus,
+  UpdateTaskAcceptanceCriterionBody,
   UpdateTaskBody,
 } from "@syncr/packages";
 import { Type } from "class-transformer";
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsInt,
@@ -35,6 +39,23 @@ class TaskAssigneeDto implements TaskAssignee {
   surname: string;
 }
 
+export class TaskAcceptanceCriterionDto implements TaskAcceptanceCriterion {
+  @IsInt()
+  id: number;
+
+  @IsInt()
+  taskId: number;
+
+  @IsString()
+  description: string;
+
+  @IsBoolean()
+  isDone: boolean;
+
+  @IsInt()
+  position: number;
+}
+
 export class TaskDto implements Task {
   @IsInt()
   id: number;
@@ -52,6 +73,11 @@ export class TaskDto implements Task {
   @IsOptional()
   @Type(() => TaskAssigneeDto)
   assignee: TaskAssigneeDto | null;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => TaskAcceptanceCriterionDto)
+  acceptanceCriteria: TaskAcceptanceCriterionDto[];
 
   @IsEnum(TaskStatus)
   status: TaskStatus;
@@ -150,4 +176,33 @@ export class SetTaskAssigneeDto implements SetTaskAssigneeBody {
   @IsInt()
   @IsOptional()
   assigneeId: number | null;
+}
+
+export class CreateTaskAcceptanceCriterionDto implements CreateTaskAcceptanceCriterionBody {
+  @IsString()
+  description: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isDone?: boolean;
+
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  position?: number;
+}
+
+export class UpdateTaskAcceptanceCriterionDto implements UpdateTaskAcceptanceCriterionBody {
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isDone?: boolean;
+
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  position?: number;
 }

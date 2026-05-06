@@ -23,17 +23,13 @@ export const TasksPage = () => {
   const [isMembersDialogOpen, setIsMembersDialogOpen] = useState(false);
 
   const { data: project } = useGetProject(numericProjectId, Boolean(projectId));
-  const {
-    data: members = [],
-    isLoading: isMembersLoading,
-  } = useGetProjectAssignees(numericProjectId, Boolean(projectId));
-  const {
-    data: memberCandidates = [],
-    isLoading: isMemberCandidatesLoading,
-  } = useGetProjectMemberCandidates(
-    numericProjectId,
-    Boolean(projectId) && isMembersDialogOpen,
-  );
+  const { data: members = [], isLoading: isMembersLoading } =
+    useGetProjectAssignees(numericProjectId, Boolean(projectId));
+  const { data: memberCandidates = [], isLoading: isMemberCandidatesLoading } =
+    useGetProjectMemberCandidates(
+      numericProjectId,
+      Boolean(projectId) && isMembersDialogOpen,
+    );
   const addProjectMember = useAddProjectMember();
   const removeProjectMember = useRemoveProjectMember();
 

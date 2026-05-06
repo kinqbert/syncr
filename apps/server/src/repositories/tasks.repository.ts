@@ -2,7 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { and, asc, count, eq, inArray } from "drizzle-orm";
 
 import db from "../db/drizzle";
-import { projects, projectUsers, tasks, userCompanyRoles, users } from "../db/schema";
+import {
+  projects,
+  projectUsers,
+  taskAcceptanceCriteria,
+  tasks,
+  userCompanyRoles,
+  users,
+} from "../db/schema";
 
 const taskWithAssigneeColumns = {
   id: tasks.id,
@@ -24,13 +31,15 @@ const taskWithAssigneeColumns = {
 @Injectable()
 export class TasksRepository {
   async getProjectTasks(projectId: number, companyId: number) {
-    return await db
+    const taskRows = await db
       .select(taskWithAssigneeColumns)
       .from(tasks)
       .innerJoin(projects, eq(tasks.projectId, projects.id))
       .leftJoin(users, eq(tasks.assigneeId, users.id))
       .where(and(eq(tasks.projectId, projectId), eq(projects.companyId, companyId)))
       .orderBy(asc(tasks.status), asc(tasks.position), asc(tasks.id));
+
+    return await this.withAcceptanceCriteria(taskRows);
   }
 
   async getProject(projectId: number, companyId: number) {
@@ -58,7 +67,7 @@ export class TasksRepository {
       )
       .limit(1);
 
-    return task;
+    return task ? (await this.withAcceptanceCriteria([task]))[0] : task;
   }
 
   async isUserInCompany(userId: number, companyId: number) {
@@ -97,6 +106,15 @@ export class TasksRepository {
     return result.taskCount;
   }
 
+  async getNextAcceptanceCriterionPosition(taskId: number) {
+    const [result] = await db
+      .select({ criteriaCount: count() })
+      .from(taskAcceptanceCriteria)
+      .where(eq(taskAcceptanceCriteria.taskId, taskId));
+
+    return result.criteriaCount;
+  }
+
   async createTask(data: typeof tasks.$inferInsert) {
     const [task] = await db.insert(tasks).values(data).returning();
 
@@ -113,6 +131,58 @@ export class TasksRepository {
     const [task] = await db.delete(tasks).where(eq(tasks.id, taskId)).returning({ id: tasks.id });
 
     return task;
+  }
+
+  async createAcceptanceCriterion(data: typeof taskAcceptanceCriteria.$inferInsert) {
+    const [criterion] = await db.insert(taskAcceptanceCriteria).values(data).returning();
+
+    return criterion;
+  }
+
+  async updateAcceptanceCriterion(
+    criterionId: number,
+    data: Partial<typeof taskAcceptanceCriteria.$inferInsert>,
+  ) {
+    const [criterion] = await db
+      .update(taskAcceptanceCriteria)
+      .set(data)
+      .where(eq(taskAcceptanceCriteria.id, criterionId))
+      .returning();
+
+    return criterion;
+  }
+
+  async deleteAcceptanceCriterion(criterionId: number) {
+    const [criterion] = await db
+      .delete(taskAcceptanceCriteria)
+      .where(eq(taskAcceptanceCriteria.id, criterionId))
+      .returning({ id: taskAcceptanceCriteria.id });
+
+    return criterion;
+  }
+
+  async getAcceptanceCriterion(
+    criterionId: number,
+    taskId: number,
+    projectId: number,
+    companyId: number,
+  ) {
+    const [criterion] = await db
+      .select({ id: taskAcceptanceCriteria.id })
+      .from(taskAcceptanceCriteria)
+      .innerJoin(tasks, eq(taskAcceptanceCriteria.taskId, tasks.id))
+      .innerJoin(projects, eq(tasks.projectId, projects.id))
+      .where(
+        and(
+          eq(taskAcceptanceCriteria.id, criterionId),
+          eq(taskAcceptanceCriteria.taskId, taskId),
+          eq(tasks.projectId, projectId),
+          eq(projects.companyId, companyId),
+        ),
+      )
+      .limit(1);
+
+    return criterion;
   }
 
   async reorderTasks(
@@ -162,6 +232,42 @@ export class TasksRepository {
       .where(eq(tasks.id, taskId))
       .limit(1);
 
-    return task;
+    return task ? (await this.withAcceptanceCriteria([task]))[0] : task;
+  }
+
+  private async withAcceptanceCriteria<T extends { id: number }>(taskRows: T[]) {
+    if (taskRows.length === 0) {
+      return [];
+    }
+
+    const taskIds = taskRows.map((task) => task.id);
+    const criteria = await db
+      .select({
+        id: taskAcceptanceCriteria.id,
+        taskId: taskAcceptanceCriteria.taskId,
+        description: taskAcceptanceCriteria.description,
+        isDone: taskAcceptanceCriteria.isDone,
+        position: taskAcceptanceCriteria.position,
+      })
+      .from(taskAcceptanceCriteria)
+      .where(inArray(taskAcceptanceCriteria.taskId, taskIds))
+      .orderBy(
+        asc(taskAcceptanceCriteria.taskId),
+        asc(taskAcceptanceCriteria.position),
+        asc(taskAcceptanceCriteria.id),
+      );
+
+    const criteriaByTaskId = new Map<number, typeof criteria>();
+
+    for (const criterion of criteria) {
+      const taskCriteria = criteriaByTaskId.get(criterion.taskId) ?? [];
+      taskCriteria.push(criterion);
+      criteriaByTaskId.set(criterion.taskId, taskCriteria);
+    }
+
+    return taskRows.map((task) => ({
+      ...task,
+      acceptanceCriteria: criteriaByTaskId.get(task.id) ?? [],
+    }));
   }
 }

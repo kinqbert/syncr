@@ -1,5 +1,6 @@
 import { InvitationStatus, ProjectStatus, TaskPriority, TaskStatus } from "@syncr/packages";
 import {
+  boolean,
   integer,
   pgEnum,
   pgTable,
@@ -118,6 +119,16 @@ export const tasks = pgTable("tasks", {
   priority: taskPriorityEnum().notNull().default("medium"),
   position: integer().notNull().default(0),
   endDate: timestamp(),
+});
+
+export const taskAcceptanceCriteria = pgTable("task_acceptance_criteria", {
+  id: serial().primaryKey(),
+  taskId: integer()
+    .notNull()
+    .references(() => tasks.id, { onDelete: "cascade" }),
+  description: text().notNull(),
+  isDone: boolean().notNull().default(false),
+  position: integer().notNull().default(0),
 });
 
 // INVITATIONS

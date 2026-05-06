@@ -2,4 +2,5 @@ export * from "./dashboard";
 export * from "./login";
 export * from "./projects";
 export * from "./register";
+export * from "./task-details";
 export * from "./tasks";

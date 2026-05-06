@@ -18,10 +18,12 @@ import { RequirePermission } from "../../common/decorators/require-permission.de
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { PermissionGuard } from "../../common/guards/permission-guard.guard";
 import {
+  CreateTaskAcceptanceCriterionDto,
   CreateTaskDto,
   ReorderTasksDto,
   SetTaskAssigneeDto,
   TaskDto,
+  UpdateTaskAcceptanceCriterionDto,
   UpdateTaskDto,
 } from "./tasks.dto";
 import { TasksService } from "./tasks.service";
@@ -89,6 +91,62 @@ export class TasksController {
     @Body() setTaskAssigneeDto: SetTaskAssigneeDto,
   ): Promise<TaskDto> {
     return await this.taskService.setAssignee(companyId, projectId, taskId, setTaskAssigneeDto);
+  }
+
+  @Post(":taskId/acceptance-criteria")
+  @RequirePermission(PermissionKey.TaskUpdate)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.CREATED)
+  async createAcceptanceCriterion(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+    @Param("taskId", ParseIntPipe) taskId: number,
+    @Body() createAcceptanceCriterionDto: CreateTaskAcceptanceCriterionDto,
+  ): Promise<TaskDto> {
+    return await this.taskService.createAcceptanceCriterion(
+      companyId,
+      projectId,
+      taskId,
+      createAcceptanceCriterionDto,
+    );
+  }
+
+  @Patch(":taskId/acceptance-criteria/:criterionId")
+  @RequirePermission(PermissionKey.TaskUpdate)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async updateAcceptanceCriterion(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+    @Param("taskId", ParseIntPipe) taskId: number,
+    @Param("criterionId", ParseIntPipe) criterionId: number,
+    @Body() updateAcceptanceCriterionDto: UpdateTaskAcceptanceCriterionDto,
+  ): Promise<TaskDto> {
+    return await this.taskService.updateAcceptanceCriterion(
+      companyId,
+      projectId,
+      taskId,
+      criterionId,
+      updateAcceptanceCriterionDto,
+    );
+  }
+
+  @Delete(":taskId/acceptance-criteria/:criterionId")
+  @RequirePermission(PermissionKey.TaskUpdate)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async deleteAcceptanceCriterion(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+    @Param("taskId", ParseIntPipe) taskId: number,
+    @Param("criterionId", ParseIntPipe) criterionId: number,
+  ): Promise<TaskDto> {
+    return await this.taskService.deleteAcceptanceCriterion(
+      companyId,
+      projectId,
+      taskId,
+      criterionId,
+    );
   }
 
   @Delete(":taskId")

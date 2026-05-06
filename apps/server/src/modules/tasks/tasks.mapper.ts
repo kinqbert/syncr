@@ -11,6 +11,13 @@ type TaskRecord = {
     name: string | null;
     surname: string | null;
   } | null;
+  acceptanceCriteria: {
+    id: number;
+    taskId: number;
+    description: string;
+    isDone: boolean;
+    position: number;
+  }[];
   status: TaskDto["status"];
   priority: TaskDto["priority"];
   position: number;
@@ -35,6 +42,7 @@ export const mapTaskToDto = (task: TaskRecord): TaskDto => {
             surname: task.assignee.surname,
           }
         : null,
+    acceptanceCriteria: task.acceptanceCriteria,
     status: task.status,
     priority: task.priority,
     position: task.position,

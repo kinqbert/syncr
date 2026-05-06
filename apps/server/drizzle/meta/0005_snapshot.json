@@ -1,6 +1,6 @@
 {
-  "id": "f8f70ae7-3573-4327-b091-282fdf271944",
-  "prevId": "5d5c7b98-7791-4c52-9ad8-17565b309336",
+  "id": "6586af7e-411c-492c-bb5b-cdf46beeeecc",
+  "prevId": "f8f70ae7-3573-4327-b091-282fdf271944",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -412,6 +412,65 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.task_acceptance_criteria": {
+      "name": "task_acceptance_criteria",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "task_id": {
+          "name": "task_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_done": {
+          "name": "is_done",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "task_acceptance_criteria_task_id_tasks_id_fk": {
+          "name": "task_acceptance_criteria_task_id_tasks_id_fk",
+          "tableFrom": "task_acceptance_criteria",
+          "tableTo": "tasks",
+          "columnsFrom": [
+            "task_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

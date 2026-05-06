@@ -2,7 +2,14 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { TaskPriority, TaskStatus } from "@syncr/packages";
 
 import { TasksRepository } from "../../repositories/tasks.repository";
-import { CreateTaskDto, ReorderTasksDto, SetTaskAssigneeDto, UpdateTaskDto } from "./tasks.dto";
+import {
+  CreateTaskAcceptanceCriterionDto,
+  CreateTaskDto,
+  ReorderTasksDto,
+  SetTaskAssigneeDto,
+  UpdateTaskAcceptanceCriterionDto,
+  UpdateTaskDto,
+} from "./tasks.dto";
 import { mapTaskToDto } from "./tasks.mapper";
 
 @Injectable()
@@ -139,6 +146,83 @@ export class TasksService {
     return mapTaskToDto(task);
   }
 
+  async createAcceptanceCriterion(
+    companyId: number,
+    projectId: number,
+    taskId: number,
+    createAcceptanceCriterionDto: CreateTaskAcceptanceCriterionDto,
+  ) {
+    await this.ensureTaskExists(taskId, projectId, companyId);
+
+    const position =
+      createAcceptanceCriterionDto.position ??
+      (await this.taskRepository.getNextAcceptanceCriterionPosition(taskId));
+
+    await this.taskRepository.createAcceptanceCriterion({
+      taskId,
+      description: this.getValidAcceptanceCriterionDescription(
+        createAcceptanceCriterionDto.description,
+      ),
+      isDone: createAcceptanceCriterionDto.isDone ?? false,
+      position,
+    });
+
+    const task = await this.taskRepository.getTask(taskId, projectId, companyId);
+
+    return mapTaskToDto(task);
+  }
+
+  async updateAcceptanceCriterion(
+    companyId: number,
+    projectId: number,
+    taskId: number,
+    criterionId: number,
+    updateAcceptanceCriterionDto: UpdateTaskAcceptanceCriterionDto,
+  ) {
+    await this.ensureAcceptanceCriterionExists(criterionId, taskId, projectId, companyId);
+
+    const updateData: Parameters<TasksRepository["updateAcceptanceCriterion"]>[1] = {};
+
+    if (updateAcceptanceCriterionDto.description !== undefined) {
+      updateData.description = this.getValidAcceptanceCriterionDescription(
+        updateAcceptanceCriterionDto.description,
+      );
+    }
+
+    if (updateAcceptanceCriterionDto.isDone !== undefined) {
+      updateData.isDone = updateAcceptanceCriterionDto.isDone;
+    }
+
+    if (updateAcceptanceCriterionDto.position !== undefined) {
+      updateData.position = updateAcceptanceCriterionDto.position;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      throw new BadRequestException("No acceptance criterion fields to update");
+    }
+
+    await this.taskRepository.updateAcceptanceCriterion(criterionId, updateData);
+
+    const task = await this.taskRepository.getTask(taskId, projectId, companyId);
+
+    return mapTaskToDto(task);
+  }
+
+  async deleteAcceptanceCriterion(
+    companyId: number,
+    projectId: number,
+    taskId: number,
+    criterionId: number,
+  ) {
+    await this.ensureAcceptanceCriterionExists(criterionId, taskId, projectId, companyId);
+
+    await this.taskRepository.deleteAcceptanceCriterion(criterionId);
+
+    const task = await this.taskRepository.getTask(taskId, projectId, companyId);
+
+    return mapTaskToDto(task);
+  }
+
   async deleteTask(companyId: number, projectId: number, taskId: number) {
     await this.ensureTaskExists(taskId, projectId, companyId);
 
@@ -161,6 +245,26 @@ export class TasksService {
     }
 
     return task;
+  }
+
+  private async ensureAcceptanceCriterionExists(
+    criterionId: number,
+    taskId: number,
+    projectId: number,
+    companyId: number,
+  ) {
+    const criterion = await this.taskRepository.getAcceptanceCriterion(
+      criterionId,
+      taskId,
+      projectId,
+      companyId,
+    );
+
+    if (!criterion) {
+      throw new NotFoundException("Acceptance criterion not found");
+    }
+
+    return criterion;
   }
 
   private async ensureAssigneeInCompany(assigneeId: number, companyId: number) {
@@ -193,6 +297,18 @@ export class TasksService {
     }
 
     return trimmedName;
+  }
+
+  private getValidAcceptanceCriterionDescription(description: string) {
+    const trimmedDescription = description.trim();
+
+    if (trimmedDescription.length < 2) {
+      throw new BadRequestException(
+        "Acceptance criterion description must be at least 2 characters long",
+      );
+    }
+
+    return trimmedDescription;
   }
 
   private getValidDate(value: string, label: string) {

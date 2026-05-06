@@ -37,12 +37,21 @@ export type TaskAssignee = {
   surname: string;
 };
 
+export type TaskAcceptanceCriterion = {
+  id: number;
+  taskId: number;
+  description: string;
+  isDone: boolean;
+  position: number;
+};
+
 export type Task = {
   id: number;
   name: string;
   description: string;
   projectId: number;
   assignee: TaskAssignee | null;
+  acceptanceCriteria: TaskAcceptanceCriterion[];
   status: TaskStatus;
   priority: TaskPriority;
   position: number;
@@ -81,4 +90,16 @@ export type ReorderTasksBody = {
 
 export type SetTaskAssigneeBody = {
   assigneeId: number | null;
+};
+
+export type CreateTaskAcceptanceCriterionBody = {
+  description: string;
+  isDone?: boolean;
+  position?: number;
+};
+
+export type UpdateTaskAcceptanceCriterionBody = {
+  description?: string;
+  isDone?: boolean;
+  position?: number;
 };
