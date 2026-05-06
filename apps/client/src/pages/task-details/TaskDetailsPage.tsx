@@ -58,7 +58,7 @@ export const TaskDetailsPage = () => {
       p={3}
       sx={{
         bgcolor: "background.default",
-        minHeight: "100%",
+        height: "100%",
         overflow: "auto",
       }}
     >
