@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { TaskPriority, TaskStatus } from "@syncr/packages";
 
+import { AcceptanceCriteriaRepository } from "../../repositories/acceptance-criteria.repository";
 import { TasksRepository } from "../../repositories/tasks.repository";
 import {
   CreateTaskAcceptanceCriterionDto,
@@ -14,14 +15,18 @@ import { mapTaskToDto } from "./tasks.mapper";
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly taskRepository: TasksRepository) {}
+  constructor(
+    private readonly taskRepository: TasksRepository,
+    private readonly acceptanceCriteriaRepository: AcceptanceCriteriaRepository,
+  ) {}
 
   async getProjectTasks(companyId: number, projectId: number) {
     await this.ensureProjectExists(projectId, companyId);
 
     const tasks = await this.taskRepository.getProjectTasks(projectId, companyId);
+    const tasksWithCriteria = await this.withAcceptanceCriteria(tasks);
 
-    return tasks.map(mapTaskToDto);
+    return tasksWithCriteria.map(mapTaskToDto);
   }
 
   async createTask(companyId: number, projectId: number, createTaskDto: CreateTaskDto) {
@@ -44,7 +49,9 @@ export class TasksService {
       endDate: createTaskDto.endDate ? this.getValidDate(createTaskDto.endDate, "End date") : null,
     });
 
-    return mapTaskToDto(task);
+    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
+
+    return mapTaskToDto(taskWithCriteria);
   }
 
   async updateTask(
@@ -96,8 +103,9 @@ export class TasksService {
     }
 
     const task = await this.taskRepository.updateTask(taskId, updateData);
+    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
 
-    return mapTaskToDto(task);
+    return mapTaskToDto(taskWithCriteria);
   }
 
   async reorderTasks(companyId: number, projectId: number, reorderTasksDto: ReorderTasksDto) {
@@ -121,7 +129,9 @@ export class TasksService {
       throw new NotFoundException("One or more tasks were not found");
     }
 
-    return tasks.map(mapTaskToDto);
+    const tasksWithCriteria = await this.withAcceptanceCriteria(tasks);
+
+    return tasksWithCriteria.map(mapTaskToDto);
   }
 
   async setAssignee(
@@ -142,8 +152,9 @@ export class TasksService {
     const task = await this.taskRepository.updateTask(taskId, {
       assigneeId: setTaskAssigneeDto.assigneeId,
     });
+    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
 
-    return mapTaskToDto(task);
+    return mapTaskToDto(taskWithCriteria);
   }
 
   async createAcceptanceCriterion(
@@ -156,9 +167,9 @@ export class TasksService {
 
     const position =
       createAcceptanceCriterionDto.position ??
-      (await this.taskRepository.getNextAcceptanceCriterionPosition(taskId));
+      (await this.acceptanceCriteriaRepository.getNextPosition(taskId));
 
-    await this.taskRepository.createAcceptanceCriterion({
+    await this.acceptanceCriteriaRepository.createAcceptanceCriterion({
       taskId,
       description: this.getValidAcceptanceCriterionDescription(
         createAcceptanceCriterionDto.description,
@@ -168,8 +179,9 @@ export class TasksService {
     });
 
     const task = await this.taskRepository.getTask(taskId, projectId, companyId);
+    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
 
-    return mapTaskToDto(task);
+    return mapTaskToDto(taskWithCriteria);
   }
 
   async updateAcceptanceCriterion(
@@ -181,7 +193,7 @@ export class TasksService {
   ) {
     await this.ensureAcceptanceCriterionExists(criterionId, taskId, projectId, companyId);
 
-    const updateData: Parameters<TasksRepository["updateAcceptanceCriterion"]>[1] = {};
+    const updateData: Parameters<AcceptanceCriteriaRepository["updateAcceptanceCriterion"]>[1] = {};
 
     if (updateAcceptanceCriterionDto.description !== undefined) {
       updateData.description = this.getValidAcceptanceCriterionDescription(
@@ -201,11 +213,12 @@ export class TasksService {
       throw new BadRequestException("No acceptance criterion fields to update");
     }
 
-    await this.taskRepository.updateAcceptanceCriterion(criterionId, updateData);
+    await this.acceptanceCriteriaRepository.updateAcceptanceCriterion(criterionId, updateData);
 
     const task = await this.taskRepository.getTask(taskId, projectId, companyId);
+    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
 
-    return mapTaskToDto(task);
+    return mapTaskToDto(taskWithCriteria);
   }
 
   async deleteAcceptanceCriterion(
@@ -216,11 +229,12 @@ export class TasksService {
   ) {
     await this.ensureAcceptanceCriterionExists(criterionId, taskId, projectId, companyId);
 
-    await this.taskRepository.deleteAcceptanceCriterion(criterionId);
+    await this.acceptanceCriteriaRepository.deleteAcceptanceCriterion(criterionId);
 
     const task = await this.taskRepository.getTask(taskId, projectId, companyId);
+    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
 
-    return mapTaskToDto(task);
+    return mapTaskToDto(taskWithCriteria);
   }
 
   async deleteTask(companyId: number, projectId: number, taskId: number) {
@@ -253,7 +267,7 @@ export class TasksService {
     projectId: number,
     companyId: number,
   ) {
-    const criterion = await this.taskRepository.getAcceptanceCriterion(
+    const criterion = await this.acceptanceCriteriaRepository.getAcceptanceCriterion(
       criterionId,
       taskId,
       projectId,
@@ -265,6 +279,28 @@ export class TasksService {
     }
 
     return criterion;
+  }
+
+  private async withAcceptanceCriteria<T extends { id: number }>(tasks: T[]) {
+    if (tasks.length === 0) {
+      return [];
+    }
+
+    const criteria = await this.acceptanceCriteriaRepository.getByTaskIds(
+      tasks.map((task) => task.id),
+    );
+    const criteriaByTaskId = new Map<number, typeof criteria>();
+
+    for (const criterion of criteria) {
+      const taskCriteria = criteriaByTaskId.get(criterion.taskId) ?? [];
+      taskCriteria.push(criterion);
+      criteriaByTaskId.set(criterion.taskId, taskCriteria);
+    }
+
+    return tasks.map((task) => ({
+      ...task,
+      acceptanceCriteria: criteriaByTaskId.get(task.id) ?? [],
+    }));
   }
 
   private async ensureAssigneeInCompany(assigneeId: number, companyId: number) {
