@@ -115,8 +115,8 @@ export const tasks = pgTable("tasks", {
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
   assigneeId: integer().references(() => users.id, { onDelete: "set null" }),
-  status: taskStatusEnum().notNull().default("backlog"),
-  priority: taskPriorityEnum().notNull().default("medium"),
+  status: taskStatusEnum().notNull().default(TaskStatus.Backlog),
+  priority: taskPriorityEnum().notNull().default(TaskPriority.Medium),
   position: integer().notNull().default(0),
   endDate: timestamp(),
 });
@@ -147,7 +147,7 @@ export const invitationStatusEnum = pgEnum("invitation_status", enumToPgEnum(Inv
 
 export const invitations = pgTable("invitations", {
   id: serial().primaryKey(),
-  status: invitationStatusEnum().default("active"),
+  status: invitationStatusEnum().default(InvitationStatus.Active),
   companyId: integer()
     .notNull()
     .references(() => companies.id, { onDelete: "cascade" }),

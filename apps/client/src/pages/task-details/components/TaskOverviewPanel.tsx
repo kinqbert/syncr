@@ -13,12 +13,12 @@ import {
   useUpdateTask,
   useUpdateTaskAcceptanceCriterion,
 } from "@/api/tasks";
+import { EditableText } from "@/components/EditableText";
+import { Panel } from "@/components/Panel";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
-import { AcceptanceCriteriaSection } from "./AcceptanceCriteriaSection";
-import { EditableText } from "../../../components/EditableText";
-import { Panel } from "../../../components/Panel";
 import { updateTaskInCache } from "../utils/updateTaskInCache";
+import { AcceptanceCriteriaSection } from "./AcceptanceCriteriaSection";
 
 type TaskOverviewPanelProps = {
   projectId: number;
