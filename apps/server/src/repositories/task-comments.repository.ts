@@ -42,7 +42,8 @@ export class TaskCommentsRepository {
       .select(taskWithAuthorColumns)
       .from(taskComments)
       .leftJoin(users, eq(taskComments.userId, users.id))
-      .where(eq(taskComments.taskId, taskId));
+      .where(eq(taskComments.taskId, taskId))
+      .orderBy(taskComments.createdAt);
 
     return comments;
   }
