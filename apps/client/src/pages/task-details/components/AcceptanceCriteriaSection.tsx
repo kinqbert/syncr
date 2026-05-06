@@ -55,11 +55,6 @@ export const AcceptanceCriteriaSection = ({
   return (
     <Stack gap={1}>
       <Typography variant="caption">Acceptance Criteria</Typography>
-      {criteria.length === 0 ? (
-        <Typography color="text.secondary" variant="body2">
-          No acceptance criteria yet.
-        </Typography>
-      ) : null}
       {criteria.map((criterion) => (
         <Stack
           alignItems="center"
