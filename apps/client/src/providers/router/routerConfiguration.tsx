@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/AppLayout";
 import {
   DashboardPage,
   LoginPage,
+  NotFoundPage,
   ProjectsPage,
   RegisterPage,
   TaskDetailsPage,
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
   {
     path: "register",
     element: <RegisterPage />,
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);
 

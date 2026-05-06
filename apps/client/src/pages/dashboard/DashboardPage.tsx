@@ -6,9 +6,9 @@ export const DashboardPage = () => {
   const user = useAuthStore((state) => state.user);
 
   return (
-    <Stack sx={{ width: "100%", alignItems: "center" }}>
-      <Typography variant="h3">Welcome to dashboard!</Typography>
-      <Typography>Logged in as {user?.email}</Typography>
+    <Stack width="100%" height="100%" p={3} gap={0.5}>
+      <Typography variant="h4">Welcome to dashboard!</Typography>
+      <Typography color="text.secondary">Logged in as {user?.email}</Typography>
     </Stack>
   );
 };

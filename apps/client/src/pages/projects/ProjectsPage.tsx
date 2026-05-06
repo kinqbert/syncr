@@ -105,13 +105,13 @@ export const ProjectsPage = () => {
           gap={2}
           justifyContent="space-between"
         >
-          <Box>
+          <Stack gap={0.5}>
             <Typography variant="h4">Projects</Typography>
-            <Typography color="text.secondary" mt={0.5}>
+            <Typography color="text.secondary">
               {projects.length} active workspace project
               {projects.length === 1 ? "" : "s"}
             </Typography>
-          </Box>
+          </Stack>
           <Button
             onClick={handleOpenCreateDialog}
             startIcon={<AddIcon />}
