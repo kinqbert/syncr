@@ -3,7 +3,7 @@ import { RoleKey } from "@syncr/packages";
 import { and, asc, eq, inArray } from "drizzle-orm";
 
 import db from "../db/drizzle";
-import { projects, projectUsers, roles, userCompanyRoles, users } from "../db/schema";
+import { projects, projectUsers, roles, tasks, userCompanyRoles, users } from "../db/schema";
 
 @Injectable()
 export class ProjectsRepository {
@@ -62,6 +62,87 @@ export class ProjectsRepository {
       .innerJoin(users, eq(projectUsers.userId, users.id))
       .where(and(eq(projects.companyId, companyId), eq(projectUsers.projectId, projectId)))
       .orderBy(asc(users.name), asc(users.surname));
+  }
+
+  async getProjectMemberCandidates(companyId: number) {
+    return await db
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        surname: users.surname,
+        roleKey: roles.key,
+        roleName: roles.name,
+      })
+      .from(userCompanyRoles)
+      .where(eq(userCompanyRoles.companyId, companyId))
+      .innerJoin(users, eq(userCompanyRoles.userId, users.id))
+      .innerJoin(roles, eq(userCompanyRoles.roleId, roles.id))
+      .orderBy(asc(users.name), asc(users.surname));
+  }
+
+  async isUserInCompany(companyId: number, userId: number) {
+    const [companyUser] = await db
+      .select({ userId: userCompanyRoles.userId })
+      .from(userCompanyRoles)
+      .where(and(eq(userCompanyRoles.companyId, companyId), eq(userCompanyRoles.userId, userId)))
+      .limit(1);
+
+    return Boolean(companyUser);
+  }
+
+  async isUserAssignedToProject(companyId: number, projectId: number, userId: number) {
+    const [projectUser] = await db
+      .select({ userId: projectUsers.userId })
+      .from(projectUsers)
+      .innerJoin(projects, eq(projectUsers.projectId, projects.id))
+      .where(
+        and(
+          eq(projects.companyId, companyId),
+          eq(projectUsers.projectId, projectId),
+          eq(projectUsers.userId, userId),
+        ),
+      )
+      .limit(1);
+
+    return Boolean(projectUser);
+  }
+
+  async addProjectMember(projectId: number, userId: number) {
+    const [projectUser] = await db.insert(projectUsers).values({ projectId, userId }).returning();
+
+    return projectUser;
+  }
+
+  async removeProjectMember(companyId: number, projectId: number, userId: number) {
+    return await db.transaction(async (tx) => {
+      const [projectUser] = await tx
+        .delete(projectUsers)
+        .where(and(eq(projectUsers.projectId, projectId), eq(projectUsers.userId, userId)))
+        .returning();
+
+      if (!projectUser) {
+        return null;
+      }
+
+      await tx
+        .update(tasks)
+        .set({ assigneeId: null })
+        .where(and(eq(tasks.projectId, projectId), eq(tasks.assigneeId, userId)));
+
+      await tx
+        .update(projects)
+        .set({ managerId: null })
+        .where(
+          and(
+            eq(projects.id, projectId),
+            eq(projects.companyId, companyId),
+            eq(projects.managerId, userId),
+          ),
+        );
+
+      return projectUser;
+    });
   }
 
   async isProjectManagerCandidate(companyId: number, userId: number) {

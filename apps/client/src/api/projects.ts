@@ -1,8 +1,10 @@
 import type {
+  AddProjectMemberBody,
   CreateProjectBody,
   Project,
   ProjectAssignee,
   ProjectManagerCandidate,
+  ProjectMemberCandidate,
   UpdateProjectBody,
 } from "@syncr/packages";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -14,6 +16,8 @@ export const projectsKeys = {
   project: (projectId: number) => ["projects", projectId],
   projectAssignees: (projectId: number) =>
     ["projects", projectId, "assignees"] as const,
+  projectMemberCandidates: (projectId: number) =>
+    ["projects", projectId, "member-candidates"] as const,
   managerCandidates: ["projects-manager-candidates"],
 };
 
@@ -45,6 +49,14 @@ const getProjectAssignees = async (projectId: number) => {
   return response.data;
 };
 
+const getProjectMemberCandidates = async (projectId: number) => {
+  const response = await api.get<ProjectMemberCandidate[]>(
+    `projects/${projectId}/member-candidates`,
+  );
+
+  return response.data;
+};
+
 const createProject = async (body: CreateProjectBody) => {
   const response = await api.post<Project>("projects", body);
 
@@ -59,6 +71,35 @@ const updateProject = async ({
   body: UpdateProjectBody;
 }) => {
   const response = await api.patch<Project>(`projects/${projectId}`, body);
+
+  return response.data;
+};
+
+const addProjectMember = async ({
+  projectId,
+  body,
+}: {
+  projectId: number;
+  body: AddProjectMemberBody;
+}) => {
+  const response = await api.post<ProjectAssignee[]>(
+    `projects/${projectId}/members`,
+    body,
+  );
+
+  return response.data;
+};
+
+const removeProjectMember = async ({
+  projectId,
+  userId,
+}: {
+  projectId: number;
+  userId: number;
+}) => {
+  const response = await api.delete<ProjectAssignee[]>(
+    `projects/${projectId}/members/${userId}`,
+  );
 
   return response.data;
 };
@@ -95,6 +136,17 @@ export const useGetProjectAssignees = (projectId: number, enabled = true) => {
   });
 };
 
+export const useGetProjectMemberCandidates = (
+  projectId: number,
+  enabled = true,
+) => {
+  return useQuery({
+    enabled,
+    queryFn: () => getProjectMemberCandidates(projectId),
+    queryKey: projectsKeys.projectMemberCandidates(projectId),
+  });
+};
+
 export const useCreateProject = () => {
   return useMutation({
     mutationFn: createProject,
@@ -104,5 +156,17 @@ export const useCreateProject = () => {
 export const useUpdateProject = () => {
   return useMutation({
     mutationFn: updateProject,
+  });
+};
+
+export const useAddProjectMember = () => {
+  return useMutation({
+    mutationFn: addProjectMember,
+  });
+};
+
+export const useRemoveProjectMember = () => {
+  return useMutation({
+    mutationFn: removeProjectMember,
   });
 };

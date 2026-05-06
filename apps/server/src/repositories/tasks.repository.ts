@@ -28,7 +28,7 @@ export class TasksRepository {
       .select(taskWithAssigneeColumns)
       .from(tasks)
       .innerJoin(projects, eq(tasks.projectId, projects.id))
-      .innerJoin(users, eq(tasks.assigneeId, users.id))
+      .leftJoin(users, eq(tasks.assigneeId, users.id))
       .where(and(eq(tasks.projectId, projectId), eq(projects.companyId, companyId)))
       .orderBy(asc(tasks.status), asc(tasks.position), asc(tasks.id));
   }
@@ -48,7 +48,7 @@ export class TasksRepository {
       .select(taskWithAssigneeColumns)
       .from(tasks)
       .innerJoin(projects, eq(tasks.projectId, projects.id))
-      .innerJoin(users, eq(tasks.assigneeId, users.id))
+      .leftJoin(users, eq(tasks.assigneeId, users.id))
       .where(
         and(
           eq(tasks.id, taskId),
@@ -158,7 +158,7 @@ export class TasksRepository {
     const [task] = await db
       .select(taskWithAssigneeColumns)
       .from(tasks)
-      .innerJoin(users, eq(tasks.assigneeId, users.id))
+      .leftJoin(users, eq(tasks.assigneeId, users.id))
       .where(eq(tasks.id, taskId))
       .limit(1);
 

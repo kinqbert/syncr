@@ -72,7 +72,7 @@ export const TaskDetailsPage = () => {
   const setTaskAssignee = useSetTaskAssignee();
   const [error, setError] = useState<string | null>(null);
   const task = tasks.find((item) => item.id === numericTaskId);
-  const assignee = projectAssignees.find((user) => user.id === task?.assignee.id);
+  const assignee = projectAssignees.find((user) => user.id === task?.assignee?.id);
 
   const saveTask = async (body: UpdateTaskBody) => {
     if (!task) {
@@ -94,8 +94,8 @@ export const TaskDetailsPage = () => {
     }
   };
 
-  const saveAssignee = async (assigneeId: number) => {
-    if (!task || task.assignee.id === assigneeId) {
+  const saveAssignee = async (assigneeId: number | null) => {
+    if (!task || (task.assignee?.id ?? null) === assigneeId) {
       return;
     }
 
@@ -321,17 +321,20 @@ export const TaskDetailsPage = () => {
                       : undefined
                   }
                   onChange={(event) =>
-                    void saveAssignee(Number(event.target.value))
+                    void saveAssignee(
+                      event.target.value ? Number(event.target.value) : null,
+                    )
                   }
                   select
                   size="small"
-                  value={task.assignee.id}
+                  value={task.assignee?.id ?? ""}
                 >
-                  {assignee ? null : (
+                  <MenuItem value="">Unassigned</MenuItem>
+                  {task.assignee && !assignee ? (
                     <MenuItem disabled value={task.assignee.id}>
                       {getUserName(task.assignee.name, task.assignee.surname)}
                     </MenuItem>
-                  )}
+                  ) : null}
                   {projectAssignees.map((user) => (
                     <MenuItem key={user.id} value={user.id}>
                       <Stack alignItems="center" direction="row" gap={1.25}>

@@ -59,7 +59,9 @@ export class TasksService {
     }
 
     if (updateTaskDto.assigneeId !== undefined) {
-      await this.ensureAssigneeInProject(updateTaskDto.assigneeId, projectId, companyId);
+      if (updateTaskDto.assigneeId !== null) {
+        await this.ensureAssigneeInProject(updateTaskDto.assigneeId, projectId, companyId);
+      }
 
       updateData.assigneeId = updateTaskDto.assigneeId;
     }
@@ -122,7 +124,13 @@ export class TasksService {
     setTaskAssigneeDto: SetTaskAssigneeDto,
   ) {
     await this.ensureTaskExists(taskId, projectId, companyId);
-    await this.ensureAssigneeInProject(setTaskAssigneeDto.assigneeId, projectId, companyId);
+    if (setTaskAssigneeDto.assigneeId === undefined) {
+      throw new BadRequestException("Task assignee field is required");
+    }
+
+    if (setTaskAssigneeDto.assigneeId !== null) {
+      await this.ensureAssigneeInProject(setTaskAssigneeDto.assigneeId, projectId, companyId);
+    }
 
     const task = await this.taskRepository.updateTask(taskId, {
       assigneeId: setTaskAssigneeDto.assigneeId,

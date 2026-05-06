@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { ProjectStatus } from "@syncr/packages";
 
 import { ProjectsRepository } from "../../repositories/projects.repository";
-import { CreateProjectDto, UpdateProjectDto } from "./projects.dto";
+import { AddProjectMemberDto, CreateProjectDto, UpdateProjectDto } from "./projects.dto";
 import { mapProjectToDto } from "./projects.mapper";
 
 @Injectable()
@@ -27,6 +27,49 @@ export class ProjectsService {
 
   async getProjectAssignees(companyId: number, projectId: number) {
     await this.ensureProjectExists(companyId, projectId);
+
+    return await this.projectRepository.getProjectAssignees(companyId, projectId);
+  }
+
+  async getProjectMemberCandidates(companyId: number, projectId: number) {
+    await this.ensureProjectExists(companyId, projectId);
+
+    return await this.projectRepository.getProjectMemberCandidates(companyId);
+  }
+
+  async addProjectMember(
+    companyId: number,
+    projectId: number,
+    addProjectMemberDto: AddProjectMemberDto,
+  ) {
+    await this.ensureProjectExists(companyId, projectId);
+    await this.ensureUserInCompany(companyId, addProjectMemberDto.userId);
+
+    const isAlreadyMember = await this.projectRepository.isUserAssignedToProject(
+      companyId,
+      projectId,
+      addProjectMemberDto.userId,
+    );
+
+    if (!isAlreadyMember) {
+      await this.projectRepository.addProjectMember(projectId, addProjectMemberDto.userId);
+    }
+
+    return await this.projectRepository.getProjectAssignees(companyId, projectId);
+  }
+
+  async removeProjectMember(companyId: number, projectId: number, userId: number) {
+    await this.ensureProjectExists(companyId, projectId);
+
+    const removedMember = await this.projectRepository.removeProjectMember(
+      companyId,
+      projectId,
+      userId,
+    );
+
+    if (!removedMember) {
+      throw new NotFoundException("Project member not found");
+    }
 
     return await this.projectRepository.getProjectAssignees(companyId, projectId);
   }
@@ -134,6 +177,14 @@ export class ProjectsService {
 
     if (!project) {
       throw new NotFoundException("Project not found");
+    }
+  }
+
+  private async ensureUserInCompany(companyId: number, userId: number) {
+    const isUserInCompany = await this.projectRepository.isUserInCompany(companyId, userId);
+
+    if (!isUserInCompany) {
+      throw new BadRequestException("Project member must belong to the company");
     }
   }
 }

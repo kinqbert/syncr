@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -17,10 +18,12 @@ import { RequirePermission } from "../../common/decorators/require-permission.de
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { PermissionGuard } from "../../common/guards/permission-guard.guard";
 import {
+  AddProjectMemberDto,
   CreateProjectDto,
   ProjectAssigneeDto,
   ProjectDto,
   ProjectManagerCandidateDto,
+  ProjectMemberCandidateDto,
   UpdateProjectDto,
 } from "./projects.dto";
 import { ProjectsService } from "./projects.service";
@@ -69,6 +72,17 @@ export class ProjectsController {
     return await this.projectService.getProjectAssignees(companyId, projectId);
   }
 
+  @Get(":projectId/member-candidates")
+  @RequirePermission(PermissionKey.ProjectView)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async getProjectMemberCandidates(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+  ): Promise<ProjectMemberCandidateDto[]> {
+    return await this.projectService.getProjectMemberCandidates(companyId, projectId);
+  }
+
   @Post()
   @RequirePermission(PermissionKey.ProjectCreate)
   @UseGuards(JwtAuthGuard, PermissionGuard)
@@ -78,6 +92,30 @@ export class ProjectsController {
     @Body() createProjectDto: CreateProjectDto,
   ): Promise<Project> {
     return await this.projectService.createProject(companyId, createProjectDto);
+  }
+
+  @Post(":projectId/members")
+  @RequirePermission(PermissionKey.ProjectUpdate)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.CREATED)
+  async addProjectMember(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+    @Body() addProjectMemberDto: AddProjectMemberDto,
+  ): Promise<ProjectAssigneeDto[]> {
+    return await this.projectService.addProjectMember(companyId, projectId, addProjectMemberDto);
+  }
+
+  @Delete(":projectId/members/:userId")
+  @RequirePermission(PermissionKey.ProjectUpdate)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async removeProjectMember(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+    @Param("userId", ParseIntPipe) userId: number,
+  ): Promise<ProjectAssigneeDto[]> {
+    return await this.projectService.removeProjectMember(companyId, projectId, userId);
   }
 
   @Patch(":projectId")

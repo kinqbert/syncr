@@ -103,8 +103,8 @@ export const projectUsers = pgTable("project_users", {
 
 // TASKS
 
-const taskStatusEnum = pgEnum("task_status", enumToPgEnum(TaskStatus));
-const taskPriorityEnum = pgEnum("task_priority", enumToPgEnum(TaskPriority));
+export const taskStatusEnum = pgEnum("task_status", enumToPgEnum(TaskStatus));
+export const taskPriorityEnum = pgEnum("task_priority", enumToPgEnum(TaskPriority));
 
 export const tasks = pgTable("tasks", {
   id: serial().primaryKey(),
@@ -113,9 +113,7 @@ export const tasks = pgTable("tasks", {
   projectId: integer()
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
-  assigneeId: integer()
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  assigneeId: integer().references(() => users.id, { onDelete: "set null" }),
   status: taskStatusEnum().notNull().default("backlog"),
   priority: taskPriorityEnum().notNull().default("medium"),
   position: integer().notNull().default(0),

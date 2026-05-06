@@ -1,5 +1,6 @@
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import PersonOffOutlinedIcon from "@mui/icons-material/PersonOffOutlined";
 import {
   Avatar,
   Card,
@@ -63,6 +64,9 @@ export const TASK_CARD_WIDTH = 320;
 
 export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
   const priorityColor = priorityColorByValue[task.priority];
+  const assigneeName = task.assignee
+    ? getUserName(task.assignee.name, task.assignee.surname)
+    : "Unassigned";
 
   return (
     <Card
@@ -142,10 +146,14 @@ export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
                 width: 34,
               }}
             >
-              {getUserInitials(task.assignee.name, task.assignee.surname)}
+              {task.assignee ? (
+                getUserInitials(task.assignee.name, task.assignee.surname)
+              ) : (
+                <PersonOffOutlinedIcon fontSize="small" />
+              )}
             </Avatar>
             <Typography color="text.secondary" noWrap variant="caption">
-              {getUserName(task.assignee.name, task.assignee.surname)}
+              {assigneeName}
             </Typography>
           </Stack>
 

@@ -45,3 +45,12 @@ export type ProjectAssignee = {
   name: string;
   surname: string;
 };
+
+export type ProjectMemberCandidate = ProjectAssignee & {
+  roleKey: string;
+  roleName: string;
+};
+
+export type AddProjectMemberBody = {
+  userId: number;
+};

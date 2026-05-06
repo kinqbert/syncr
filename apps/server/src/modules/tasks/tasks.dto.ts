@@ -49,8 +49,9 @@ export class TaskDto implements Task {
   projectId: number;
 
   @ValidateNested()
+  @IsOptional()
   @Type(() => TaskAssigneeDto)
-  assignee: TaskAssigneeDto;
+  assignee: TaskAssigneeDto | null;
 
   @IsEnum(TaskStatus)
   status: TaskStatus;
@@ -106,7 +107,7 @@ export class UpdateTaskDto implements UpdateTaskBody {
 
   @IsInt()
   @IsOptional()
-  assigneeId?: number;
+  assigneeId?: number | null;
 
   @IsEnum(TaskStatus)
   @IsOptional()
@@ -147,5 +148,6 @@ export class ReorderTasksDto implements ReorderTasksBody {
 
 export class SetTaskAssigneeDto implements SetTaskAssigneeBody {
   @IsInt()
-  assigneeId: number;
+  @IsOptional()
+  assigneeId: number | null;
 }

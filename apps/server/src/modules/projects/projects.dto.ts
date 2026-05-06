@@ -1,8 +1,10 @@
 import {
+  AddProjectMemberBody,
   CreateProjectBody,
   Project,
   ProjectAssignee,
   ProjectManagerCandidate,
+  ProjectMemberCandidate,
   ProjectStatus,
   UpdateProjectBody,
 } from "@syncr/packages";
@@ -115,4 +117,20 @@ export class ProjectAssigneeDto implements ProjectAssignee {
 
   @IsString()
   surname: string;
+}
+
+export class ProjectMemberCandidateDto
+  extends ProjectAssigneeDto
+  implements ProjectMemberCandidate
+{
+  @IsString()
+  roleKey: string;
+
+  @IsString()
+  roleName: string;
+}
+
+export class AddProjectMemberDto implements AddProjectMemberBody {
+  @IsNumber()
+  userId: number;
 }

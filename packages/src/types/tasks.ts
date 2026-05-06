@@ -42,7 +42,7 @@ export type Task = {
   name: string;
   description: string;
   projectId: number;
-  assignee: TaskAssignee;
+  assignee: TaskAssignee | null;
   status: TaskStatus;
   priority: TaskPriority;
   position: number;
@@ -62,7 +62,7 @@ export type CreateTaskBody = {
 export type UpdateTaskBody = {
   name?: string;
   description?: string | null;
-  assigneeId?: number;
+  assigneeId?: number | null;
   status?: TaskStatus;
   priority?: TaskPriority;
   position?: number;
@@ -80,5 +80,5 @@ export type ReorderTasksBody = {
 };
 
 export type SetTaskAssigneeBody = {
-  assigneeId: number;
+  assigneeId: number | null;
 };
