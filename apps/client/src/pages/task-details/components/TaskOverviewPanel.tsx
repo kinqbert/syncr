@@ -8,7 +8,6 @@ import {
 import { useState } from "react";
 
 import {
-  taskKeys,
   useCreateTaskAcceptanceCriterion,
   useDeleteTaskAcceptanceCriterion,
   useUpdateTask,
@@ -16,10 +15,8 @@ import {
 } from "@/api/tasks";
 import { EditableText } from "@/components/EditableText";
 import { Panel } from "@/components/Panel";
-import { queryClient } from "@/lib/react-query";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
-import { updateTaskInCache } from "../utils/updateTaskInCache";
 import { AcceptanceCriteriaSection } from "./AcceptanceCriteriaSection";
 
 type TaskOverviewPanelProps = {
@@ -41,15 +38,10 @@ export const TaskOverviewPanel = ({
     setError(null);
 
     try {
-      const updatedTask = await updateTask.mutateAsync({
+      await updateTask.mutateAsync({
         projectId,
         taskId: task.id,
         body,
-      });
-
-      updateTaskInCache(projectId, updatedTask);
-      void queryClient.invalidateQueries({
-        queryKey: taskKeys.taskActivities(projectId, task.id),
       });
     } catch (saveError) {
       setError(getErrorMessage(saveError, "Could not update task."));
@@ -63,16 +55,11 @@ export const TaskOverviewPanel = ({
     setError(null);
 
     try {
-      const updatedTask = await updateTaskAcceptanceCriterion.mutateAsync({
+      await updateTaskAcceptanceCriterion.mutateAsync({
         projectId,
         taskId: task.id,
         criterionId,
         body,
-      });
-
-      updateTaskInCache(projectId, updatedTask);
-      void queryClient.invalidateQueries({
-        queryKey: taskKeys.taskActivities(projectId, task.id),
       });
     } catch (saveError) {
       setError(
@@ -85,15 +72,10 @@ export const TaskOverviewPanel = ({
     setError(null);
 
     try {
-      const updatedTask = await createTaskAcceptanceCriterion.mutateAsync({
+      await createTaskAcceptanceCriterion.mutateAsync({
         projectId,
         taskId: task.id,
         body: { description },
-      });
-
-      updateTaskInCache(projectId, updatedTask);
-      void queryClient.invalidateQueries({
-        queryKey: taskKeys.taskActivities(projectId, task.id),
       });
     } catch (saveError) {
       setError(
@@ -106,15 +88,10 @@ export const TaskOverviewPanel = ({
     setError(null);
 
     try {
-      const updatedTask = await deleteTaskAcceptanceCriterion.mutateAsync({
+      await deleteTaskAcceptanceCriterion.mutateAsync({
         projectId,
         taskId: task.id,
         criterionId,
-      });
-
-      updateTaskInCache(projectId, updatedTask);
-      void queryClient.invalidateQueries({
-        queryKey: taskKeys.taskActivities(projectId, task.id),
       });
     } catch (saveError) {
       setError(

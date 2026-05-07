@@ -14,6 +14,8 @@ import {
 import type { Task } from "@syncr/packages";
 import { Link as RouterLink } from "react-router";
 
+import { formatDate } from "@/utils/formatDate";
+
 type TaskCardProps = {
   detailsPath?: string;
   task: Task;
@@ -39,17 +41,6 @@ const priorityColorByValue: Record<
 
 const formatPriority = (priority: Task["priority"]) => {
   return priority.charAt(0).toUpperCase() + priority.slice(1);
-};
-
-const formatDate = (value: string | null) => {
-  if (!value) {
-    return "No date";
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    day: "numeric",
-    month: "short",
-  }).format(new Date(value));
 };
 
 const getUserInitials = (name: string, surname: string) => {

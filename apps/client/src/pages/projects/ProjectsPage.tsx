@@ -19,23 +19,14 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
 import {
-  projectsKeys,
   useCreateProject,
   useGetMyProjects,
   useGetProjectManagerCandidates,
   useUpdateProject,
 } from "@/api/projects";
-import { queryClient } from "@/lib/react-query";
+import { formatDate } from "@/utils/formatDate";
 
 import { NoProjectsCard, ProjectFormDialog } from "./components";
-
-const formatDate = (value: string) => {
-  return new Intl.DateTimeFormat(undefined, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(value));
-};
 
 export const ProjectsPage = () => {
   const navigate = useNavigate();
@@ -93,7 +84,6 @@ export const ProjectsPage = () => {
       await createProject.mutateAsync(body);
     }
 
-    await queryClient.invalidateQueries({ queryKey: projectsKeys.projects });
     handleCloseDialog();
   };
 

@@ -11,6 +11,7 @@ import type {
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
+import { queryClient } from "@/lib/react-query";
 
 export const projectsKeys = {
   projects: ["projects"],
@@ -169,23 +170,53 @@ export const useGetProjectMemberCandidates = (
 export const useCreateProject = () => {
   return useMutation({
     mutationFn: createProject,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: projectsKeys.projects });
+    },
   });
 };
 
 export const useUpdateProject = () => {
   return useMutation({
     mutationFn: updateProject,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: projectsKeys.projects });
+    },
   });
 };
 
 export const useAddProjectMember = () => {
   return useMutation({
     mutationFn: addProjectMember,
+    onSuccess: (members, variables) => {
+      queryClient.setQueryData(
+        projectsKeys.projectAssignees(variables.projectId),
+        members,
+      );
+      void queryClient.invalidateQueries({
+        queryKey: projectsKeys.projectAssignees(variables.projectId),
+      });
+    },
   });
 };
 
 export const useRemoveProjectMember = () => {
   return useMutation({
     mutationFn: removeProjectMember,
+    onSuccess: (members, variables) => {
+      queryClient.setQueryData(
+        projectsKeys.projectAssignees(variables.projectId),
+        members,
+      );
+      void queryClient.invalidateQueries({
+        queryKey: projectsKeys.project(variables.projectId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectsKeys.projectAssignees(variables.projectId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["projects", variables.projectId, "tasks"],
+      });
+    },
   });
 };

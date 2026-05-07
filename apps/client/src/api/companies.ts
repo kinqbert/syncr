@@ -2,6 +2,7 @@ import type { Company, CreateCompanyBody } from "@syncr/packages";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
+import { queryClient } from "@/lib/react-query";
 
 export const companiesKeys = {
   companies: ["companies"],
@@ -29,5 +30,10 @@ export const useGetMyCompanies = () => {
 export const useCreateCompany = () => {
   return useMutation({
     mutationFn: createCompany,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: companiesKeys.companies,
+      });
+    },
   });
 };

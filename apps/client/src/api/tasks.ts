@@ -13,6 +13,7 @@ import type {
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
+import { queryClient } from "@/lib/react-query";
 
 export const taskKeys = {
   projectTasks: (projectId: number) =>
@@ -197,6 +198,26 @@ const getTaskActivities = async ({
   return response.data;
 };
 
+const updateTaskInProjectCache = (projectId: number, updatedTask: Task) => {
+  queryClient.setQueryData<Task[]>(
+    taskKeys.projectTasks(projectId),
+    (tasks = []) =>
+      tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
+  );
+};
+
+const invalidateTaskActivities = (projectId: number, taskId: number) => {
+  void queryClient.invalidateQueries({
+    queryKey: taskKeys.taskActivities(projectId, taskId),
+  });
+};
+
+const invalidateProjectLabels = (projectId: number) => {
+  void queryClient.invalidateQueries({
+    queryKey: ["projects", projectId, "labels"] as const,
+  });
+};
+
 export const useGetProjectTasks = (projectId: number, enabled = true) => {
   return useQuery({
     enabled,
@@ -208,24 +229,44 @@ export const useGetProjectTasks = (projectId: number, enabled = true) => {
 export const useCreateTask = () => {
   return useMutation({
     mutationFn: createTask,
+    onSuccess: (_task, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: taskKeys.projectTasks(variables.projectId),
+      });
+    },
   });
 };
 
 export const useUpdateTask = () => {
   return useMutation({
     mutationFn: updateTask,
+    onSuccess: (updatedTask, variables) => {
+      updateTaskInProjectCache(variables.projectId, updatedTask);
+      invalidateTaskActivities(variables.projectId, variables.taskId);
+
+      if (variables.body.labelNames) {
+        invalidateProjectLabels(variables.projectId);
+      }
+    },
   });
 };
 
 export const useReorderTasks = () => {
   return useMutation({
     mutationFn: reorderTasks,
+    onSuccess: (tasks, variables) => {
+      queryClient.setQueryData(taskKeys.projectTasks(variables.projectId), tasks);
+    },
   });
 };
 
 export const useSetTaskAssignee = () => {
   return useMutation({
     mutationFn: setTaskAssignee,
+    onSuccess: (updatedTask, variables) => {
+      updateTaskInProjectCache(variables.projectId, updatedTask);
+      invalidateTaskActivities(variables.projectId, variables.taskId);
+    },
   });
 };
 
@@ -238,18 +279,30 @@ export const useDeleteTask = () => {
 export const useCreateTaskAcceptanceCriterion = () => {
   return useMutation({
     mutationFn: createTaskAcceptanceCriterion,
+    onSuccess: (updatedTask, variables) => {
+      updateTaskInProjectCache(variables.projectId, updatedTask);
+      invalidateTaskActivities(variables.projectId, variables.taskId);
+    },
   });
 };
 
 export const useUpdateTaskAcceptanceCriterion = () => {
   return useMutation({
     mutationFn: updateTaskAcceptanceCriterion,
+    onSuccess: (updatedTask, variables) => {
+      updateTaskInProjectCache(variables.projectId, updatedTask);
+      invalidateTaskActivities(variables.projectId, variables.taskId);
+    },
   });
 };
 
 export const useDeleteTaskAcceptanceCriterion = () => {
   return useMutation({
     mutationFn: deleteTaskAcceptanceCriterion,
+    onSuccess: (updatedTask, variables) => {
+      updateTaskInProjectCache(variables.projectId, updatedTask);
+      invalidateTaskActivities(variables.projectId, variables.taskId);
+    },
   });
 };
 
@@ -268,6 +321,13 @@ export const useGetTaskComments = (
 export const useCreateTaskComment = () => {
   return useMutation({
     mutationFn: createTaskComment,
+    onSuccess: (createdComment, variables) => {
+      queryClient.setQueryData<TaskComment[]>(
+        taskKeys.taskComments(variables.projectId, variables.taskId),
+        (currentComments = []) => [...currentComments, createdComment],
+      );
+      invalidateTaskActivities(variables.projectId, variables.taskId);
+    },
   });
 };
 

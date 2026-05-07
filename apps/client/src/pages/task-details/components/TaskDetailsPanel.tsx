@@ -19,13 +19,10 @@ import {
 } from "@syncr/packages";
 import { useState } from "react";
 
-import { projectsKeys } from "@/api/projects";
-import { taskKeys, useSetTaskAssignee, useUpdateTask } from "@/api/tasks";
-import { queryClient } from "@/lib/react-query";
+import { useSetTaskAssignee, useUpdateTask } from "@/api/tasks";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { Panel } from "../../../components/Panel";
-import { updateTaskInCache } from "../utils/updateTaskInCache";
 
 type TaskDetailsPanelProps = {
   isAssigneesPending: boolean;
@@ -67,22 +64,11 @@ export const TaskDetailsPanel = ({
     setError(null);
 
     try {
-      const updatedTask = await updateTask.mutateAsync({
+      await updateTask.mutateAsync({
         projectId,
         taskId: task.id,
         body,
       });
-
-      updateTaskInCache(projectId, updatedTask);
-      void queryClient.invalidateQueries({
-        queryKey: taskKeys.taskActivities(projectId, task.id),
-      });
-
-      if (body.labelNames) {
-        void queryClient.invalidateQueries({
-          queryKey: projectsKeys.projectLabels(projectId),
-        });
-      }
     } catch (saveError) {
       setError(getErrorMessage(saveError, "Could not update task."));
     }
@@ -96,15 +82,10 @@ export const TaskDetailsPanel = ({
     setError(null);
 
     try {
-      const updatedTask = await setTaskAssignee.mutateAsync({
+      await setTaskAssignee.mutateAsync({
         projectId,
         taskId: task.id,
         body: { assigneeId },
-      });
-
-      updateTaskInCache(projectId, updatedTask);
-      void queryClient.invalidateQueries({
-        queryKey: taskKeys.taskActivities(projectId, task.id),
       });
     } catch (saveError) {
       setError(getErrorMessage(saveError, "Could not update task assignee."));

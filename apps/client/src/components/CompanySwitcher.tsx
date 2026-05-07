@@ -17,12 +17,8 @@ import {
 import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-import {
-  companiesKeys,
-  useCreateCompany,
-  useGetMyCompanies,
-} from "@/api/companies";
-import { queryClient, removeCompanyScopedCache } from "@/lib/react-query";
+import { useCreateCompany, useGetMyCompanies } from "@/api/companies";
+import { removeCompanyScopedCache } from "@/lib/react-query";
 import { useCompanyStore } from "@/store/useCompanyStore";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
@@ -111,10 +107,6 @@ export const CompanySwitcher = () => {
     try {
       const company = await createCompany.mutateAsync({
         name: trimmedCompanyName,
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: companiesKeys.companies,
       });
 
       navigate("/");

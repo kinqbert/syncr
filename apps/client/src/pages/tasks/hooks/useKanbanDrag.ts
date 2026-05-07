@@ -308,7 +308,6 @@ export const useKanbanDrag = ({
     handleDragOver,
     handleDragStart,
     sensors,
-    taskQueryKey,
     tasksByStatus,
   };
 };

@@ -12,12 +12,7 @@ import {
 import type { TaskComment } from "@syncr/packages";
 import { useState } from "react";
 
-import {
-  taskKeys,
-  useCreateTaskComment,
-  useGetTaskComments,
-} from "@/api/tasks";
-import { queryClient } from "@/lib/react-query";
+import { useCreateTaskComment, useGetTaskComments } from "@/api/tasks";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { Panel } from "../../../components/Panel";
@@ -68,19 +63,12 @@ export const TaskCommentsPanel = ({
     setError(null);
 
     try {
-      const createdComment = await createTaskComment.mutateAsync({
+      await createTaskComment.mutateAsync({
         projectId,
         taskId,
         body: { content },
       });
 
-      queryClient.setQueryData<TaskComment[]>(
-        taskKeys.taskComments(projectId, taskId),
-        (currentComments = []) => [...currentComments, createdComment],
-      );
-      void queryClient.invalidateQueries({
-        queryKey: taskKeys.taskActivities(projectId, taskId),
-      });
       setComment("");
     } catch (createError) {
       setError(getErrorMessage(createError, "Could not post comment."));

@@ -11,7 +11,6 @@ import {
 } from "@syncr/packages";
 
 import { useCreateTask, useGetProjectTasks } from "@/api/tasks";
-import { queryClient } from "@/lib/react-query";
 
 import { useKanbanDrag } from "../hooks/useKanbanDrag";
 import { KanbanColumn } from "./KanbanColumn";
@@ -61,7 +60,6 @@ export const Kanban = ({ projectAssignees, projectId }: KanbanProps) => {
     handleDragOver,
     handleDragStart,
     sensors,
-    taskQueryKey,
     tasksByStatus,
   } = useKanbanDrag({
     columnStatuses,
@@ -73,10 +71,6 @@ export const Kanban = ({ projectAssignees, projectId }: KanbanProps) => {
     await createTask.mutateAsync({
       projectId,
       body,
-    });
-
-    await queryClient.invalidateQueries({
-      queryKey: taskQueryKey,
     });
   };
 

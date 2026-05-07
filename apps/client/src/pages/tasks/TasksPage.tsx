@@ -4,15 +4,12 @@ import { useState } from "react";
 import { useParams } from "react-router";
 
 import {
-  projectsKeys,
   useAddProjectMember,
   useGetProject,
   useGetProjectAssignees,
   useGetProjectMemberCandidates,
   useRemoveProjectMember,
 } from "@/api/projects";
-import { taskKeys } from "@/api/tasks";
-import { queryClient } from "@/lib/react-query";
 
 import { Kanban } from "./components/Kanban";
 import { ProjectMembersDialog } from "./components/ProjectMembersDialog";
@@ -38,40 +35,16 @@ export const TasksPage = () => {
   }
 
   const handleAddProjectMember = async (userId: number) => {
-    const updatedMembers = await addProjectMember.mutateAsync({
+    await addProjectMember.mutateAsync({
       projectId: numericProjectId,
       body: { userId },
-    });
-
-    queryClient.setQueryData(
-      projectsKeys.projectAssignees(numericProjectId),
-      updatedMembers,
-    );
-
-    void queryClient.invalidateQueries({
-      queryKey: projectsKeys.projectAssignees(numericProjectId),
     });
   };
 
   const handleRemoveProjectMember = async (userId: number) => {
-    const updatedMembers = await removeProjectMember.mutateAsync({
+    await removeProjectMember.mutateAsync({
       projectId: numericProjectId,
       userId,
-    });
-
-    queryClient.setQueryData(
-      projectsKeys.projectAssignees(numericProjectId),
-      updatedMembers,
-    );
-
-    void queryClient.invalidateQueries({
-      queryKey: projectsKeys.project(numericProjectId),
-    });
-    void queryClient.invalidateQueries({
-      queryKey: projectsKeys.projectAssignees(numericProjectId),
-    });
-    void queryClient.invalidateQueries({
-      queryKey: taskKeys.projectTasks(numericProjectId),
     });
   };
 
