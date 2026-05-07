@@ -117,7 +117,7 @@ export const CompanySwitcher = () => {
         queryKey: companiesKeys.companies,
       });
 
-      navigate("/dashboard");
+      navigate("/");
 
       setSelectedCompanyId(company.id);
       removeCompanyScopedCache();
