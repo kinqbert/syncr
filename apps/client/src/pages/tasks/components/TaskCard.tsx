@@ -1,4 +1,3 @@
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PersonOffOutlinedIcon from "@mui/icons-material/PersonOffOutlined";
@@ -12,11 +11,10 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import type { Task } from "@syncr/packages";
+import type { Task, TaskPriority } from "@syncr/packages";
 import { Link as RouterLink } from "react-router";
 
-import { formatDate } from "@/utils/formatDate";
-import { formatDuration } from "@/utils/formatDuration";
+import { formatDateShort } from "@/utils/formatDate";
 import { getUserFullName } from "@/utils/getUserFullName";
 import { getUserInitials } from "@/utils/getUserInitials";
 
@@ -43,7 +41,7 @@ const priorityColorByValue: Record<
   },
 };
 
-const formatPriority = (priority: Task["priority"]) => {
+const formatPriority = (priority: TaskPriority) => {
   return priority.charAt(0).toUpperCase() + priority.slice(1);
 };
 
@@ -62,7 +60,7 @@ export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
         minWidth: TASK_CARD_WIDTH,
         maxWidth: TASK_CARD_WIDTH,
         borderColor: "divider",
-        borderRadius: 3,
+        borderRadius: 1.5,
         boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
         p: 2,
         transition: "border-color 160ms ease, box-shadow 160ms ease",
@@ -98,7 +96,7 @@ export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
                   outlineOffset: 2,
                 },
               }}
-              variant="button"
+              variant="subtitle1"
             >
               {task.name}
             </MuiLink>
@@ -110,6 +108,9 @@ export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
               aria-label="Task actions"
               size="small"
               sx={{ color: "text.secondary", mt: -0.5 }}
+              onPointerDown={(event) => {
+                event.stopPropagation();
+              }}
             >
               <MoreVertIcon fontSize="small" />
             </IconButton>
@@ -117,8 +118,8 @@ export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
         </Stack>
 
         <Stack
-          direction="column"
-          alignItems="start"
+          direction="row"
+          alignItems="center"
           justifyContent="space-between"
           gap={1.5}
         >
@@ -139,7 +140,7 @@ export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
                 <PersonOffOutlinedIcon fontSize="small" />
               )}
             </Avatar>
-            <Typography color="text.secondary" noWrap variant="caption">
+            <Typography color="text.secondary" noWrap variant="body2">
               {assigneeName}
             </Typography>
           </Stack>
@@ -148,25 +149,19 @@ export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
               label={formatPriority(task.priority)}
               size="small"
               sx={{
+                borderRadius: 1.5,
                 bgcolor: priorityColor.bgcolor,
                 color: priorityColor.color,
                 fontWeight: 700,
               }}
             />
-            <Stack direction="row" alignItems="center" gap={0.5}>
-              <AccessTimeOutlinedIcon
-                sx={{ color: "text.secondary", fontSize: 18 }}
-              />
-              <Typography color="text.secondary">
-                {formatDuration(task.estimateMinutes)}
-              </Typography>
-            </Stack>
+
             <Stack direction="row" alignItems="center" gap={0.5}>
               <CalendarTodayOutlinedIcon
                 sx={{ color: "text.secondary", fontSize: 18 }}
               />
               <Typography color="text.secondary">
-                {formatDate(task.endDate)}
+                {formatDateShort(task.endDate)}
               </Typography>
             </Stack>
           </Stack>

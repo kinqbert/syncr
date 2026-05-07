@@ -83,7 +83,7 @@ export const Kanban = ({ projectAssignees, projectId }: KanbanProps) => {
       onDragStart={handleDragStart}
       sensors={sensors}
     >
-      <Stack direction="row" gap={4}>
+      <Stack direction="row" gap={1}>
         {columns.map((column) => (
           <KanbanColumn
             key={column.status}
@@ -97,7 +97,7 @@ export const Kanban = ({ projectAssignees, projectId }: KanbanProps) => {
               items={tasksByStatus[column.status].map((task) => task.id)}
               strategy={verticalListSortingStrategy}
             >
-              <Stack gap={2}>
+              <Stack gap={1}>
                 {tasksByStatus[column.status].map((task) => (
                   <SortableTaskCard
                     key={task.id}

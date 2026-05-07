@@ -1,4 +1,21 @@
+import "@mui/material/styles";
+
 import { createTheme } from "@mui/material";
+
+declare module "@mui/material/styles" {
+  interface Palette {
+    kanban: {
+      dragOver: string;
+    };
+  }
+
+  interface PaletteOptions {
+    kanban?: {
+      bg?: string;
+      bgActive?: string;
+    };
+  }
+}
 
 export const theme = createTheme({
   typography: {
@@ -25,11 +42,16 @@ export const theme = createTheme({
     h6: {
       fontWeight: 500,
     },
+    subtitle1: {
+      fontWeight: 500,
+    },
+    subtitle2: {
+      fontWeight: 500,
+    },
   },
   palette: {
     mode: "light",
 
-    // Primary Brand Color (Indigo)
     primary: {
       main: "#4F46E5",
       light: "#6366F1",
@@ -37,7 +59,6 @@ export const theme = createTheme({
       contrastText: "#FFFFFF",
     },
 
-    // Secondary Color (Purple)
     secondary: {
       main: "#9333EA",
       light: "#A855F7",
@@ -45,7 +66,6 @@ export const theme = createTheme({
       contrastText: "#FFFFFF",
     },
 
-    // Success Color (Green)
     success: {
       main: "#10B981",
       light: "#34D399",
@@ -53,7 +73,6 @@ export const theme = createTheme({
       contrastText: "#FFFFFF",
     },
 
-    // Warning Color (Orange)
     warning: {
       main: "#EA580C",
       light: "#F97316",
@@ -61,7 +80,6 @@ export const theme = createTheme({
       contrastText: "#FFFFFF",
     },
 
-    // Error Color (Red)
     error: {
       main: "#DC2626",
       light: "#EF4444",
@@ -69,7 +87,6 @@ export const theme = createTheme({
       contrastText: "#FFFFFF",
     },
 
-    // Info Color (Blue)
     info: {
       main: "#2563EB",
       light: "#3B82F6",
@@ -77,29 +94,30 @@ export const theme = createTheme({
       contrastText: "#FFFFFF",
     },
 
-    // Background Colors
     background: {
       default: "#F9FAFB",
-      paper: "#FFFFFF", // white
+      paper: "#FFFFFF",
     },
 
-    // Text Colors
     text: {
       primary: "#111827",
       secondary: "#4B5563",
       disabled: "#9CA3AF",
     },
 
-    // Divider Color
-    divider: "#E5E7EB", // gray-200
+    divider: "#E5E7EB",
 
-    // Action Colors
+    kanban: {
+      bg: "#f4f7ff",
+      bgActive: "#EEF2FF",
+    },
+
     action: {
-      active: "#4F46E5", // indigo-600
-      hover: "rgba(79, 70, 229, 0.04)", // indigo with opacity
+      active: "#4F46E5",
+      hover: "rgba(79, 70, 229, 0.04)",
       selected: "rgba(79, 70, 229, 0.08)",
-      disabled: "#9CA3AF", // gray-400
-      disabledBackground: "#F3F4F6", // gray-100
+      disabled: "#9CA3AF",
+      disabledBackground: "#F3F4F6",
       focus: "rgba(79, 70, 229, 0.12)",
     },
   },

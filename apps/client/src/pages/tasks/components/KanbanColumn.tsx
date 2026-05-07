@@ -25,7 +25,7 @@ type KanbanColumnProps = {
   projectAssignees: ProjectAssignee[];
 };
 
-const BORDER_SIZE = 2;
+const PADDING = 8;
 
 export const KanbanColumn = ({
   children,
@@ -54,14 +54,19 @@ export const KanbanColumn = ({
     <Box
       ref={setNodeRef}
       sx={{
-        minWidth: TASK_CARD_WIDTH + BORDER_SIZE * 2,
-        maxWidth: TASK_CARD_WIDTH + BORDER_SIZE * 2,
+        minWidth: TASK_CARD_WIDTH + PADDING * 2,
+        maxWidth: TASK_CARD_WIDTH + PADDING * 2,
         width: "100%",
         borderRadius: 2,
         transition: "background-color 160ms ease",
       }}
     >
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        px={`${PADDING}px`}
+      >
         <Typography variant="subtitle1" fontWeight={600}>
           {column.label}
         </Typography>
@@ -87,10 +92,10 @@ export const KanbanColumn = ({
       )}
 
       <Box
-        minHeight="300px"
+        minHeight="600px"
         sx={{
-          border: `${BORDER_SIZE}px dashed`,
-          borderColor: isDragOver ? "text.primary" : "transparent",
+          p: `${PADDING}px`,
+          backgroundColor: isDragOver ? "kanban.bgActive" : "kanban.bg",
           borderRadius: 2,
           boxSizing: "border-box",
           transition: "border-color 160ms ease",
