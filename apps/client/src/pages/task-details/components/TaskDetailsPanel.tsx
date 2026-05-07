@@ -21,6 +21,7 @@ import {
 import { useMemo, useState } from "react";
 
 import { useUpdateTask } from "@/api/tasks";
+import { useProject } from "@/hooks";
 import { formatDuration } from "@/utils/formatDuration";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { getUserFullName } from "@/utils/getUserFullName";
@@ -32,7 +33,6 @@ import { toDateInputValue } from "../utils/format";
 type TaskDetailsPanelProps = {
   isAssigneesPending: boolean;
   isLabelsPending: boolean;
-  projectId: number;
   projectAssignees: ProjectAssignee[];
   projectLabels: ProjectLabel[];
   task: Task;
@@ -95,19 +95,20 @@ type FormState = {
 export const TaskDetailsPanel = ({
   isAssigneesPending,
   isLabelsPending,
-  projectId,
   projectAssignees,
   projectLabels,
   task,
 }: TaskDetailsPanelProps) => {
+  const { projectId } = useProject();
+
+  const initialState: FormState = useMemo(() => createFormState(task), [task]);
+  const [form, setForm] = useState<FormState>(initialState);
+  const [error, setError] = useState<string | null>(null);
+
   const updateTask = useUpdateTask();
 
-  const [error, setError] = useState<string | null>(null);
-  const initialState: FormState = useMemo(() => createFormState(task), [task]);
-
-  const [form, setForm] = useState<FormState>(initialState);
-
   const isDirty = JSON.stringify(form) !== JSON.stringify(initialState);
+
   const handleSave = async () => {
     setError(null);
 

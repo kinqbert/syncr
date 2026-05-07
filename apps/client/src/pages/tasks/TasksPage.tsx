@@ -27,6 +27,7 @@ export const TasksPage = () => {
       numericProjectId,
       Boolean(projectId) && isMembersDialogOpen,
     );
+
   const addProjectMember = useAddProjectMember();
   const removeProjectMember = useRemoveProjectMember();
 
@@ -73,7 +74,7 @@ export const TasksPage = () => {
         </Button>
       </Stack>
       <Box minHeight={0} minWidth={0} sx={{ flex: 1, overflowX: "scroll" }}>
-        <Kanban projectAssignees={members} projectId={numericProjectId} />
+        <Kanban projectAssignees={members} />
       </Box>
       <ProjectMembersDialog
         candidates={memberCandidates}

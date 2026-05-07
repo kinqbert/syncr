@@ -15,24 +15,24 @@ import {
 } from "@/api/tasks";
 import { EditableText } from "@/components/EditableText";
 import { Panel } from "@/components/Panel";
+import { useProject } from "@/hooks";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { AcceptanceCriteriaSection } from "./AcceptanceCriteriaSection";
 
 type TaskOverviewPanelProps = {
-  projectId: number;
   task: Task;
 };
 
-export const TaskOverviewPanel = ({
-  projectId,
-  task,
-}: TaskOverviewPanelProps) => {
+export const TaskOverviewPanel = ({ task }: TaskOverviewPanelProps) => {
+  const { projectId } = useProject();
+
+  const [error, setError] = useState<string | null>(null);
+
   const updateTask = useUpdateTask();
   const createTaskAcceptanceCriterion = useCreateTaskAcceptanceCriterion();
   const updateTaskAcceptanceCriterion = useUpdateTaskAcceptanceCriterion();
   const deleteTaskAcceptanceCriterion = useDeleteTaskAcceptanceCriterion();
-  const [error, setError] = useState<string | null>(null);
 
   const saveTask = async (body: UpdateTaskBody) => {
     setError(null);

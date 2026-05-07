@@ -2,29 +2,31 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Box } from "@mui/material";
 import type { Task } from "@syncr/packages";
+import { useState } from "react";
+
+import { useProject } from "@/hooks";
 
 import { TaskCard } from "./TaskCard";
 
 type SortableTaskCardProps = {
-  projectId: number;
   task: Task;
 };
 
-export const SortableTaskCard = ({
-  projectId,
-  task,
-}: SortableTaskCardProps) => {
+export const SortableTaskCard = ({ task }: SortableTaskCardProps) => {
+  const { projectId } = useProject();
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const { attributes, isDragging, listeners, setNodeRef, transform } =
     useSortable({
       animateLayoutChanges: () => false,
       id: task.id,
+      disabled: isMenuOpen,
     });
 
   return (
     <Box
       ref={setNodeRef}
-      {...attributes}
-      {...listeners}
       sx={{
         cursor: isDragging ? "grabbing" : "grab",
         transform: CSS.Transform.toString(transform),
@@ -34,8 +36,13 @@ export const SortableTaskCard = ({
       }}
     >
       <TaskCard
-        detailsPath={`/projects/${projectId}/tasks/${task.id}`}
         task={task}
+        detailsPath={`/projects/${projectId}/tasks/${task.id}`}
+        onMenuOpenChange={setIsMenuOpen}
+        dragHandleProps={{
+          ...attributes,
+          ...listeners,
+        }}
       />
     </Box>
   );

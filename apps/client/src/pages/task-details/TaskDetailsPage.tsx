@@ -85,22 +85,21 @@ export const TaskDetailsPage = () => {
         }}
       >
         <Stack gap={2.25} minWidth={0}>
-          <TaskOverviewPanel projectId={numericProjectId} task={task} />
+          <TaskOverviewPanel task={task} />
 
-          <TaskCommentsPanel projectId={numericProjectId} taskId={task.id} />
+          <TaskCommentsPanel taskId={task.id} />
         </Stack>
 
         <Stack gap={2.25} minWidth={0}>
           <TaskDetailsPanel
             isAssigneesPending={areAssigneesPending}
             isLabelsPending={areLabelsPending}
-            projectId={numericProjectId}
             projectAssignees={projectAssignees}
             projectLabels={projectLabels}
             task={task}
           />
 
-          <TaskActivityPanel projectId={numericProjectId} taskId={task.id} />
+          <TaskActivityPanel taskId={task.id} />
         </Stack>
       </Box>
     </Stack>

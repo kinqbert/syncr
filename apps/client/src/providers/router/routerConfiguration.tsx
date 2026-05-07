@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 
 import { AppLayout } from "@/components/AppLayout";
+import { ProjectLayout } from "@/components/ProjectLayout";
 import {
   DashboardPage,
   LoginPage,
@@ -25,12 +26,18 @@ const router = createBrowserRouter([
         element: <ProjectsPage />,
       },
       {
-        path: "projects/:projectId/tasks",
-        element: <TasksPage />,
-      },
-      {
-        path: "projects/:projectId/tasks/:taskId",
-        element: <TaskDetailsPage />,
+        path: "projects/:projectId",
+        element: <ProjectLayout />,
+        children: [
+          {
+            path: "tasks",
+            element: <TasksPage />,
+          },
+          {
+            path: "tasks/:taskId",
+            element: <TaskDetailsPage />,
+          },
+        ],
       },
     ],
   },

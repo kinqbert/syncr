@@ -13,12 +13,12 @@ import type { TaskComment } from "@syncr/packages";
 import { useState } from "react";
 
 import { useCreateTaskComment, useGetTaskComments } from "@/api/tasks";
+import { useProject } from "@/hooks";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { Panel } from "../../../components/Panel";
 
 type TaskCommentsPanelProps = {
-  projectId: number;
   taskId: number;
 };
 
@@ -41,10 +41,9 @@ const formatCreatedAt = (value: string) => {
   }).format(new Date(value));
 };
 
-export const TaskCommentsPanel = ({
-  projectId,
-  taskId,
-}: TaskCommentsPanelProps) => {
+export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
+  const { projectId } = useProject();
+
   const { data: comments = [], isPending } = useGetTaskComments(
     projectId,
     taskId,

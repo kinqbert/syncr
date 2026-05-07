@@ -2,12 +2,12 @@ import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { type TaskActivity, TaskActivityAction } from "@syncr/packages";
 
 import { useGetTaskActivities } from "@/api/tasks";
+import { useProject } from "@/hooks";
 import { formatDuration } from "@/utils/formatDuration";
 
 import { Panel } from "../../../components/Panel";
 
 type TaskActivityPanelProps = {
-  projectId: number;
   taskId: number;
 };
 
@@ -68,10 +68,9 @@ const getEstimateChangeText = (activity: TaskActivity) => {
   return `${formatDuration(previousValue)} to ${formatDuration(newValue)}`;
 };
 
-export const TaskActivityPanel = ({
-  projectId,
-  taskId,
-}: TaskActivityPanelProps) => {
+export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
+  const { projectId } = useProject();
+
   const { data: activities = [], isPending } = useGetTaskActivities(
     projectId,
     taskId,

@@ -13,6 +13,7 @@ import type { Task, TaskStatus } from "@syncr/packages";
 import { useMemo, useRef, useState } from "react";
 
 import { taskKeys, useReorderTasks } from "@/api/tasks";
+import { useProject } from "@/hooks";
 import { queryClient } from "@/lib/react-query";
 
 type TasksByStatus = Record<TaskStatus, Task[]>;
@@ -20,7 +21,6 @@ type DragOverTarget = NonNullable<DragOverEvent["over"]>;
 
 type UseKanbanDragParams = {
   columnStatuses: TaskStatus[];
-  projectId: number;
   tasks: Task[] | undefined;
 };
 
@@ -149,9 +149,10 @@ const moveTask = (
 
 export const useKanbanDrag = ({
   columnStatuses,
-  projectId,
   tasks,
 }: UseKanbanDragParams) => {
+  const { projectId } = useProject();
+
   const reorderTasks = useReorderTasks();
   const dragStartTasksRef = useRef<Task[] | null>(null);
   const [activeTaskId, setActiveTaskId] = useState<number | null>(null);

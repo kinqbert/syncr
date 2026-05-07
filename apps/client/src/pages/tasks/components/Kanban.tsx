@@ -11,6 +11,7 @@ import {
 } from "@syncr/packages";
 
 import { useCreateTask, useGetProjectTasks } from "@/api/tasks";
+import { useProject } from "@/hooks";
 
 import { useKanbanDrag } from "../hooks/useKanbanDrag";
 import { KanbanColumn } from "./KanbanColumn";
@@ -44,12 +45,12 @@ const columnStatuses = columns.map((column) => column.status);
 
 type KanbanProps = {
   projectAssignees: ProjectAssignee[];
-  projectId: number;
 };
 
 type CreateTaskFormBody = CreateTaskBody;
 
-export const Kanban = ({ projectAssignees, projectId }: KanbanProps) => {
+export const Kanban = ({ projectAssignees }: KanbanProps) => {
+  const { projectId } = useProject();
   const { data: tasks } = useGetProjectTasks(projectId);
   const createTask = useCreateTask();
   const {
@@ -63,7 +64,6 @@ export const Kanban = ({ projectAssignees, projectId }: KanbanProps) => {
     tasksByStatus,
   } = useKanbanDrag({
     columnStatuses,
-    projectId,
     tasks,
   });
 
@@ -99,11 +99,7 @@ export const Kanban = ({ projectAssignees, projectId }: KanbanProps) => {
             >
               <Stack gap={1}>
                 {tasksByStatus[column.status].map((task) => (
-                  <SortableTaskCard
-                    key={task.id}
-                    projectId={projectId}
-                    task={task}
-                  />
+                  <SortableTaskCard key={task.id} task={task} />
                 ))}
               </Stack>
             </SortableContext>
