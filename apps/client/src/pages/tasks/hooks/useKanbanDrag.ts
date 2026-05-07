@@ -156,7 +156,7 @@ export const useKanbanDrag = ({
   const dragStartTasksRef = useRef<Task[] | null>(null);
   const [activeTaskId, setActiveTaskId] = useState<number | null>(null);
   const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null);
-  const taskQueryKey = taskKeys.projectTasks(projectId);
+  const taskQueryKey = taskKeys.lists(projectId);
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
