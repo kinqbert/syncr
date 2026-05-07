@@ -100,7 +100,7 @@ export const TasksPage = () => {
         </Button>
       </Stack>
       <Box minHeight={0} minWidth={0} sx={{ flex: 1, overflowX: "scroll" }}>
-        <Kanban projectId={numericProjectId} />
+        <Kanban projectAssignees={members} projectId={numericProjectId} />
       </Box>
       <ProjectMembersDialog
         candidates={memberCandidates}

@@ -5,6 +5,7 @@ import type {
   ReorderTasksBody,
   SetTaskAssigneeBody,
   Task,
+  TaskActivity,
   TaskComment,
   UpdateTaskAcceptanceCriterionBody,
   UpdateTaskBody,
@@ -18,6 +19,8 @@ export const taskKeys = {
     ["projects", projectId, "tasks"] as const,
   taskComments: (projectId: number, taskId: number) =>
     ["projects", projectId, "tasks", taskId, "comments"] as const,
+  taskActivities: (projectId: number, taskId: number) =>
+    ["projects", projectId, "tasks", taskId, "activities"] as const,
 };
 
 const getProjectTasks = async (projectId: number) => {
@@ -180,6 +183,20 @@ const getTaskComments = async ({
   return response.data;
 };
 
+const getTaskActivities = async ({
+  projectId,
+  taskId,
+}: {
+  projectId: number;
+  taskId: number;
+}) => {
+  const response = await api.get<TaskActivity[]>(
+    `projects/${projectId}/tasks/${taskId}/activities`,
+  );
+
+  return response.data;
+};
+
 export const useGetProjectTasks = (projectId: number, enabled = true) => {
   return useQuery({
     enabled,
@@ -251,5 +268,17 @@ export const useGetTaskComments = (
 export const useCreateTaskComment = () => {
   return useMutation({
     mutationFn: createTaskComment,
+  });
+};
+
+export const useGetTaskActivities = (
+  projectId: number,
+  taskId: number,
+  enabled = true,
+) => {
+  return useQuery({
+    enabled,
+    queryFn: () => getTaskActivities({ projectId, taskId }),
+    queryKey: taskKeys.taskActivities(projectId, taskId),
   });
 };

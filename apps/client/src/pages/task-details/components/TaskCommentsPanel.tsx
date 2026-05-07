@@ -78,6 +78,9 @@ export const TaskCommentsPanel = ({
         taskKeys.taskComments(projectId, taskId),
         (currentComments = []) => [...currentComments, createdComment],
       );
+      void queryClient.invalidateQueries({
+        queryKey: taskKeys.taskActivities(projectId, taskId),
+      });
       setComment("");
     } catch (createError) {
       setError(getErrorMessage(createError, "Could not post comment."));

@@ -4,16 +4,19 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Box, Stack } from "@mui/material";
-import { type CreateTaskBody, TaskStatus } from "@syncr/packages";
+import {
+  type CreateTaskBody,
+  type ProjectAssignee,
+  TaskStatus,
+} from "@syncr/packages";
 
 import { useCreateTask, useGetProjectTasks } from "@/api/tasks";
 import { queryClient } from "@/lib/react-query";
-import { useAuthStore } from "@/store/useAuthStore";
 
+import { useKanbanDrag } from "../hooks/useKanbanDrag";
 import { KanbanColumn } from "./KanbanColumn";
 import { SortableTaskCard } from "./SortableTaskCard";
 import { TaskCard } from "./TaskCard";
-import { useKanbanDrag } from "../hooks/useKanbanDrag";
 
 const columns: KanbanColumn[] = [
   {
@@ -41,14 +44,14 @@ const columns: KanbanColumn[] = [
 const columnStatuses = columns.map((column) => column.status);
 
 type KanbanProps = {
+  projectAssignees: ProjectAssignee[];
   projectId: number;
 };
 
-type CreateTaskFormBody = Omit<CreateTaskBody, "assigneeId">;
+type CreateTaskFormBody = CreateTaskBody;
 
-export const Kanban = ({ projectId }: KanbanProps) => {
+export const Kanban = ({ projectAssignees, projectId }: KanbanProps) => {
   const { data: tasks } = useGetProjectTasks(projectId);
-  const currentUserId = useAuthStore((state) => state.user?.id ?? null);
   const createTask = useCreateTask();
   const {
     activeTask,
@@ -67,16 +70,9 @@ export const Kanban = ({ projectId }: KanbanProps) => {
   });
 
   const handleCreateTask = async (body: CreateTaskFormBody) => {
-    if (!currentUserId) {
-      throw new Error("You need to be signed in to create a task.");
-    }
-
     await createTask.mutateAsync({
       projectId,
-      body: {
-        ...body,
-        assigneeId: currentUserId,
-      },
+      body,
     });
 
     await queryClient.invalidateQueries({
@@ -101,6 +97,7 @@ export const Kanban = ({ projectId }: KanbanProps) => {
             isDragOver={dragOverStatus === column.status}
             isCreating={createTask.isPending}
             onCreateTask={handleCreateTask}
+            projectAssignees={projectAssignees}
           >
             <SortableContext
               items={tasksByStatus[column.status].map((task) => task.id)}

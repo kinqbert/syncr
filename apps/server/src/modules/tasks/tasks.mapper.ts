@@ -1,5 +1,11 @@
-import { TaskComment } from "@syncr/packages";
-import { projectLabels, taskAcceptanceCriteria, taskComments, tasks } from "src/db/schema";
+import { TaskActivity, TaskComment } from "@syncr/packages";
+import {
+  projectLabels,
+  taskAcceptanceCriteria,
+  taskActivities,
+  taskComments,
+  tasks,
+} from "src/db/schema";
 
 import { TaskDto } from "./tasks.dto";
 
@@ -65,5 +71,33 @@ export const mapTaskCommentToDto = (task: TaskCommentRecord): TaskComment => {
         }
       : null,
     createdAt: task.createdAt.toISOString(),
+  };
+};
+
+type TaskActivityRecord = typeof taskActivities.$inferSelect & {
+  user: {
+    id: number;
+    email: string;
+    name: string;
+    surname: string;
+  } | null;
+};
+
+export const mapTaskActivityToDto = (activity: TaskActivityRecord): TaskActivity => {
+  return {
+    id: activity.id,
+    taskId: activity.taskId,
+    action: activity.action,
+    previousValue: activity.previousValue,
+    newValue: activity.newValue,
+    actor: activity.user
+      ? {
+          id: activity.user.id,
+          email: activity.user.email,
+          name: activity.user.name,
+          surname: activity.user.surname,
+        }
+      : null,
+    createdAt: activity.createdAt.toISOString(),
   };
 };

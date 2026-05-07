@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { TaskActivitiesRepository } from "src/repositories/task-activities.repository";
 import { TaskCommentsRepository } from "src/repositories/task-comments.repository";
 
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
@@ -15,6 +16,7 @@ import { TasksService } from "./tasks.service";
   providers: [
     TasksService,
     TasksRepository,
+    TaskActivitiesRepository,
     TaskCommentsRepository,
     AcceptanceCriteriaRepository,
     LabelsRepository,

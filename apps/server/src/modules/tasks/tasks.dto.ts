@@ -7,6 +7,9 @@ import {
   SetTaskAssigneeBody,
   Task,
   TaskAcceptanceCriterion,
+  TaskActivity,
+  TaskActivityAction,
+  TaskActivityActor,
   TaskAssignee,
   TaskLabel,
   TaskPriority,
@@ -56,6 +59,47 @@ export class TaskAcceptanceCriterionDto implements TaskAcceptanceCriterion {
 
   @IsInt()
   position: number;
+}
+
+class TaskActivityActorDto implements TaskActivityActor {
+  @IsInt()
+  id: number;
+
+  @IsString()
+  email: string;
+
+  @IsString()
+  name: string;
+
+  @IsString()
+  surname: string;
+}
+
+export class TaskActivityDto implements TaskActivity {
+  @IsInt()
+  id: number;
+
+  @IsInt()
+  taskId: number;
+
+  @IsEnum(TaskActivityAction)
+  action: TaskActivityAction;
+
+  @ValidateNested()
+  @IsOptional()
+  @Type(() => TaskActivityActorDto)
+  actor: TaskActivityActorDto | null;
+
+  @IsString()
+  @IsOptional()
+  previousValue: string | null;
+
+  @IsString()
+  @IsOptional()
+  newValue: string | null;
+
+  @IsDateString()
+  createdAt: string;
 }
 
 export class TaskLabelDto implements TaskLabel {
@@ -120,7 +164,8 @@ export class CreateTaskDto implements CreateTaskBody {
   description?: string | null;
 
   @IsInt()
-  assigneeId: number;
+  @IsOptional()
+  assigneeId?: number;
 
   @IsEnum(TaskStatus)
   @IsOptional()

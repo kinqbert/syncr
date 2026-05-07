@@ -8,6 +8,7 @@ import {
 import { useState } from "react";
 
 import {
+  taskKeys,
   useCreateTaskAcceptanceCriterion,
   useDeleteTaskAcceptanceCriterion,
   useUpdateTask,
@@ -15,6 +16,7 @@ import {
 } from "@/api/tasks";
 import { EditableText } from "@/components/EditableText";
 import { Panel } from "@/components/Panel";
+import { queryClient } from "@/lib/react-query";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { updateTaskInCache } from "../utils/updateTaskInCache";
@@ -46,6 +48,9 @@ export const TaskOverviewPanel = ({
       });
 
       updateTaskInCache(projectId, updatedTask);
+      void queryClient.invalidateQueries({
+        queryKey: taskKeys.taskActivities(projectId, task.id),
+      });
     } catch (saveError) {
       setError(getErrorMessage(saveError, "Could not update task."));
     }
@@ -66,6 +71,9 @@ export const TaskOverviewPanel = ({
       });
 
       updateTaskInCache(projectId, updatedTask);
+      void queryClient.invalidateQueries({
+        queryKey: taskKeys.taskActivities(projectId, task.id),
+      });
     } catch (saveError) {
       setError(
         getErrorMessage(saveError, "Could not update acceptance criterion."),
@@ -84,6 +92,9 @@ export const TaskOverviewPanel = ({
       });
 
       updateTaskInCache(projectId, updatedTask);
+      void queryClient.invalidateQueries({
+        queryKey: taskKeys.taskActivities(projectId, task.id),
+      });
     } catch (saveError) {
       setError(
         getErrorMessage(saveError, "Could not add acceptance criterion."),
@@ -102,6 +113,9 @@ export const TaskOverviewPanel = ({
       });
 
       updateTaskInCache(projectId, updatedTask);
+      void queryClient.invalidateQueries({
+        queryKey: taskKeys.taskActivities(projectId, task.id),
+      });
     } catch (saveError) {
       setError(
         getErrorMessage(saveError, "Could not remove acceptance criterion."),

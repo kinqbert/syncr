@@ -1,4 +1,10 @@
-import { InvitationStatus, ProjectStatus, TaskPriority, TaskStatus } from "@syncr/packages";
+import {
+  InvitationStatus,
+  ProjectStatus,
+  TaskActivityAction,
+  TaskPriority,
+  TaskStatus,
+} from "@syncr/packages";
 import {
   boolean,
   integer,
@@ -118,6 +124,10 @@ export const projectLabels = pgTable(
 
 export const taskStatusEnum = pgEnum("task_status", enumToPgEnum(TaskStatus));
 export const taskPriorityEnum = pgEnum("task_priority", enumToPgEnum(TaskPriority));
+export const taskActivityActionEnum = pgEnum(
+  "task_activity_action",
+  enumToPgEnum(TaskActivityAction),
+);
 
 export const tasks = pgTable("tasks", {
   id: serial().primaryKey(),
@@ -150,6 +160,18 @@ export const taskComments = pgTable("task_comments", {
     .references(() => tasks.id, { onDelete: "cascade" }),
   userId: integer().references(() => users.id, { onDelete: "set null" }),
   content: text().notNull(),
+  createdAt: timestamp().notNull().defaultNow(),
+});
+
+export const taskActivities = pgTable("task_activities", {
+  id: serial().primaryKey(),
+  taskId: integer()
+    .notNull()
+    .references(() => tasks.id, { onDelete: "cascade" }),
+  userId: integer().references(() => users.id, { onDelete: "set null" }),
+  action: taskActivityActionEnum().notNull(),
+  previousValue: text(),
+  newValue: text(),
   createdAt: timestamp().notNull().defaultNow(),
 });
 

@@ -20,7 +20,7 @@ import {
 import { useState } from "react";
 
 import { projectsKeys } from "@/api/projects";
-import { useSetTaskAssignee, useUpdateTask } from "@/api/tasks";
+import { taskKeys, useSetTaskAssignee, useUpdateTask } from "@/api/tasks";
 import { queryClient } from "@/lib/react-query";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
@@ -74,6 +74,9 @@ export const TaskDetailsPanel = ({
       });
 
       updateTaskInCache(projectId, updatedTask);
+      void queryClient.invalidateQueries({
+        queryKey: taskKeys.taskActivities(projectId, task.id),
+      });
 
       if (body.labelNames) {
         void queryClient.invalidateQueries({
@@ -100,6 +103,9 @@ export const TaskDetailsPanel = ({
       });
 
       updateTaskInCache(projectId, updatedTask);
+      void queryClient.invalidateQueries({
+        queryKey: taskKeys.taskActivities(projectId, task.id),
+      });
     } catch (saveError) {
       setError(getErrorMessage(saveError, "Could not update task assignee."));
     }

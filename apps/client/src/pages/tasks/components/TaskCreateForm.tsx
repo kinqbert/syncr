@@ -7,7 +7,12 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import type { CreateTaskBody, TaskPriority, TaskStatus } from "@syncr/packages";
+import type {
+  CreateTaskBody,
+  ProjectAssignee,
+  TaskPriority,
+  TaskStatus,
+} from "@syncr/packages";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -16,30 +21,38 @@ import { getErrorMessage } from "@/utils/getErrorMessage";
 type TaskFormState = {
   name: string;
   description: string;
+  assigneeId: string;
   priority: TaskPriority;
   endDate: string;
 };
 
-type CreateTaskFormBody = Omit<CreateTaskBody, "assigneeId">;
+type CreateTaskFormBody = CreateTaskBody;
 
 type TaskCreateFormProps = {
   isCreating: boolean;
   onClose: () => void;
   onCreateTask: (body: CreateTaskFormBody) => Promise<void>;
+  projectAssignees: ProjectAssignee[];
   status: TaskStatus;
 };
 
 const createDefaultFormState = (): TaskFormState => ({
   name: "",
   description: "",
+  assigneeId: "",
   priority: "medium",
   endDate: "",
 });
+
+const getUserName = (user: Pick<ProjectAssignee, "name" | "surname">) => {
+  return `${user.name} ${user.surname}`.trim();
+};
 
 export const TaskCreateForm = ({
   isCreating,
   onClose,
   onCreateTask,
+  projectAssignees,
   status,
 }: TaskCreateFormProps) => {
   const [formError, setFormError] = useState<string | null>(null);
@@ -70,6 +83,9 @@ export const TaskCreateForm = ({
       await onCreateTask({
         name: formState.name.trim(),
         description: formState.description.trim() || null,
+        assigneeId: formState.assigneeId
+          ? Number(formState.assigneeId)
+          : undefined,
         priority: formState.priority,
         status,
         endDate: formState.endDate || null,
@@ -120,6 +136,39 @@ export const TaskCreateForm = ({
             minRows={2}
             multiline
             size="small"
+          />
+          <Controller
+            control={control}
+            name="assigneeId"
+            render={({ field }) => (
+              <TextField
+                {...field}
+                disabled={isCreating}
+                fullWidth
+                helperText={
+                  projectAssignees.length === 0
+                    ? "No users are assigned to this project."
+                    : undefined
+                }
+                label="Assignee"
+                select
+                size="small"
+                slotProps={{
+                  select: {
+                    MenuProps: {
+                      disablePortal: true,
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="">Unassigned</MenuItem>
+                {projectAssignees.map((assignee) => (
+                  <MenuItem key={assignee.id} value={String(assignee.id)}>
+                    {getUserName(assignee)}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
           />
           <Controller
             control={control}

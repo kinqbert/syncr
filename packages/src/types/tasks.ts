@@ -63,6 +63,37 @@ export type TaskComment = {
   createdAt: string;
 };
 
+export const TaskActivityAction = {
+  TaskCreated: "task_created",
+  TaskUpdated: "task_updated",
+  TaskNameUpdated: "task_name_updated",
+  TaskDescriptionUpdated: "task_description_updated",
+  TaskAssigneeUpdated: "task_assignee_updated",
+  TaskStatusUpdated: "task_status_updated",
+  TaskPriorityUpdated: "task_priority_updated",
+  TaskDeadlineUpdated: "task_deadline_updated",
+  TaskLabelsUpdated: "task_labels_updated",
+  TaskCommentAdded: "task_comment_added",
+  AcceptanceCriterionCreated: "acceptance_criterion_created",
+  AcceptanceCriterionUpdated: "acceptance_criterion_updated",
+  AcceptanceCriterionDeleted: "acceptance_criterion_deleted",
+} as const;
+
+export type TaskActivityAction =
+  (typeof TaskActivityAction)[keyof typeof TaskActivityAction];
+
+export type TaskActivityActor = TaskUserBase;
+
+export type TaskActivity = {
+  id: number;
+  taskId: number;
+  action: TaskActivityAction;
+  actor: TaskActivityActor | null;
+  previousValue: string | null;
+  newValue: string | null;
+  createdAt: string;
+};
+
 export type Task = {
   id: number;
   name: string;
@@ -80,7 +111,7 @@ export type Task = {
 export type CreateTaskBody = {
   name: string;
   description?: string | null;
-  assigneeId: number;
+  assigneeId?: number;
   status?: TaskStatus;
   priority?: TaskPriority;
   position?: number;

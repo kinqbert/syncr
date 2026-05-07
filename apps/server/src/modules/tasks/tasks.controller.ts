@@ -11,7 +11,7 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
-import { PermissionKey, TaskComment } from "@syncr/packages";
+import { PermissionKey, TaskActivity, TaskComment } from "@syncr/packages";
 import { UserId } from "src/common/decorators/user-id.decorator";
 
 import { CompanyId } from "../../common/decorators/company-id.decorator";
@@ -52,9 +52,10 @@ export class TasksController {
   async createTask(
     @CompanyId() companyId: number,
     @Param("projectId", ParseIntPipe) projectId: number,
+    @UserId() userId: number,
     @Body() createTaskDto: CreateTaskDto,
   ): Promise<TaskDto> {
-    return await this.taskService.createTask(companyId, projectId, createTaskDto);
+    return await this.taskService.createTask(companyId, projectId, userId, createTaskDto);
   }
 
   @Patch("reorder")
@@ -77,9 +78,22 @@ export class TasksController {
     @CompanyId() companyId: number,
     @Param("projectId", ParseIntPipe) projectId: number,
     @Param("taskId", ParseIntPipe) taskId: number,
+    @UserId() userId: number,
     @Body() updateTaskDto: UpdateTaskDto,
   ): Promise<TaskDto> {
-    return await this.taskService.updateTask(companyId, projectId, taskId, updateTaskDto);
+    return await this.taskService.updateTask(companyId, projectId, taskId, userId, updateTaskDto);
+  }
+
+  @Get(":taskId/activities")
+  @RequirePermission(PermissionKey.TaskView)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async getTaskActivities(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+    @Param("taskId", ParseIntPipe) taskId: number,
+  ): Promise<TaskActivity[]> {
+    return await this.taskService.getTaskActivities(companyId, projectId, taskId);
   }
 
   @Get(":taskId/comments")
@@ -122,9 +136,16 @@ export class TasksController {
     @CompanyId() companyId: number,
     @Param("projectId", ParseIntPipe) projectId: number,
     @Param("taskId", ParseIntPipe) taskId: number,
+    @UserId() userId: number,
     @Body() setTaskAssigneeDto: SetTaskAssigneeDto,
   ): Promise<TaskDto> {
-    return await this.taskService.setAssignee(companyId, projectId, taskId, setTaskAssigneeDto);
+    return await this.taskService.setAssignee(
+      companyId,
+      projectId,
+      taskId,
+      userId,
+      setTaskAssigneeDto,
+    );
   }
 
   @Post(":taskId/acceptance-criteria")
@@ -135,12 +156,14 @@ export class TasksController {
     @CompanyId() companyId: number,
     @Param("projectId", ParseIntPipe) projectId: number,
     @Param("taskId", ParseIntPipe) taskId: number,
+    @UserId() userId: number,
     @Body() createAcceptanceCriterionDto: CreateTaskAcceptanceCriterionDto,
   ): Promise<TaskDto> {
     return await this.taskService.createAcceptanceCriterion(
       companyId,
       projectId,
       taskId,
+      userId,
       createAcceptanceCriterionDto,
     );
   }
@@ -154,6 +177,7 @@ export class TasksController {
     @Param("projectId", ParseIntPipe) projectId: number,
     @Param("taskId", ParseIntPipe) taskId: number,
     @Param("criterionId", ParseIntPipe) criterionId: number,
+    @UserId() userId: number,
     @Body() updateAcceptanceCriterionDto: UpdateTaskAcceptanceCriterionDto,
   ): Promise<TaskDto> {
     return await this.taskService.updateAcceptanceCriterion(
@@ -161,6 +185,7 @@ export class TasksController {
       projectId,
       taskId,
       criterionId,
+      userId,
       updateAcceptanceCriterionDto,
     );
   }
@@ -174,12 +199,14 @@ export class TasksController {
     @Param("projectId", ParseIntPipe) projectId: number,
     @Param("taskId", ParseIntPipe) taskId: number,
     @Param("criterionId", ParseIntPipe) criterionId: number,
+    @UserId() userId: number,
   ): Promise<TaskDto> {
     return await this.taskService.deleteAcceptanceCriterion(
       companyId,
       projectId,
       taskId,
       criterionId,
+      userId,
     );
   }
 

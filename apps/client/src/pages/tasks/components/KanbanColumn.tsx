@@ -2,7 +2,11 @@ import { useDroppable } from "@dnd-kit/core";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
-import type { CreateTaskBody, TaskStatus } from "@syncr/packages";
+import type {
+  CreateTaskBody,
+  ProjectAssignee,
+  TaskStatus,
+} from "@syncr/packages";
 import { useState } from "react";
 
 import { TASK_CARD_WIDTH } from "./TaskCard";
@@ -10,7 +14,7 @@ import { TaskCreateForm } from "./TaskCreateForm";
 
 export type KanbanColumn = { status: TaskStatus; label: string };
 
-type CreateTaskFormBody = Omit<CreateTaskBody, "assigneeId">;
+type CreateTaskFormBody = CreateTaskBody;
 
 type KanbanColumnProps = {
   children: React.ReactNode;
@@ -18,6 +22,7 @@ type KanbanColumnProps = {
   isCreating?: boolean;
   isDragOver?: boolean;
   onCreateTask: (body: CreateTaskFormBody) => Promise<void>;
+  projectAssignees: ProjectAssignee[];
 };
 
 const BORDER_SIZE = 2;
@@ -28,6 +33,7 @@ export const KanbanColumn = ({
   isCreating = false,
   isDragOver = false,
   onCreateTask,
+  projectAssignees,
 }: KanbanColumnProps) => {
   const { setNodeRef } = useDroppable({ id: column.status });
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -75,6 +81,7 @@ export const KanbanColumn = ({
           isCreating={isCreating}
           onClose={handleCloseForm}
           onCreateTask={onCreateTask}
+          projectAssignees={projectAssignees}
           status={column.status}
         />
       )}

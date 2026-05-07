@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { TaskPriority, TaskStatus } from "@syncr/packages";
+import { TaskActivityAction, TaskPriority, TaskStatus } from "@syncr/packages";
+import { TaskActivitiesRepository } from "src/repositories/task-activities.repository";
 import { TaskCommentsRepository } from "src/repositories/task-comments.repository";
 
 import { AcceptanceCriteriaRepository } from "../../repositories/acceptance-criteria.repository";
@@ -14,12 +15,13 @@ import {
   UpdateTaskAcceptanceCriterionDto,
   UpdateTaskDto,
 } from "./tasks.dto";
-import { mapTaskCommentToDto, mapTaskToDto } from "./tasks.mapper";
+import { mapTaskActivityToDto, mapTaskCommentToDto, mapTaskToDto } from "./tasks.mapper";
 
 @Injectable()
 export class TasksService {
   constructor(
     private readonly taskRepository: TasksRepository,
+    private readonly taskActivitiesRepository: TaskActivitiesRepository,
     private readonly taskCommentsRepository: TaskCommentsRepository,
     private readonly acceptanceCriteriaRepository: AcceptanceCriteriaRepository,
     private readonly labelsRepository: LabelsRepository,
@@ -34,9 +36,17 @@ export class TasksService {
     return tasksWithCriteria.map(mapTaskToDto);
   }
 
-  async createTask(companyId: number, projectId: number, createTaskDto: CreateTaskDto) {
+  async createTask(
+    companyId: number,
+    projectId: number,
+    userId: number,
+    createTaskDto: CreateTaskDto,
+  ) {
     await this.ensureProjectExists(projectId, companyId);
-    await this.ensureAssigneeInProject(createTaskDto.assigneeId, projectId, companyId);
+
+    if (createTaskDto.assigneeId) {
+      await this.ensureAssigneeInProject(createTaskDto.assigneeId, projectId, companyId);
+    }
 
     const status = createTaskDto.status ?? TaskStatus.Backlog;
 
@@ -47,7 +57,7 @@ export class TasksService {
       projectId,
       name: this.getValidName(createTaskDto.name),
       description: createTaskDto.description?.trim() ?? "",
-      assigneeId: createTaskDto.assigneeId,
+      assigneeId: createTaskDto.assigneeId ?? null,
       status,
       priority: createTaskDto.priority ?? TaskPriority.Medium,
       position,
@@ -62,6 +72,12 @@ export class TasksService {
       );
     }
 
+    await this.taskActivitiesRepository.createTaskActivity({
+      taskId: task.id,
+      userId,
+      action: TaskActivityAction.TaskCreated,
+    });
+
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
@@ -71,11 +87,14 @@ export class TasksService {
     companyId: number,
     projectId: number,
     taskId: number,
+    userId: number,
     updateTaskDto: UpdateTaskDto,
   ) {
-    await this.ensureTaskExists(taskId, projectId, companyId);
+    const existingTask = await this.ensureTaskExists(taskId, projectId, companyId);
 
     const updateData: Parameters<TasksRepository["updateTask"]>[1] = {};
+
+    const previousValue = existingTask.name;
 
     if (updateTaskDto.name !== undefined) {
       updateData.name = this.getValidName(updateTaskDto.name);
@@ -129,6 +148,18 @@ export class TasksService {
       await this.labelsRepository.setTaskLabels(taskId, projectId, labelNames);
     }
 
+    const activityAction = this.getUpdateActivityAction(updateTaskDto, previousValue);
+
+    if (activityAction) {
+      await this.taskActivitiesRepository.createTaskActivity({
+        taskId,
+        userId,
+        action: activityAction,
+        previousValue: activityAction === TaskActivityAction.TaskNameUpdated ? previousValue : null,
+        newValue: activityAction === TaskActivityAction.TaskNameUpdated ? task.name : null,
+      });
+    }
+
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
@@ -168,6 +199,14 @@ export class TasksService {
     return comments.map(mapTaskCommentToDto);
   }
 
+  async getTaskActivities(companyId: number, projectId: number, taskId: number) {
+    await this.ensureTaskExists(taskId, projectId, companyId);
+
+    const activities = await this.taskActivitiesRepository.getTaskActivities(taskId);
+
+    return activities.map(mapTaskActivityToDto);
+  }
+
   async createTaskComment(
     companyId: number,
     projectId: number,
@@ -183,6 +222,12 @@ export class TasksService {
       content: createTaskCommentDto.content,
     });
 
+    await this.taskActivitiesRepository.createTaskActivity({
+      taskId,
+      userId,
+      action: TaskActivityAction.TaskCommentAdded,
+    });
+
     return mapTaskCommentToDto(comment);
   }
 
@@ -190,6 +235,7 @@ export class TasksService {
     companyId: number,
     projectId: number,
     taskId: number,
+    userId: number,
     setTaskAssigneeDto: SetTaskAssigneeDto,
   ) {
     await this.ensureTaskExists(taskId, projectId, companyId);
@@ -204,6 +250,11 @@ export class TasksService {
     const task = await this.taskRepository.updateTask(taskId, {
       assigneeId: setTaskAssigneeDto.assigneeId,
     });
+    await this.taskActivitiesRepository.createTaskActivity({
+      taskId,
+      userId,
+      action: TaskActivityAction.TaskAssigneeUpdated,
+    });
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
@@ -213,6 +264,7 @@ export class TasksService {
     companyId: number,
     projectId: number,
     taskId: number,
+    userId: number,
     createAcceptanceCriterionDto: CreateTaskAcceptanceCriterionDto,
   ) {
     await this.ensureTaskExists(taskId, projectId, companyId);
@@ -230,6 +282,12 @@ export class TasksService {
       position,
     });
 
+    await this.taskActivitiesRepository.createTaskActivity({
+      taskId,
+      userId,
+      action: TaskActivityAction.AcceptanceCriterionCreated,
+    });
+
     const task = await this.taskRepository.getTask(taskId, projectId, companyId);
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
@@ -241,6 +299,7 @@ export class TasksService {
     projectId: number,
     taskId: number,
     criterionId: number,
+    userId: number,
     updateAcceptanceCriterionDto: UpdateTaskAcceptanceCriterionDto,
   ) {
     await this.ensureAcceptanceCriterionExists(criterionId, taskId, projectId, companyId);
@@ -267,6 +326,12 @@ export class TasksService {
 
     await this.acceptanceCriteriaRepository.updateAcceptanceCriterion(criterionId, updateData);
 
+    await this.taskActivitiesRepository.createTaskActivity({
+      taskId,
+      userId,
+      action: TaskActivityAction.AcceptanceCriterionUpdated,
+    });
+
     const task = await this.taskRepository.getTask(taskId, projectId, companyId);
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
@@ -278,10 +343,17 @@ export class TasksService {
     projectId: number,
     taskId: number,
     criterionId: number,
+    userId: number,
   ) {
     await this.ensureAcceptanceCriterionExists(criterionId, taskId, projectId, companyId);
 
     await this.acceptanceCriteriaRepository.deleteAcceptanceCriterion(criterionId);
+
+    await this.taskActivitiesRepository.createTaskActivity({
+      taskId,
+      userId,
+      action: TaskActivityAction.AcceptanceCriterionDeleted,
+    });
 
     const task = await this.taskRepository.getTask(taskId, projectId, companyId);
     const [taskWithCriteria] = await this.withTaskRelations([task]);
@@ -371,7 +443,11 @@ export class TasksService {
 
     return tasks.map((task) => ({
       ...task,
-      labels: (labelsByTaskId.get(task.id) ?? []).map(({ taskId, ...label }) => label),
+      labels: (labelsByTaskId.get(task.id) ?? []).map((label) => ({
+        id: label.id,
+        projectId: label.projectId,
+        name: label.name,
+      })),
     }));
   }
 
@@ -437,5 +513,47 @@ export class TasksService {
     const names = labelNames.map((name) => name.trim().toLowerCase()).filter(Boolean);
 
     return [...new Set(names)];
+  }
+
+  private getUpdateActivityAction(updateTaskDto: UpdateTaskDto, previousValue: string) {
+    const updatedActions: TaskActivityAction[] = [];
+
+    if (updateTaskDto.name !== undefined && updateTaskDto.name.trim() !== previousValue) {
+      updatedActions.push(TaskActivityAction.TaskNameUpdated);
+    }
+
+    if (updateTaskDto.description !== undefined) {
+      updatedActions.push(TaskActivityAction.TaskDescriptionUpdated);
+    }
+
+    if (updateTaskDto.assigneeId !== undefined) {
+      updatedActions.push(TaskActivityAction.TaskAssigneeUpdated);
+    }
+
+    if (updateTaskDto.status !== undefined) {
+      updatedActions.push(TaskActivityAction.TaskStatusUpdated);
+    }
+
+    if (updateTaskDto.priority !== undefined) {
+      updatedActions.push(TaskActivityAction.TaskPriorityUpdated);
+    }
+
+    if (updateTaskDto.endDate !== undefined) {
+      updatedActions.push(TaskActivityAction.TaskDeadlineUpdated);
+    }
+
+    if (updateTaskDto.labelNames !== undefined) {
+      updatedActions.push(TaskActivityAction.TaskLabelsUpdated);
+    }
+
+    if (updatedActions.length === 0) {
+      return null;
+    }
+
+    return updatedActions.includes(TaskActivityAction.TaskNameUpdated)
+      ? TaskActivityAction.TaskNameUpdated
+      : updatedActions.length === 1
+        ? updatedActions[0]
+        : TaskActivityAction.TaskUpdated;
   }
 }

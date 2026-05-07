@@ -103,7 +103,7 @@ export const TaskDetailsPage = () => {
             task={task}
           />
 
-          <TaskActivityPanel />
+          <TaskActivityPanel projectId={numericProjectId} taskId={task.id} />
         </Stack>
       </Box>
     </Stack>
