@@ -1,6 +1,7 @@
 import {
   Autocomplete,
   Avatar,
+  Button,
   Chip,
   MenuItem,
   Stack,
@@ -17,12 +18,16 @@ import {
   TaskStatus,
   type UpdateTaskBody,
 } from "@syncr/packages";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import { useSetTaskAssignee, useUpdateTask } from "@/api/tasks";
+import { useUpdateTask } from "@/api/tasks";
+import { formatDuration } from "@/utils/formatDuration";
 import { getErrorMessage } from "@/utils/getErrorMessage";
+import { getUserFullName } from "@/utils/getUserFullName";
+import { getUserInitials } from "@/utils/getUserInitials";
 
 import { Panel } from "../../../components/Panel";
+import { toDateInputValue } from "../utils/format";
 
 type TaskDetailsPanelProps = {
   isAssigneesPending: boolean;
@@ -33,16 +38,58 @@ type TaskDetailsPanelProps = {
   task: Task;
 };
 
-const toDateInputValue = (value: string | null) => {
-  return value ? value.slice(0, 10) : "";
+const getChangedFields = (task: Task, form: FormState): UpdateTaskBody => {
+  const estimate = Number(form.estimateMinutes);
+
+  const body: UpdateTaskBody = {};
+
+  if ((task.assignee?.id ?? null) !== form.assigneeId) {
+    body.assigneeId = form.assigneeId;
+  }
+
+  if (form.priority !== task.priority) {
+    body.priority = form.priority;
+  }
+
+  if (form.status !== task.status) {
+    body.status = form.status;
+  }
+
+  if (form.endDate !== toDateInputValue(task.endDate)) {
+    body.endDate = form.endDate || null;
+  }
+
+  if ((estimate === 0 ? null : estimate) !== task.estimateMinutes) {
+    body.estimateMinutes = estimate === 0 ? null : estimate;
+  }
+
+  const originalLabels = task.labels.map((label) => label.name).sort();
+
+  const currentLabels = [...form.labelNames].sort();
+
+  if (JSON.stringify(originalLabels) !== JSON.stringify(currentLabels)) {
+    body.labelNames = form.labelNames;
+  }
+
+  return body;
 };
 
-const getUserInitials = (name: string, surname: string) => {
-  return `${name.charAt(0)}${surname.charAt(0)}`.toUpperCase();
-};
+const createFormState = (task: Task): FormState => ({
+  assigneeId: task.assignee?.id ?? null,
+  priority: task.priority,
+  endDate: toDateInputValue(task.endDate),
+  estimateMinutes: String(task.estimateMinutes ?? 0),
+  status: task.status,
+  labelNames: task.labels.map((label) => label.name),
+});
 
-const getUserName = (name: string, surname: string) => {
-  return `${name} ${surname}`.trim();
+type FormState = {
+  assigneeId: number | null;
+  priority: TaskPriority;
+  endDate: string;
+  estimateMinutes: string;
+  status: TaskStatus;
+  labelNames: string[];
 };
 
 export const TaskDetailsPanel = ({
@@ -54,41 +101,35 @@ export const TaskDetailsPanel = ({
   task,
 }: TaskDetailsPanelProps) => {
   const updateTask = useUpdateTask();
-  const setTaskAssignee = useSetTaskAssignee();
-  const [error, setError] = useState<string | null>(null);
-  const assignee = projectAssignees.find(
-    (user) => user.id === task.assignee?.id,
-  );
 
-  const saveTask = async (body: UpdateTaskBody) => {
+  const [error, setError] = useState<string | null>(null);
+  const initialState: FormState = useMemo(() => createFormState(task), [task]);
+
+  const [form, setForm] = useState<FormState>(initialState);
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(initialState);
+  const handleSave = async () => {
     setError(null);
 
-    try {
-      await updateTask.mutateAsync({
-        projectId,
-        taskId: task.id,
-        body,
-      });
-    } catch (saveError) {
-      setError(getErrorMessage(saveError, "Could not update task."));
-    }
-  };
+    const estimate = Number(form.estimateMinutes);
 
-  const saveAssignee = async (assigneeId: number | null) => {
-    if ((task.assignee?.id ?? null) === assigneeId) {
+    if (estimate && estimate % 15 !== 0) {
+      setError("Estimate must be divisible by 15 minutes.");
       return;
     }
 
-    setError(null);
-
     try {
-      await setTaskAssignee.mutateAsync({
-        projectId,
-        taskId: task.id,
-        body: { assigneeId },
-      });
+      const body = getChangedFields(task, form);
+
+      if (Object.keys(body).length > 0) {
+        await updateTask.mutateAsync({
+          projectId,
+          taskId: task.id,
+          body,
+        });
+      }
     } catch (saveError) {
-      setError(getErrorMessage(saveError, "Could not update task assignee."));
+      setError(getErrorMessage(saveError, "Could not update task."));
     }
   };
 
@@ -96,47 +137,51 @@ export const TaskDetailsPanel = ({
     <Panel>
       <Stack gap={2}>
         <Typography variant="subtitle1">Details</Typography>
+
         {error && (
           <Typography color="error" variant="body2">
             {error}
           </Typography>
         )}
+
         <Stack gap={1}>
           <Typography color="text.secondary" variant="caption">
             Assigned To
           </Typography>
+
           <TextField
-            disabled={isAssigneesPending || setTaskAssignee.isPending}
+            disabled={isAssigneesPending}
             helperText={
               projectAssignees.length === 0
                 ? "No users are assigned to this project."
                 : undefined
             }
             onChange={(event) =>
-              void saveAssignee(
-                event.target.value ? Number(event.target.value) : null,
-              )
+              setForm((prev) => ({
+                ...prev,
+                assigneeId: event.target.value
+                  ? Number(event.target.value)
+                  : null,
+              }))
             }
             select
             size="small"
-            value={task.assignee?.id ?? ""}
+            value={form.assigneeId ?? ""}
           >
             <MenuItem value="">Unassigned</MenuItem>
-            {task.assignee && !assignee ? (
-              <MenuItem disabled value={task.assignee.id}>
-                {getUserName(task.assignee.name, task.assignee.surname)}
-              </MenuItem>
-            ) : null}
+
             {projectAssignees.map((user) => (
               <MenuItem key={user.id} value={user.id}>
                 <Stack alignItems="center" direction="row" gap={1.25}>
                   <Avatar sx={{ height: 28, width: 28 }}>
                     {getUserInitials(user.name, user.surname)}
                   </Avatar>
+
                   <Stack minWidth={0}>
                     <Typography variant="body2">
-                      {getUserName(user.name, user.surname)}
+                      {getUserFullName(user.name, user.surname)}
                     </Typography>
+
                     <Typography color="text.secondary" variant="caption">
                       {user.email}
                     </Typography>
@@ -150,13 +195,14 @@ export const TaskDetailsPanel = ({
         <TextField
           label="Priority"
           onChange={(event) =>
-            void saveTask({
+            setForm((prev) => ({
+              ...prev,
               priority: event.target.value as TaskPriority,
-            })
+            }))
           }
           select
           size="small"
-          value={task.priority}
+          value={form.priority}
         >
           {(Object.values(TaskPriority) as TaskPriority[]).map((priority) => (
             <MenuItem key={priority} value={priority}>
@@ -168,22 +214,48 @@ export const TaskDetailsPanel = ({
         <TextField
           label="Deadline"
           onChange={(event) =>
-            void saveTask({ endDate: event.target.value || null })
+            setForm((prev) => ({
+              ...prev,
+              endDate: event.target.value,
+            }))
           }
           size="small"
           slotProps={{ inputLabel: { shrink: true } }}
           type="date"
-          value={toDateInputValue(task.endDate)}
+          value={form.endDate}
+        />
+
+        <TextField
+          label="Estimate (minutes)"
+          helperText={formatDuration(Number(form.estimateMinutes) || 0)}
+          onChange={(event) =>
+            setForm((prev) => ({
+              ...prev,
+              estimateMinutes: event.target.value,
+            }))
+          }
+          size="small"
+          slotProps={{
+            htmlInput: {
+              min: 0,
+              step: 15,
+            },
+          }}
+          type="number"
+          value={form.estimateMinutes}
         />
 
         <TextField
           label="Status"
           onChange={(event) =>
-            void saveTask({ status: event.target.value as TaskStatus })
+            setForm((prev) => ({
+              ...prev,
+              status: event.target.value as TaskStatus,
+            }))
           }
           select
           size="small"
-          value={task.status}
+          value={form.status}
         >
           {(Object.values(TaskStatus) as TaskStatus[]).map((status) => (
             <MenuItem key={status} value={status}>
@@ -196,9 +268,10 @@ export const TaskDetailsPanel = ({
           <Typography color="text.secondary" variant="caption">
             Labels
           </Typography>
+
           <Autocomplete<ProjectLabel, true, false, true>
             autoSelect
-            disabled={isLabelsPending || updateTask.isPending}
+            disabled={isLabelsPending}
             filterSelectedOptions
             freeSolo
             getOptionLabel={(option) =>
@@ -209,17 +282,18 @@ export const TaskDetailsPanel = ({
             }
             multiple
             onChange={(_, value) =>
-              void saveTask({
+              setForm((prev) => ({
+                ...prev,
                 labelNames: value.map((option) =>
                   typeof option === "string" ? option : option.name,
                 ),
-              })
+              }))
             }
             options={projectLabels}
             renderInput={(params) => (
               <TextField
                 {...params}
-                placeholder={task.labels.length === 0 ? "Add label" : ""}
+                placeholder={form.labelNames.length === 0 ? "Add label" : ""}
                 size="small"
               />
             )}
@@ -238,9 +312,19 @@ export const TaskDetailsPanel = ({
               })
             }
             size="small"
-            value={task.labels}
+            value={form.labelNames}
           />
         </Stack>
+
+        {isDirty && (
+          <Button
+            disabled={updateTask.isPending}
+            onClick={() => void handleSave()}
+            variant="contained"
+          >
+            Save Changes
+          </Button>
+        )}
       </Stack>
     </Panel>
   );

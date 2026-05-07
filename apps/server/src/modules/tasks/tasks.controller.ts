@@ -23,7 +23,6 @@ import {
   CreateTaskCommentDto,
   CreateTaskDto,
   ReorderTasksDto,
-  SetTaskAssigneeDto,
   TaskDto,
   UpdateTaskAcceptanceCriterionDto,
   UpdateTaskDto,
@@ -125,26 +124,6 @@ export class TasksController {
       taskId,
       userId,
       createTaskCommentDto,
-    );
-  }
-
-  @Patch(":taskId/set-assignee")
-  @RequirePermission(PermissionKey.TaskAssign)
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @HttpCode(HttpStatus.OK)
-  async setAssignee(
-    @CompanyId() companyId: number,
-    @Param("projectId", ParseIntPipe) projectId: number,
-    @Param("taskId", ParseIntPipe) taskId: number,
-    @UserId() userId: number,
-    @Body() setTaskAssigneeDto: SetTaskAssigneeDto,
-  ): Promise<TaskDto> {
-    return await this.taskService.setAssignee(
-      companyId,
-      projectId,
-      taskId,
-      userId,
-      setTaskAssigneeDto,
     );
   }
 

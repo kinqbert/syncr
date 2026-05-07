@@ -141,6 +141,7 @@ export const tasks = pgTable("tasks", {
   priority: taskPriorityEnum().notNull().default(TaskPriority.Medium),
   position: integer().notNull().default(0),
   endDate: timestamp(),
+  estimateMinutes: integer(),
 });
 
 export const taskAcceptanceCriteria = pgTable("task_acceptance_criteria", {

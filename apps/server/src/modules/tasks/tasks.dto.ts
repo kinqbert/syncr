@@ -4,7 +4,6 @@ import {
   CreateTaskCommentBody,
   ReorderTaskItem,
   ReorderTasksBody,
-  SetTaskAssigneeBody,
   Task,
   TaskAcceptanceCriterion,
   TaskActivity,
@@ -22,6 +21,7 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
+  IsDivisibleBy,
   IsEnum,
   IsInt,
   IsOptional,
@@ -153,6 +153,10 @@ export class TaskDto implements Task {
   @IsDateString()
   @IsOptional()
   endDate: string | null;
+
+  @IsInt()
+  @IsOptional()
+  estimateMinutes: number | null;
 }
 
 export class CreateTaskDto implements CreateTaskBody {
@@ -183,6 +187,12 @@ export class CreateTaskDto implements CreateTaskBody {
   @IsDateString()
   @IsOptional()
   endDate?: string | null;
+
+  @IsInt()
+  @IsDivisibleBy(15)
+  @Min(0)
+  @IsOptional()
+  estimateMinutes?: number | null;
 
   @IsArray()
   @IsString({ each: true })
@@ -220,6 +230,12 @@ export class UpdateTaskDto implements UpdateTaskBody {
   @IsOptional()
   endDate?: string | null;
 
+  @IsInt()
+  @IsDivisibleBy(15)
+  @Min(0)
+  @IsOptional()
+  estimateMinutes?: number | null;
+
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
@@ -243,12 +259,6 @@ export class ReorderTasksDto implements ReorderTasksBody {
   @ValidateNested({ each: true })
   @Type(() => ReorderTaskItemDto)
   tasks: ReorderTaskItemDto[];
-}
-
-export class SetTaskAssigneeDto implements SetTaskAssigneeBody {
-  @IsInt()
-  @IsOptional()
-  assigneeId: number | null;
 }
 
 export class CreateTaskCommentDto implements CreateTaskCommentBody {

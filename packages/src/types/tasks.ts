@@ -72,6 +72,7 @@ export const TaskActivityAction = {
   TaskStatusUpdated: "task_status_updated",
   TaskPriorityUpdated: "task_priority_updated",
   TaskDeadlineUpdated: "task_deadline_updated",
+  TaskEstimateUpdated: "task_estimate_updated",
   TaskLabelsUpdated: "task_labels_updated",
   TaskCommentAdded: "task_comment_added",
   AcceptanceCriterionCreated: "acceptance_criterion_created",
@@ -106,6 +107,7 @@ export type Task = {
   priority: TaskPriority;
   position: number;
   endDate: string | null;
+  estimateMinutes: number | null;
 };
 
 export type CreateTaskBody = {
@@ -116,6 +118,7 @@ export type CreateTaskBody = {
   priority?: TaskPriority;
   position?: number;
   endDate?: string | null;
+  estimateMinutes?: number | null;
   labelNames?: string[];
 };
 
@@ -127,6 +130,7 @@ export type UpdateTaskBody = {
   priority?: TaskPriority;
   position?: number;
   endDate?: string | null;
+  estimateMinutes?: number | null;
   labelNames?: string[];
 };
 
@@ -138,10 +142,6 @@ export type ReorderTaskItem = {
 
 export type ReorderTasksBody = {
   tasks: ReorderTaskItem[];
-};
-
-export type SetTaskAssigneeBody = {
-  assigneeId: number | null;
 };
 
 export type CreateTaskAcceptanceCriterionBody = {

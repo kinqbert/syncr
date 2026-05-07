@@ -3,7 +3,6 @@ import type {
   CreateTaskBody,
   CreateTaskCommentBody,
   ReorderTasksBody,
-  SetTaskAssigneeBody,
   Task,
   TaskActivity,
   TaskComment,
@@ -16,13 +15,45 @@ import api from "@/lib/axios";
 import { queryClient } from "@/lib/react-query";
 
 export const taskKeys = {
-  projectTasks: (projectId: number) =>
-    ["projects", projectId, "tasks"] as const,
-  taskComments: (projectId: number, taskId: number) =>
-    ["projects", projectId, "tasks", taskId, "comments"] as const,
-  taskActivities: (projectId: number, taskId: number) =>
-    ["projects", projectId, "tasks", taskId, "activities"] as const,
+  all: ["tasks"] as const,
+
+  project: (projectId: number) =>
+    [...taskKeys.all, "project", projectId] as const,
+
+  lists: (projectId: number) =>
+    [...taskKeys.project(projectId), "list"] as const,
+
+  detail: (projectId: number, taskId: number) =>
+    [...taskKeys.project(projectId), taskId] as const,
+
+  comments: (projectId: number, taskId: number) =>
+    [...taskKeys.detail(projectId, taskId), "comments"] as const,
+
+  activities: (projectId: number, taskId: number) =>
+    [...taskKeys.detail(projectId, taskId), "activities"] as const,
 };
+
+// HELPERS
+
+const handleTaskMutationSuccess = ({
+  updatedTask,
+  projectId,
+  taskId,
+}: {
+  updatedTask: Task;
+  projectId: number;
+  taskId: number;
+}) => {
+  queryClient.setQueryData<Task[]>(taskKeys.lists(projectId), (tasks = []) =>
+    tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
+  );
+
+  void queryClient.invalidateQueries({
+    queryKey: taskKeys.activities(projectId, taskId),
+  });
+};
+
+// API CALLS
 
 const getProjectTasks = async (projectId: number) => {
   const response = await api.get<Task[]>(`projects/${projectId}/tasks`);
@@ -68,23 +99,6 @@ const reorderTasks = async ({
 }) => {
   const response = await api.patch<Task[]>(
     `projects/${projectId}/tasks/reorder`,
-    body,
-  );
-
-  return response.data;
-};
-
-const setTaskAssignee = async ({
-  projectId,
-  taskId,
-  body,
-}: {
-  projectId: number;
-  taskId: number;
-  body: SetTaskAssigneeBody;
-}) => {
-  const response = await api.patch<Task>(
-    `projects/${projectId}/tasks/${taskId}/set-assignee`,
     body,
   );
 
@@ -198,20 +212,6 @@ const getTaskActivities = async ({
   return response.data;
 };
 
-const updateTaskInProjectCache = (projectId: number, updatedTask: Task) => {
-  queryClient.setQueryData<Task[]>(
-    taskKeys.projectTasks(projectId),
-    (tasks = []) =>
-      tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
-  );
-};
-
-const invalidateTaskActivities = (projectId: number, taskId: number) => {
-  void queryClient.invalidateQueries({
-    queryKey: taskKeys.taskActivities(projectId, taskId),
-  });
-};
-
 const invalidateProjectLabels = (projectId: number) => {
   void queryClient.invalidateQueries({
     queryKey: ["projects", projectId, "labels"] as const,
@@ -222,16 +222,16 @@ export const useGetProjectTasks = (projectId: number, enabled = true) => {
   return useQuery({
     enabled,
     queryFn: () => getProjectTasks(projectId),
-    queryKey: taskKeys.projectTasks(projectId),
+    queryKey: taskKeys.lists(projectId),
   });
 };
 
 export const useCreateTask = () => {
   return useMutation({
     mutationFn: createTask,
-    onSuccess: (_task, variables) => {
+    onSuccess: (_task, { projectId }) => {
       void queryClient.invalidateQueries({
-        queryKey: taskKeys.projectTasks(variables.projectId),
+        queryKey: taskKeys.lists(projectId),
       });
     },
   });
@@ -240,12 +240,15 @@ export const useCreateTask = () => {
 export const useUpdateTask = () => {
   return useMutation({
     mutationFn: updateTask,
-    onSuccess: (updatedTask, variables) => {
-      updateTaskInProjectCache(variables.projectId, updatedTask);
-      invalidateTaskActivities(variables.projectId, variables.taskId);
+    onSuccess: (updatedTask, { projectId, taskId, body }) => {
+      handleTaskMutationSuccess({
+        updatedTask,
+        projectId: projectId,
+        taskId: taskId,
+      });
 
-      if (variables.body.labelNames) {
-        invalidateProjectLabels(variables.projectId);
+      if (body.labelNames) {
+        invalidateProjectLabels(projectId);
       }
     },
   });
@@ -255,17 +258,7 @@ export const useReorderTasks = () => {
   return useMutation({
     mutationFn: reorderTasks,
     onSuccess: (tasks, variables) => {
-      queryClient.setQueryData(taskKeys.projectTasks(variables.projectId), tasks);
-    },
-  });
-};
-
-export const useSetTaskAssignee = () => {
-  return useMutation({
-    mutationFn: setTaskAssignee,
-    onSuccess: (updatedTask, variables) => {
-      updateTaskInProjectCache(variables.projectId, updatedTask);
-      invalidateTaskActivities(variables.projectId, variables.taskId);
+      queryClient.setQueryData(taskKeys.lists(variables.projectId), tasks);
     },
   });
 };
@@ -273,6 +266,16 @@ export const useSetTaskAssignee = () => {
 export const useDeleteTask = () => {
   return useMutation({
     mutationFn: deleteTask,
+    onSuccess: (_, variables) => {
+      queryClient.setQueryData<Task[]>(
+        taskKeys.lists(variables.projectId),
+        (tasks = []) => tasks.filter((task) => task.id !== variables.taskId),
+      );
+
+      queryClient.removeQueries({
+        queryKey: taskKeys.detail(variables.projectId, variables.taskId),
+      });
+    },
   });
 };
 
@@ -280,8 +283,11 @@ export const useCreateTaskAcceptanceCriterion = () => {
   return useMutation({
     mutationFn: createTaskAcceptanceCriterion,
     onSuccess: (updatedTask, variables) => {
-      updateTaskInProjectCache(variables.projectId, updatedTask);
-      invalidateTaskActivities(variables.projectId, variables.taskId);
+      handleTaskMutationSuccess({
+        updatedTask,
+        projectId: variables.projectId,
+        taskId: variables.taskId,
+      });
     },
   });
 };
@@ -290,8 +296,11 @@ export const useUpdateTaskAcceptanceCriterion = () => {
   return useMutation({
     mutationFn: updateTaskAcceptanceCriterion,
     onSuccess: (updatedTask, variables) => {
-      updateTaskInProjectCache(variables.projectId, updatedTask);
-      invalidateTaskActivities(variables.projectId, variables.taskId);
+      handleTaskMutationSuccess({
+        updatedTask,
+        projectId: variables.projectId,
+        taskId: variables.taskId,
+      });
     },
   });
 };
@@ -300,8 +309,11 @@ export const useDeleteTaskAcceptanceCriterion = () => {
   return useMutation({
     mutationFn: deleteTaskAcceptanceCriterion,
     onSuccess: (updatedTask, variables) => {
-      updateTaskInProjectCache(variables.projectId, updatedTask);
-      invalidateTaskActivities(variables.projectId, variables.taskId);
+      handleTaskMutationSuccess({
+        updatedTask,
+        projectId: variables.projectId,
+        taskId: variables.taskId,
+      });
     },
   });
 };
@@ -314,19 +326,21 @@ export const useGetTaskComments = (
   return useQuery({
     enabled,
     queryFn: () => getTaskComments({ projectId, taskId }),
-    queryKey: taskKeys.taskComments(projectId, taskId),
+    queryKey: taskKeys.comments(projectId, taskId),
   });
 };
 
 export const useCreateTaskComment = () => {
   return useMutation({
     mutationFn: createTaskComment,
-    onSuccess: (createdComment, variables) => {
+    onSuccess: (createdComment, { projectId, taskId }) => {
       queryClient.setQueryData<TaskComment[]>(
-        taskKeys.taskComments(variables.projectId, variables.taskId),
+        taskKeys.comments(projectId, taskId),
         (currentComments = []) => [...currentComments, createdComment],
       );
-      invalidateTaskActivities(variables.projectId, variables.taskId);
+      queryClient.invalidateQueries({
+        queryKey: taskKeys.activities(projectId, taskId),
+      });
     },
   });
 };
@@ -339,6 +353,6 @@ export const useGetTaskActivities = (
   return useQuery({
     enabled,
     queryFn: () => getTaskActivities({ projectId, taskId }),
-    queryKey: taskKeys.taskActivities(projectId, taskId),
+    queryKey: taskKeys.activities(projectId, taskId),
   });
 };

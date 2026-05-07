@@ -12,7 +12,6 @@ import { useGetProjectAssignees, useGetProjectLabels } from "@/api/projects";
 import { useGetProjectTasks } from "@/api/tasks";
 
 import { TaskActivityPanel } from "./components/TaskActivityPanel";
-import { TaskAttachmentsPanel } from "./components/TaskAttachmentsPanel";
 import { TaskCommentsPanel } from "./components/TaskCommentsPanel";
 import { TaskDetailsPanel } from "./components/TaskDetailsPanel";
 import { TaskOverviewPanel } from "./components/TaskOverviewPanel";
@@ -87,8 +86,6 @@ export const TaskDetailsPage = () => {
       >
         <Stack gap={2.25} minWidth={0}>
           <TaskOverviewPanel projectId={numericProjectId} task={task} />
-
-          <TaskAttachmentsPanel />
 
           <TaskCommentsPanel projectId={numericProjectId} taskId={task.id} />
         </Stack>

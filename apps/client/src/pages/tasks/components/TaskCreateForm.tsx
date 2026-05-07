@@ -17,6 +17,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { getErrorMessage } from "@/utils/getErrorMessage";
+import { getUserFullName } from "@/utils/getUserFullName";
 
 type TaskFormState = {
   name: string;
@@ -26,12 +27,10 @@ type TaskFormState = {
   endDate: string;
 };
 
-type CreateTaskFormBody = CreateTaskBody;
-
 type TaskCreateFormProps = {
   isCreating: boolean;
   onClose: () => void;
-  onCreateTask: (body: CreateTaskFormBody) => Promise<void>;
+  onCreateTask: (body: CreateTaskBody) => Promise<void>;
   projectAssignees: ProjectAssignee[];
   status: TaskStatus;
 };
@@ -43,10 +42,6 @@ const createDefaultFormState = (): TaskFormState => ({
   priority: "medium",
   endDate: "",
 });
-
-const getUserName = (user: Pick<ProjectAssignee, "name" | "surname">) => {
-  return `${user.name} ${user.surname}`.trim();
-};
 
 export const TaskCreateForm = ({
   isCreating,
@@ -164,7 +159,7 @@ export const TaskCreateForm = ({
                 <MenuItem value="">Unassigned</MenuItem>
                 {projectAssignees.map((assignee) => (
                   <MenuItem key={assignee.id} value={String(assignee.id)}>
-                    {getUserName(assignee)}
+                    {getUserFullName(assignee.name, assignee.surname)}
                   </MenuItem>
                 ))}
               </TextField>

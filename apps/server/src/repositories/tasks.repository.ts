@@ -19,6 +19,7 @@ const taskWithAssigneeColumns = {
   priority: tasks.priority,
   position: tasks.position,
   endDate: tasks.endDate,
+  estimateMinutes: tasks.estimateMinutes,
 };
 
 @Injectable()

@@ -28,6 +28,10 @@ export class TaskActivitiesRepository {
     return this.getTaskActivity(activity.id);
   }
 
+  async createTaskActivities(data: (typeof taskActivities.$inferInsert)[]) {
+    await db.insert(taskActivities).values(data).returning();
+  }
+
   async getTaskActivity(activityId: number) {
     const [activity] = await db
       .select(taskActivityColumns)

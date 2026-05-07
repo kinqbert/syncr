@@ -1,3 +1,4 @@
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PersonOffOutlinedIcon from "@mui/icons-material/PersonOffOutlined";
@@ -15,6 +16,9 @@ import type { Task } from "@syncr/packages";
 import { Link as RouterLink } from "react-router";
 
 import { formatDate } from "@/utils/formatDate";
+import { formatDuration } from "@/utils/formatDuration";
+import { getUserFullName } from "@/utils/getUserFullName";
+import { getUserInitials } from "@/utils/getUserInitials";
 
 type TaskCardProps = {
   detailsPath?: string;
@@ -43,20 +47,12 @@ const formatPriority = (priority: Task["priority"]) => {
   return priority.charAt(0).toUpperCase() + priority.slice(1);
 };
 
-const getUserInitials = (name: string, surname: string) => {
-  return `${name.charAt(0)}${surname.charAt(0)}`.toUpperCase();
-};
-
-const getUserName = (name: string, surname: string) => {
-  return `${name} ${surname}`.trim();
-};
-
 export const TASK_CARD_WIDTH = 320;
 
 export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
   const priorityColor = priorityColorByValue[task.priority];
   const assigneeName = task.assignee
-    ? getUserName(task.assignee.name, task.assignee.surname)
+    ? getUserFullName(task.assignee.name, task.assignee.surname)
     : "Unassigned";
 
   return (
@@ -121,8 +117,8 @@ export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
         </Stack>
 
         <Stack
-          direction="row"
-          alignItems="center"
+          direction="column"
+          alignItems="start"
           justifyContent="space-between"
           gap={1.5}
         >
@@ -147,7 +143,6 @@ export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
               {assigneeName}
             </Typography>
           </Stack>
-
           <Stack direction="row" alignItems="center" gap={1.5} flexShrink={0}>
             <Chip
               label={formatPriority(task.priority)}
@@ -158,6 +153,14 @@ export const TaskCard = ({ detailsPath, task }: TaskCardProps) => {
                 fontWeight: 700,
               }}
             />
+            <Stack direction="row" alignItems="center" gap={0.5}>
+              <AccessTimeOutlinedIcon
+                sx={{ color: "text.secondary", fontSize: 18 }}
+              />
+              <Typography color="text.secondary">
+                {formatDuration(task.estimateMinutes)}
+              </Typography>
+            </Stack>
             <Stack direction="row" alignItems="center" gap={0.5}>
               <CalendarTodayOutlinedIcon
                 sx={{ color: "text.secondary", fontSize: 18 }}

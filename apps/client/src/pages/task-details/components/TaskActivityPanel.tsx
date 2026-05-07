@@ -2,6 +2,7 @@ import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { type TaskActivity, TaskActivityAction } from "@syncr/packages";
 
 import { useGetTaskActivities } from "@/api/tasks";
+import { formatDuration } from "@/utils/formatDuration";
 
 import { Panel } from "../../../components/Panel";
 
@@ -19,6 +20,7 @@ const ACTIVITY_LABEL: Record<TaskActivityAction, string> = {
   [TaskActivityAction.TaskStatusUpdated]: "Status updated",
   [TaskActivityAction.TaskPriorityUpdated]: "Priority updated",
   [TaskActivityAction.TaskDeadlineUpdated]: "Deadline updated",
+  [TaskActivityAction.TaskEstimateUpdated]: "Estimate updated",
   [TaskActivityAction.TaskLabelsUpdated]: "Labels updated",
   [TaskActivityAction.TaskCommentAdded]: "Comment added",
   [TaskActivityAction.AcceptanceCriterionCreated]: "Acceptance criterion added",
@@ -53,6 +55,19 @@ const getTitleChangeText = (activity: TaskActivity) => {
   return `"${activity.previousValue}" to "${activity.newValue}"`;
 };
 
+const getEstimateChangeText = (activity: TaskActivity) => {
+  if (activity.action !== TaskActivityAction.TaskEstimateUpdated) {
+    return null;
+  }
+
+  const previousValue = activity.previousValue
+    ? Number(activity.previousValue)
+    : null;
+  const newValue = activity.newValue ? Number(activity.newValue) : null;
+
+  return `${formatDuration(previousValue)} to ${formatDuration(newValue)}`;
+};
+
 export const TaskActivityPanel = ({
   projectId,
   taskId,
@@ -82,9 +97,14 @@ export const TaskActivityPanel = ({
         {activities.map((activity) => {
           const finalTextArr = [ACTIVITY_LABEL[activity.action]];
           const titleChangeText = getTitleChangeText(activity);
+          const estimateChangeText = getEstimateChangeText(activity);
 
           if (titleChangeText) {
             finalTextArr.push(titleChangeText);
+          }
+
+          if (estimateChangeText) {
+            finalTextArr.push(estimateChangeText);
           }
 
           return (

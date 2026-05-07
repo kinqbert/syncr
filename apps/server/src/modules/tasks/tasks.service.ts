@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { TaskActivityAction, TaskPriority, TaskStatus } from "@syncr/packages";
+import { taskActivities } from "src/db/schema";
 import { TaskActivitiesRepository } from "src/repositories/task-activities.repository";
 import { TaskCommentsRepository } from "src/repositories/task-comments.repository";
 
@@ -11,7 +12,6 @@ import {
   CreateTaskCommentDto,
   CreateTaskDto,
   ReorderTasksDto,
-  SetTaskAssigneeDto,
   UpdateTaskAcceptanceCriterionDto,
   UpdateTaskDto,
 } from "./tasks.dto";
@@ -62,6 +62,10 @@ export class TasksService {
       priority: createTaskDto.priority ?? TaskPriority.Medium,
       position,
       endDate: createTaskDto.endDate ? this.getValidDate(createTaskDto.endDate, "End date") : null,
+      estimateMinutes:
+        createTaskDto.estimateMinutes !== undefined
+          ? this.getValidEstimateMinutes(createTaskDto.estimateMinutes)
+          : null,
     });
 
     if (createTaskDto.labelNames !== undefined) {
@@ -93,8 +97,6 @@ export class TasksService {
     const existingTask = await this.ensureTaskExists(taskId, projectId, companyId);
 
     const updateData: Parameters<TasksRepository["updateTask"]>[1] = {};
-
-    const previousValue = existingTask.name;
 
     if (updateTaskDto.name !== undefined) {
       updateData.name = this.getValidName(updateTaskDto.name);
@@ -130,6 +132,10 @@ export class TasksService {
         : null;
     }
 
+    if (updateTaskDto.estimateMinutes !== undefined) {
+      updateData.estimateMinutes = this.getValidEstimateMinutes(updateTaskDto.estimateMinutes);
+    }
+
     const labelNames =
       updateTaskDto.labelNames !== undefined
         ? this.getValidLabelNames(updateTaskDto.labelNames)
@@ -148,16 +154,10 @@ export class TasksService {
       await this.labelsRepository.setTaskLabels(taskId, projectId, labelNames);
     }
 
-    const activityAction = this.getUpdateActivityAction(updateTaskDto, previousValue);
+    const activityActions = this.getUpdateActivitiesAction(userId, updateTaskDto, existingTask);
 
-    if (activityAction) {
-      await this.taskActivitiesRepository.createTaskActivity({
-        taskId,
-        userId,
-        action: activityAction,
-        previousValue: activityAction === TaskActivityAction.TaskNameUpdated ? previousValue : null,
-        newValue: activityAction === TaskActivityAction.TaskNameUpdated ? task.name : null,
-      });
+    if (activityActions) {
+      await this.taskActivitiesRepository.createTaskActivities(activityActions);
     }
 
     const [taskWithCriteria] = await this.withTaskRelations([task]);
@@ -229,35 +229,6 @@ export class TasksService {
     });
 
     return mapTaskCommentToDto(comment);
-  }
-
-  async setAssignee(
-    companyId: number,
-    projectId: number,
-    taskId: number,
-    userId: number,
-    setTaskAssigneeDto: SetTaskAssigneeDto,
-  ) {
-    await this.ensureTaskExists(taskId, projectId, companyId);
-    if (setTaskAssigneeDto.assigneeId === undefined) {
-      throw new BadRequestException("Task assignee field is required");
-    }
-
-    if (setTaskAssigneeDto.assigneeId !== null) {
-      await this.ensureAssigneeInProject(setTaskAssigneeDto.assigneeId, projectId, companyId);
-    }
-
-    const task = await this.taskRepository.updateTask(taskId, {
-      assigneeId: setTaskAssigneeDto.assigneeId,
-    });
-    await this.taskActivitiesRepository.createTaskActivity({
-      taskId,
-      userId,
-      action: TaskActivityAction.TaskAssigneeUpdated,
-    });
-    const [taskWithCriteria] = await this.withTaskRelations([task]);
-
-    return mapTaskToDto(taskWithCriteria);
   }
 
   async createAcceptanceCriterion(
@@ -509,51 +480,96 @@ export class TasksService {
     return date;
   }
 
+  private getValidEstimateMinutes(value: number | null) {
+    if (value === null) {
+      return null;
+    }
+
+    if (!Number.isInteger(value) || value < 0 || value % 15 !== 0) {
+      throw new BadRequestException("Task estimate must be divisible by 15 minutes");
+    }
+
+    return value;
+  }
+
   private getValidLabelNames(labelNames: string[]) {
     const names = labelNames.map((name) => name.trim().toLowerCase()).filter(Boolean);
 
     return [...new Set(names)];
   }
 
-  private getUpdateActivityAction(updateTaskDto: UpdateTaskDto, previousValue: string) {
-    const updatedActions: TaskActivityAction[] = [];
+  private getUpdateActivitiesAction(
+    userId: number,
+    updateTaskDto: UpdateTaskDto,
+    previousTask: Awaited<ReturnType<TasksService["ensureTaskExists"]>>,
+  ) {
+    const taskId = previousTask.id;
+    const base = { taskId, userId };
+    const updatedActions: (typeof taskActivities.$inferInsert)[] = [];
 
-    if (updateTaskDto.name !== undefined && updateTaskDto.name.trim() !== previousValue) {
-      updatedActions.push(TaskActivityAction.TaskNameUpdated);
+    if (updateTaskDto.name !== undefined && updateTaskDto.name.trim() !== previousTask.name) {
+      updatedActions.push({
+        ...base,
+        action: TaskActivityAction.TaskNameUpdated,
+        newValue: updateTaskDto.name,
+        previousValue: previousTask.name,
+      });
     }
 
     if (updateTaskDto.description !== undefined) {
-      updatedActions.push(TaskActivityAction.TaskDescriptionUpdated);
+      updatedActions.push({
+        ...base,
+        action: TaskActivityAction.TaskDescriptionUpdated,
+      });
     }
 
     if (updateTaskDto.assigneeId !== undefined) {
-      updatedActions.push(TaskActivityAction.TaskAssigneeUpdated);
+      updatedActions.push({
+        ...base,
+        action: TaskActivityAction.TaskAssigneeUpdated,
+      });
     }
 
     if (updateTaskDto.status !== undefined) {
-      updatedActions.push(TaskActivityAction.TaskStatusUpdated);
+      updatedActions.push({
+        ...base,
+        action: TaskActivityAction.TaskStatusUpdated,
+      });
     }
 
     if (updateTaskDto.priority !== undefined) {
-      updatedActions.push(TaskActivityAction.TaskPriorityUpdated);
+      updatedActions.push({
+        ...base,
+        action: TaskActivityAction.TaskPriorityUpdated,
+      });
     }
 
     if (updateTaskDto.endDate !== undefined) {
-      updatedActions.push(TaskActivityAction.TaskDeadlineUpdated);
+      updatedActions.push({
+        ...base,
+        action: TaskActivityAction.TaskDeadlineUpdated,
+      });
+    }
+
+    if (
+      updateTaskDto.estimateMinutes !== undefined &&
+      updateTaskDto.estimateMinutes !== previousTask.estimateMinutes
+    ) {
+      updatedActions.push({
+        ...base,
+        action: TaskActivityAction.TaskEstimateUpdated,
+        newValue: updateTaskDto.estimateMinutes?.toString() ?? "0",
+        previousValue: previousTask.estimateMinutes?.toString() ?? "0",
+      });
     }
 
     if (updateTaskDto.labelNames !== undefined) {
-      updatedActions.push(TaskActivityAction.TaskLabelsUpdated);
+      updatedActions.push({
+        ...base,
+        action: TaskActivityAction.TaskLabelsUpdated,
+      });
     }
 
-    if (updatedActions.length === 0) {
-      return null;
-    }
-
-    return updatedActions.includes(TaskActivityAction.TaskNameUpdated)
-      ? TaskActivityAction.TaskNameUpdated
-      : updatedActions.length === 1
-        ? updatedActions[0]
-        : TaskActivityAction.TaskUpdated;
+    return updatedActions;
   }
 }

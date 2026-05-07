@@ -45,6 +45,7 @@ export const mapTaskToDto = (task: TaskRecord): TaskDto => {
     priority: task.priority,
     position: task.position,
     endDate: task.endDate ? task.endDate.toISOString() : null,
+    estimateMinutes: task.estimateMinutes,
   };
 };
 

@@ -71,6 +71,13 @@
       "when": 1778156188653,
       "tag": "0009_massive_william_stryker",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1778161482532,
+      "tag": "0010_glamorous_sunspot",
+      "breakpoints": true
     }
   ]
 }
