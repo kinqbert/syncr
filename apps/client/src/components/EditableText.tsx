@@ -66,8 +66,34 @@ export const EditableText = ({
             setIsEditing(false);
           }
         }}
-        size="small"
+        slotProps={{
+          input: {
+            disableUnderline: true,
+          },
+        }}
+        sx={{
+          mx: -1,
+          "& .MuiInputBase-root": {
+            borderRadius: 1,
+            outline: "2px solid",
+            outlineColor: error ? "error.main" : "divider",
+            outlineOffset: "-1px",
+            p: 0,
+            typography: variant,
+            "&.Mui-focused": {
+              outlineColor: error ? "error.main" : "primary.main",
+            },
+          },
+          "& .MuiInputBase-input": {
+            height: "auto",
+            lineHeight: "inherit",
+            overflowWrap: "anywhere",
+            px: 1,
+            py: 0.75,
+          },
+        }}
         value={draft}
+        variant="standard"
       />
     );
   }
@@ -93,7 +119,7 @@ export const EditableText = ({
     >
       <Typography
         color={value ? "text.primary" : "text.secondary"}
-        sx={{ whiteSpace: "pre-wrap" }}
+        sx={{ overflowWrap: "anywhere", whiteSpace: "pre-wrap" }}
         variant={variant}
       >
         {value || placeholder}

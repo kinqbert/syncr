@@ -14,14 +14,12 @@ import { TaskCreateForm } from "./TaskCreateForm";
 
 export type KanbanColumn = { status: TaskStatus; label: string };
 
-type CreateTaskFormBody = CreateTaskBody;
-
 type KanbanColumnProps = {
   children: React.ReactNode;
   column: KanbanColumn;
   isCreating?: boolean;
   isDragOver?: boolean;
-  onCreateTask: (body: CreateTaskFormBody) => Promise<void>;
+  onCreateTask: (body: CreateTaskBody) => Promise<void>;
   projectAssignees: ProjectAssignee[];
 };
 

@@ -115,10 +115,14 @@ export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
                   height: 6,
                   mt: 0.75,
                   width: 6,
+                  flexShrink: 0,
                 }}
               />
               <Stack>
-                <Typography variant="body2">
+                <Typography
+                  variant="body2"
+                  sx={{ overflowWrap: "anywhere", whiteSpace: "pre-wrap" }}
+                >
                   {finalTextArr.join(". ")}
                 </Typography>
 

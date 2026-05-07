@@ -111,7 +111,7 @@ export const TaskCard = ({
             <Stack direction="row" alignItems="start" gap={1.25}>
               <IconButton
                 disableRipple
-                sx={{ width: "34px", p: 0, mt: 0.25 }}
+                sx={{ width: "34px", p: 0, mt: 0.25, cursor: "inherit" }}
                 {...dragHandleProps}
               >
                 <DragIndicatorIcon />
@@ -130,6 +130,8 @@ export const TaskCard = ({
                     cursor: "pointer",
                     minWidth: 0,
                     textDecoration: "none",
+                    overflowWrap: "anywhere",
+                    whiteSpace: "pre-wrap",
                     "&:hover": {
                       color: "primary.main",
                     },

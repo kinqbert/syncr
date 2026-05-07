@@ -109,9 +109,9 @@ export const TaskOverviewPanel = ({ task }: TaskOverviewPanelProps) => {
           </Typography>
         )}
         <Stack
-          alignItems="flex-start"
           direction="row"
           gap={2}
+          alignItems="center"
           justifyContent="space-between"
         >
           <EditableText
