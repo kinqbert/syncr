@@ -8,6 +8,7 @@ import {
   Task,
   TaskAcceptanceCriterion,
   TaskAssignee,
+  TaskLabel,
   TaskPriority,
   TaskStatus,
   UpdateTaskAcceptanceCriterionBody,
@@ -57,6 +58,17 @@ export class TaskAcceptanceCriterionDto implements TaskAcceptanceCriterion {
   position: number;
 }
 
+export class TaskLabelDto implements TaskLabel {
+  @IsInt()
+  id: number;
+
+  @IsInt()
+  projectId: number;
+
+  @IsString()
+  name: string;
+}
+
 export class TaskDto implements Task {
   @IsInt()
   id: number;
@@ -79,6 +91,11 @@ export class TaskDto implements Task {
   @ValidateNested({ each: true })
   @Type(() => TaskAcceptanceCriterionDto)
   acceptanceCriteria: TaskAcceptanceCriterionDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => TaskLabelDto)
+  labels: TaskLabelDto[];
 
   @IsEnum(TaskStatus)
   status: TaskStatus;
@@ -121,6 +138,11 @@ export class CreateTaskDto implements CreateTaskBody {
   @IsDateString()
   @IsOptional()
   endDate?: string | null;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  labelNames?: string[];
 }
 
 export class UpdateTaskDto implements UpdateTaskBody {
@@ -152,6 +174,11 @@ export class UpdateTaskDto implements UpdateTaskBody {
   @IsDateString()
   @IsOptional()
   endDate?: string | null;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  labelNames?: string[];
 }
 
 export class ReorderTaskItemDto implements ReorderTaskItem {

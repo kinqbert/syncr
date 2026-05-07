@@ -4,6 +4,7 @@ import { TaskCommentsRepository } from "src/repositories/task-comments.repositor
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { AcceptanceCriteriaRepository } from "../../repositories/acceptance-criteria.repository";
 import { AuthRepository } from "../../repositories/auth.repository";
+import { LabelsRepository } from "../../repositories/labels.repository";
 import { RoleRepository } from "../../repositories/role.repository";
 import { TasksRepository } from "../../repositories/tasks.repository";
 import { TasksController } from "./tasks.controller";
@@ -16,6 +17,7 @@ import { TasksService } from "./tasks.service";
     TasksRepository,
     TaskCommentsRepository,
     AcceptanceCriteriaRepository,
+    LabelsRepository,
     JwtAuthGuard,
     AuthRepository,
     RoleRepository,

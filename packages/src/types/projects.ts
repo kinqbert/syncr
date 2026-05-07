@@ -46,6 +46,12 @@ export type ProjectAssignee = {
   surname: string;
 };
 
+export type ProjectLabel = {
+  id: number;
+  projectId: number;
+  name: string;
+};
+
 export type ProjectMemberCandidate = ProjectAssignee & {
   roleKey: string;
   roleName: string;

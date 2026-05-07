@@ -3,6 +3,7 @@ import {
   CreateProjectBody,
   Project,
   ProjectAssignee,
+  ProjectLabel,
   ProjectManagerCandidate,
   ProjectMemberCandidate,
   ProjectStatus,
@@ -117,6 +118,17 @@ export class ProjectAssigneeDto implements ProjectAssignee {
 
   @IsString()
   surname: string;
+}
+
+export class ProjectLabelDto implements ProjectLabel {
+  @IsNumber()
+  id: number;
+
+  @IsNumber()
+  projectId: number;
+
+  @IsString()
+  name: string;
 }
 
 export class ProjectMemberCandidateDto

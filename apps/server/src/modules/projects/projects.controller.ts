@@ -22,6 +22,7 @@ import {
   CreateProjectDto,
   ProjectAssigneeDto,
   ProjectDto,
+  ProjectLabelDto,
   ProjectManagerCandidateDto,
   ProjectMemberCandidateDto,
   UpdateProjectDto,
@@ -70,6 +71,17 @@ export class ProjectsController {
     @Param("projectId", ParseIntPipe) projectId: number,
   ): Promise<ProjectAssigneeDto[]> {
     return await this.projectService.getProjectAssignees(companyId, projectId);
+  }
+
+  @Get(":projectId/labels")
+  @RequirePermission(PermissionKey.ProjectView)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async getProjectLabels(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+  ): Promise<ProjectLabelDto[]> {
+    return await this.projectService.getProjectLabels(companyId, projectId);
   }
 
   @Get(":projectId/member-candidates")

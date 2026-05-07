@@ -3,7 +3,16 @@ import { RoleKey } from "@syncr/packages";
 import { and, asc, eq, inArray } from "drizzle-orm";
 
 import db from "../db/drizzle";
-import { projects, projectUsers, roles, tasks, userCompanyRoles, users } from "../db/schema";
+import {
+  projectLabels,
+  projects,
+  projectUsers,
+  roles,
+  tasks,
+  userCompanyRoles,
+  users,
+} from "../db/schema";
+import { DEFAULT_PROJECT_LABELS } from "./labels.repository";
 
 @Injectable()
 export class ProjectsRepository {
@@ -170,6 +179,10 @@ export class ProjectsRepository {
       if (data.managerId) {
         await tx.insert(projectUsers).values({ userId: data.managerId, projectId: project.id });
       }
+
+      await tx
+        .insert(projectLabels)
+        .values(DEFAULT_PROJECT_LABELS.map((name) => ({ projectId: project.id, name })));
 
       return project;
     });

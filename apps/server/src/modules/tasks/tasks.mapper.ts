@@ -1,5 +1,5 @@
 import { TaskComment } from "@syncr/packages";
-import { taskAcceptanceCriteria, taskComments, tasks } from "src/db/schema";
+import { projectLabels, taskAcceptanceCriteria, taskComments, tasks } from "src/db/schema";
 
 import { TaskDto } from "./tasks.dto";
 
@@ -11,6 +11,7 @@ type TaskRecord = Omit<typeof tasks.$inferSelect, "assigneeId" | "endDate"> & {
     surname: string | null;
   } | null;
   acceptanceCriteria: (typeof taskAcceptanceCriteria.$inferSelect)[];
+  labels: (typeof projectLabels.$inferSelect)[];
   endDate: Date | null;
 };
 
@@ -33,6 +34,7 @@ export const mapTaskToDto = (task: TaskRecord): TaskDto => {
           }
         : null,
     acceptanceCriteria: task.acceptanceCriteria,
+    labels: task.labels,
     status: task.status,
     priority: task.priority,
     position: task.position,

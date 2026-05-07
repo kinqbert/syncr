@@ -47,6 +47,12 @@ export type TaskAcceptanceCriterion = {
   position: number;
 };
 
+export type TaskLabel = {
+  id: number;
+  projectId: number;
+  name: string;
+};
+
 export type TaskCommentAuthor = TaskUserBase;
 
 export type TaskComment = {
@@ -64,6 +70,7 @@ export type Task = {
   projectId: number;
   assignee: TaskAssignee | null;
   acceptanceCriteria: TaskAcceptanceCriterion[];
+  labels: TaskLabel[];
   status: TaskStatus;
   priority: TaskPriority;
   position: number;
@@ -78,6 +85,7 @@ export type CreateTaskBody = {
   priority?: TaskPriority;
   position?: number;
   endDate?: string | null;
+  labelNames?: string[];
 };
 
 export type UpdateTaskBody = {
@@ -88,6 +96,7 @@ export type UpdateTaskBody = {
   priority?: TaskPriority;
   position?: number;
   endDate?: string | null;
+  labelNames?: string[];
 };
 
 export type ReorderTaskItem = {

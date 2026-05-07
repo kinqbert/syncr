@@ -1,6 +1,6 @@
 import {
+  Autocomplete,
   Avatar,
-  Button,
   Chip,
   MenuItem,
   Stack,
@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import {
   type ProjectAssignee,
+  type ProjectLabel,
   type Task,
   TASK_PRIORITY_LABEL,
   TASK_STATUS_LABEL,
@@ -18,7 +19,9 @@ import {
 } from "@syncr/packages";
 import { useState } from "react";
 
+import { projectsKeys } from "@/api/projects";
 import { useSetTaskAssignee, useUpdateTask } from "@/api/tasks";
+import { queryClient } from "@/lib/react-query";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { Panel } from "../../../components/Panel";
@@ -26,8 +29,10 @@ import { updateTaskInCache } from "../utils/updateTaskInCache";
 
 type TaskDetailsPanelProps = {
   isAssigneesPending: boolean;
+  isLabelsPending: boolean;
   projectId: number;
   projectAssignees: ProjectAssignee[];
+  projectLabels: ProjectLabel[];
   task: Task;
 };
 
@@ -45,8 +50,10 @@ const getUserName = (name: string, surname: string) => {
 
 export const TaskDetailsPanel = ({
   isAssigneesPending,
+  isLabelsPending,
   projectId,
   projectAssignees,
+  projectLabels,
   task,
 }: TaskDetailsPanelProps) => {
   const updateTask = useUpdateTask();
@@ -67,6 +74,12 @@ export const TaskDetailsPanel = ({
       });
 
       updateTaskInCache(projectId, updatedTask);
+
+      if (body.labelNames) {
+        void queryClient.invalidateQueries({
+          queryKey: projectsKeys.projectLabels(projectId),
+        });
+      }
     } catch (saveError) {
       setError(getErrorMessage(saveError, "Could not update task."));
     }
@@ -196,13 +209,50 @@ export const TaskDetailsPanel = ({
           <Typography color="text.secondary" variant="caption">
             Labels
           </Typography>
-          <Stack direction="row" flexWrap="wrap" gap={1}>
-            <Chip label="Backend" size="small" />
-            <Chip label="API" size="small" />
-            <Button size="small" variant="outlined">
-              + Add Label
-            </Button>
-          </Stack>
+          <Autocomplete<ProjectLabel, true, false, true>
+            autoSelect
+            disabled={isLabelsPending || updateTask.isPending}
+            filterSelectedOptions
+            freeSolo
+            getOptionLabel={(option) =>
+              typeof option === "string" ? option : option.name
+            }
+            isOptionEqualToValue={(option, value) =>
+              typeof value !== "string" && option.id === value.id
+            }
+            multiple
+            onChange={(_, value) =>
+              void saveTask({
+                labelNames: value.map((option) =>
+                  typeof option === "string" ? option : option.name,
+                ),
+              })
+            }
+            options={projectLabels}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder={task.labels.length === 0 ? "Add label" : ""}
+                size="small"
+              />
+            )}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => {
+                const { key, ...tagProps } = getTagProps({ index });
+
+                return (
+                  <Chip
+                    key={key}
+                    label={typeof option === "string" ? option : option.name}
+                    size="small"
+                    {...tagProps}
+                  />
+                );
+              })
+            }
+            size="small"
+            value={task.labels}
+          />
         </Stack>
       </Stack>
     </Panel>

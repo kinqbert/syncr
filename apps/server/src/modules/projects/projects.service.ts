@@ -1,13 +1,17 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ProjectStatus } from "@syncr/packages";
 
+import { LabelsRepository } from "../../repositories/labels.repository";
 import { ProjectsRepository } from "../../repositories/projects.repository";
 import { AddProjectMemberDto, CreateProjectDto, UpdateProjectDto } from "./projects.dto";
 import { mapProjectToDto } from "./projects.mapper";
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly projectRepository: ProjectsRepository) {}
+  constructor(
+    private readonly projectRepository: ProjectsRepository,
+    private readonly labelsRepository: LabelsRepository,
+  ) {}
 
   async getCompanyProjects(companyId: number) {
     const projects = await this.projectRepository.getCompanyProjects(companyId);
@@ -29,6 +33,18 @@ export class ProjectsService {
     await this.ensureProjectExists(companyId, projectId);
 
     return await this.projectRepository.getProjectAssignees(companyId, projectId);
+  }
+
+  async getProjectLabels(companyId: number, projectId: number) {
+    await this.ensureProjectExists(companyId, projectId);
+
+    const labels = await this.labelsRepository.getProjectLabels(projectId, companyId);
+
+    if (labels.length === 0) {
+      return await this.labelsRepository.createDefaultProjectLabels(projectId);
+    }
+
+    return labels;
   }
 
   async getProjectMemberCandidates(companyId: number, projectId: number) {

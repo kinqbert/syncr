@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { Link, useParams } from "react-router";
 
-import { useGetProjectAssignees } from "@/api/projects";
+import { useGetProjectAssignees, useGetProjectLabels } from "@/api/projects";
 import { useGetProjectTasks } from "@/api/tasks";
 
 import { TaskActivityPanel } from "./components/TaskActivityPanel";
@@ -27,6 +27,8 @@ export const TaskDetailsPage = () => {
   );
   const { data: projectAssignees = [], isPending: areAssigneesPending } =
     useGetProjectAssignees(numericProjectId, Boolean(projectId));
+  const { data: projectLabels = [], isPending: areLabelsPending } =
+    useGetProjectLabels(numericProjectId, Boolean(projectId));
   const task = tasks.find((item) => item.id === numericTaskId);
 
   if (!projectId || !taskId) {
@@ -94,8 +96,10 @@ export const TaskDetailsPage = () => {
         <Stack gap={2.25} minWidth={0}>
           <TaskDetailsPanel
             isAssigneesPending={areAssigneesPending}
+            isLabelsPending={areLabelsPending}
             projectId={numericProjectId}
             projectAssignees={projectAssignees}
+            projectLabels={projectLabels}
             task={task}
           />
 

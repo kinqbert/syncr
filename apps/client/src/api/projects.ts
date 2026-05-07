@@ -3,6 +3,7 @@ import type {
   CreateProjectBody,
   Project,
   ProjectAssignee,
+  ProjectLabel,
   ProjectManagerCandidate,
   ProjectMemberCandidate,
   UpdateProjectBody,
@@ -16,6 +17,8 @@ export const projectsKeys = {
   project: (projectId: number) => ["projects", projectId],
   projectAssignees: (projectId: number) =>
     ["projects", projectId, "assignees"] as const,
+  projectLabels: (projectId: number) =>
+    ["projects", projectId, "labels"] as const,
   projectMemberCandidates: (projectId: number) =>
     ["projects", projectId, "member-candidates"] as const,
   managerCandidates: ["projects-manager-candidates"],
@@ -44,6 +47,14 @@ const getProjectManagerCandidates = async () => {
 const getProjectAssignees = async (projectId: number) => {
   const response = await api.get<ProjectAssignee[]>(
     `projects/${projectId}/assignees`,
+  );
+
+  return response.data;
+};
+
+const getProjectLabels = async (projectId: number) => {
+  const response = await api.get<ProjectLabel[]>(
+    `projects/${projectId}/labels`,
   );
 
   return response.data;
@@ -133,6 +144,14 @@ export const useGetProjectAssignees = (projectId: number, enabled = true) => {
     enabled,
     queryFn: () => getProjectAssignees(projectId),
     queryKey: projectsKeys.projectAssignees(projectId),
+  });
+};
+
+export const useGetProjectLabels = (projectId: number, enabled = true) => {
+  return useQuery({
+    enabled,
+    queryFn: () => getProjectLabels(projectId),
+    queryKey: projectsKeys.projectLabels(projectId),
   });
 };
 

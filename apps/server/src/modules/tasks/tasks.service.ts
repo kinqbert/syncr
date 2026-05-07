@@ -3,6 +3,7 @@ import { TaskPriority, TaskStatus } from "@syncr/packages";
 import { TaskCommentsRepository } from "src/repositories/task-comments.repository";
 
 import { AcceptanceCriteriaRepository } from "../../repositories/acceptance-criteria.repository";
+import { LabelsRepository } from "../../repositories/labels.repository";
 import { TasksRepository } from "../../repositories/tasks.repository";
 import {
   CreateTaskAcceptanceCriterionDto,
@@ -21,13 +22,14 @@ export class TasksService {
     private readonly taskRepository: TasksRepository,
     private readonly taskCommentsRepository: TaskCommentsRepository,
     private readonly acceptanceCriteriaRepository: AcceptanceCriteriaRepository,
+    private readonly labelsRepository: LabelsRepository,
   ) {}
 
   async getProjectTasks(companyId: number, projectId: number) {
     await this.ensureProjectExists(projectId, companyId);
 
     const tasks = await this.taskRepository.getProjectTasks(projectId, companyId);
-    const tasksWithCriteria = await this.withAcceptanceCriteria(tasks);
+    const tasksWithCriteria = await this.withTaskRelations(tasks);
 
     return tasksWithCriteria.map(mapTaskToDto);
   }
@@ -52,7 +54,15 @@ export class TasksService {
       endDate: createTaskDto.endDate ? this.getValidDate(createTaskDto.endDate, "End date") : null,
     });
 
-    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
+    if (createTaskDto.labelNames !== undefined) {
+      await this.labelsRepository.setTaskLabels(
+        task.id,
+        projectId,
+        this.getValidLabelNames(createTaskDto.labelNames),
+      );
+    }
+
+    const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
   }
@@ -101,12 +111,25 @@ export class TasksService {
         : null;
     }
 
-    if (Object.keys(updateData).length === 0) {
+    const labelNames =
+      updateTaskDto.labelNames !== undefined
+        ? this.getValidLabelNames(updateTaskDto.labelNames)
+        : undefined;
+
+    if (Object.keys(updateData).length === 0 && labelNames === undefined) {
       throw new BadRequestException("No task fields to update");
     }
 
-    const task = await this.taskRepository.updateTask(taskId, updateData);
-    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
+    const task =
+      Object.keys(updateData).length > 0
+        ? await this.taskRepository.updateTask(taskId, updateData)
+        : await this.taskRepository.getTask(taskId, projectId, companyId);
+
+    if (labelNames !== undefined) {
+      await this.labelsRepository.setTaskLabels(taskId, projectId, labelNames);
+    }
+
+    const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
   }
@@ -132,7 +155,7 @@ export class TasksService {
       throw new NotFoundException("One or more tasks were not found");
     }
 
-    const tasksWithCriteria = await this.withAcceptanceCriteria(tasks);
+    const tasksWithCriteria = await this.withTaskRelations(tasks);
 
     return tasksWithCriteria.map(mapTaskToDto);
   }
@@ -181,7 +204,7 @@ export class TasksService {
     const task = await this.taskRepository.updateTask(taskId, {
       assigneeId: setTaskAssigneeDto.assigneeId,
     });
-    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
+    const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
   }
@@ -208,7 +231,7 @@ export class TasksService {
     });
 
     const task = await this.taskRepository.getTask(taskId, projectId, companyId);
-    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
+    const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
   }
@@ -245,7 +268,7 @@ export class TasksService {
     await this.acceptanceCriteriaRepository.updateAcceptanceCriterion(criterionId, updateData);
 
     const task = await this.taskRepository.getTask(taskId, projectId, companyId);
-    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
+    const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
   }
@@ -261,7 +284,7 @@ export class TasksService {
     await this.acceptanceCriteriaRepository.deleteAcceptanceCriterion(criterionId);
 
     const task = await this.taskRepository.getTask(taskId, projectId, companyId);
-    const [taskWithCriteria] = await this.withAcceptanceCriteria([task]);
+    const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
   }
@@ -332,6 +355,30 @@ export class TasksService {
     }));
   }
 
+  private async withLabels<T extends { id: number }>(tasks: T[]) {
+    if (tasks.length === 0) {
+      return [];
+    }
+
+    const labels = await this.labelsRepository.getLabelsByTaskIds(tasks.map((task) => task.id));
+    const labelsByTaskId = new Map<number, typeof labels>();
+
+    for (const label of labels) {
+      const taskLabels = labelsByTaskId.get(label.taskId) ?? [];
+      taskLabels.push(label);
+      labelsByTaskId.set(label.taskId, taskLabels);
+    }
+
+    return tasks.map((task) => ({
+      ...task,
+      labels: (labelsByTaskId.get(task.id) ?? []).map(({ taskId, ...label }) => label),
+    }));
+  }
+
+  private async withTaskRelations<T extends { id: number }>(tasks: T[]) {
+    return await this.withLabels(await this.withAcceptanceCriteria(tasks));
+  }
+
   private async ensureAssigneeInCompany(assigneeId: number, companyId: number) {
     const isUserInCompany = await this.taskRepository.isUserInCompany(assigneeId, companyId);
 
@@ -384,5 +431,11 @@ export class TasksService {
     }
 
     return date;
+  }
+
+  private getValidLabelNames(labelNames: string[]) {
+    const names = labelNames.map((name) => name.trim().toLowerCase()).filter(Boolean);
+
+    return [...new Set(names)];
   }
 }

@@ -102,6 +102,18 @@ export const projectUsers = pgTable("project_users", {
     .references(() => projects.id, { onDelete: "cascade" }),
 });
 
+export const projectLabels = pgTable(
+  "project_labels",
+  {
+    id: serial().primaryKey(),
+    projectId: integer()
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    name: text().notNull(),
+  },
+  (table) => [unique().on(table.projectId, table.name)],
+);
+
 // TASKS
 
 export const taskStatusEnum = pgEnum("task_status", enumToPgEnum(TaskStatus));
@@ -140,6 +152,19 @@ export const taskComments = pgTable("task_comments", {
   content: text().notNull(),
   createdAt: timestamp().notNull().defaultNow(),
 });
+
+export const taskLabels = pgTable(
+  "task_labels",
+  {
+    taskId: integer()
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    labelId: integer()
+      .notNull()
+      .references(() => projectLabels.id, { onDelete: "cascade" }),
+  },
+  (table) => [unique().on(table.taskId, table.labelId)],
+);
 
 // INVITATIONS
 
