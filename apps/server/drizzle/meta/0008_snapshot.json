@@ -1,5 +1,5 @@
 {
-  "id": "2952c431-b6af-43f2-9c9e-5d35c7fa32fc",
+  "id": "db9f1a3c-af51-4f0b-9d96-ac599cff043e",
   "prevId": "918d8eee-c0ba-40f2-93bd-60905907628f",
   "version": "7",
   "dialect": "postgresql",
@@ -529,6 +529,90 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.task_activities": {
+      "name": "task_activities",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "task_id": {
+          "name": "task_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "action": {
+          "name": "action",
+          "type": "task_activity_action",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "previous_title": {
+          "name": "previous_title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_title": {
+          "name": "new_title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "task_activities_task_id_tasks_id_fk": {
+          "name": "task_activities_task_id_tasks_id_fk",
+          "tableFrom": "task_activities",
+          "tableTo": "tasks",
+          "columnsFrom": [
+            "task_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "task_activities_user_id_users_id_fk": {
+          "name": "task_activities_user_id_users_id_fk",
+          "tableFrom": "task_activities",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.task_comments": {
       "name": "task_comments",
       "schema": "",
@@ -964,6 +1048,25 @@
         "paused",
         "completed",
         "archived"
+      ]
+    },
+    "public.task_activity_action": {
+      "name": "task_activity_action",
+      "schema": "public",
+      "values": [
+        "task_created",
+        "task_updated",
+        "task_name_updated",
+        "task_description_updated",
+        "task_assignee_updated",
+        "task_status_updated",
+        "task_priority_updated",
+        "task_deadline_updated",
+        "task_labels_updated",
+        "task_comment_added",
+        "acceptance_criterion_created",
+        "acceptance_criterion_updated",
+        "acceptance_criterion_deleted"
       ]
     },
     "public.task_priority": {
