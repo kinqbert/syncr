@@ -211,6 +211,11 @@ export const useKanbanDrag = ({
       return;
     }
 
+    const activeStatus = getTaskStatusById(
+      tasksByStatus,
+      active.id,
+      columnStatuses,
+    );
     const targetStatus = getTaskStatusById(
       tasksByStatus,
       over.id,
@@ -220,6 +225,7 @@ export const useKanbanDrag = ({
     setDragOverStatus(targetStatus);
 
     if (active.id === over.id) return;
+    if (activeStatus === targetStatus) return;
 
     const nextTasksByStatus = moveTask(
       tasksByStatus,
@@ -257,6 +263,8 @@ export const useKanbanDrag = ({
       return;
     }
 
+    const rollbackTasks = dragStartTasksRef.current ?? tasks ?? [];
+
     if (active.id !== over.id) {
       const nextTasksByStatus = moveTask(
         tasksByStatus,
@@ -276,6 +284,10 @@ export const useKanbanDrag = ({
     const reorderedTasks =
       queryClient.getQueryData<Task[]>(taskQueryKey) ?? tasks ?? [];
 
+    dragStartTasksRef.current = null;
+    setActiveTaskId(null);
+    setDragOverStatus(null);
+
     try {
       const savedTasks = await reorderTasks.mutateAsync({
         projectId,
@@ -290,14 +302,7 @@ export const useKanbanDrag = ({
 
       queryClient.setQueryData(taskQueryKey, savedTasks);
     } catch {
-      queryClient.setQueryData(
-        taskQueryKey,
-        dragStartTasksRef.current ?? tasks ?? [],
-      );
-    } finally {
-      dragStartTasksRef.current = null;
-      setActiveTaskId(null);
-      setDragOverStatus(null);
+      queryClient.setQueryData(taskQueryKey, rollbackTasks);
     }
   };
 
