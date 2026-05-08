@@ -7,6 +7,7 @@ import {
   TaskActivityAction,
   TaskPriority,
   TaskStatus,
+  UserStatus,
 } from "@syncr/packages";
 import { jsonb } from "drizzle-orm/pg-core";
 import {
@@ -22,12 +23,18 @@ import {
 } from "drizzle-orm/pg-core";
 
 // CORE TABLES
+export const userStatusEnum = pgEnum("user_status", enumToPgEnum(UserStatus));
+
 export const users = pgTable("users", {
   id: serial().primaryKey(),
   email: text().notNull().unique(),
   name: text().notNull(),
   surname: text().notNull(),
   password: text().notNull(),
+  status: userStatusEnum().notNull().default(UserStatus.Active),
+  weeklyLoadMinutes: integer()
+    .notNull()
+    .default(40 * 60),
 });
 
 export const companies = pgTable("companies", {

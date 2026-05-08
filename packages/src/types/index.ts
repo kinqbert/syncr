@@ -5,4 +5,5 @@ export * from "./invitations";
 export * from "./notifications";
 export * from "./role";
 export * from "./tasks";
+export * from "./team";
 export * from "./user";
