@@ -234,6 +234,12 @@ const invalidateProjectSummaries = () => {
   void queryClient.invalidateQueries({ queryKey: ["projects"] as const });
 };
 
+const invalidateProjectActivities = (projectId: number) => {
+  void queryClient.invalidateQueries({
+    queryKey: ["projects", projectId, "activity"] as const,
+  });
+};
+
 export const useGetProjectTasks = (projectId: number, enabled = true) => {
   return useQuery({
     enabled,
@@ -250,6 +256,7 @@ export const useCreateTask = () => {
         queryKey: taskKeys.lists(projectId),
       });
       invalidateProjectSummaries();
+      invalidateProjectActivities(projectId);
     },
   });
 };
@@ -269,6 +276,7 @@ export const useUpdateTask = () => {
       }
 
       invalidateProjectSummaries();
+      invalidateProjectActivities(projectId);
     },
   });
 };
@@ -278,6 +286,8 @@ export const useReorderTasks = () => {
     mutationFn: reorderTasks,
     onSuccess: (tasks, variables) => {
       queryClient.setQueryData(taskKeys.lists(variables.projectId), tasks);
+      invalidateProjectSummaries();
+      invalidateProjectActivities(variables.projectId);
     },
   });
 };
@@ -295,6 +305,7 @@ export const useDeleteTask = () => {
         queryKey: taskKeys.detail(variables.projectId, variables.taskId),
       });
       invalidateProjectSummaries();
+      invalidateProjectActivities(variables.projectId);
     },
   });
 };
@@ -308,6 +319,7 @@ export const useCreateTaskAcceptanceCriterion = () => {
         projectId: variables.projectId,
         taskId: variables.taskId,
       });
+      invalidateProjectActivities(variables.projectId);
     },
   });
 };
@@ -321,6 +333,7 @@ export const useUpdateTaskAcceptanceCriterion = () => {
         projectId: variables.projectId,
         taskId: variables.taskId,
       });
+      invalidateProjectActivities(variables.projectId);
     },
   });
 };
@@ -334,6 +347,7 @@ export const useDeleteTaskAcceptanceCriterion = () => {
         projectId: variables.projectId,
         taskId: variables.taskId,
       });
+      invalidateProjectActivities(variables.projectId);
     },
   });
 };
@@ -361,6 +375,7 @@ export const useCreateTaskComment = () => {
       queryClient.invalidateQueries({
         queryKey: taskKeys.activities(projectId, taskId),
       });
+      invalidateProjectActivities(projectId);
     },
   });
 };

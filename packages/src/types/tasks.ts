@@ -100,6 +100,18 @@ export type TaskActivitiesPage = {
   hasMore: boolean;
 };
 
+export type ProjectActivity = TaskActivity & {
+  task: {
+    id: number;
+    name: string;
+  };
+};
+
+export type ProjectActivitiesPage = {
+  items: ProjectActivity[];
+  hasMore: boolean;
+};
+
 export type Task = {
   id: number;
   name: string;

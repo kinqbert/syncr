@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
@@ -9,9 +10,10 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
-import { PermissionKey, Project } from "@syncr/packages";
+import { PermissionKey, Project, ProjectActivitiesPage } from "@syncr/packages";
 import { UserId } from "src/common/decorators/user-id.decorator";
 
 import { CompanyId } from "../../common/decorators/company-id.decorator";
@@ -50,6 +52,19 @@ export class ProjectsController {
     @CompanyId() companyId: number,
   ): Promise<ProjectManagerCandidateDto[]> {
     return await this.projectService.getProjectManagerCandidates(companyId);
+  }
+
+  @Get(":projectId/activity")
+  @RequirePermission(PermissionKey.ProjectView)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async getProjectActivities(
+    @CompanyId() companyId: number,
+    @Param("projectId", ParseIntPipe) projectId: number,
+    @Query("limit", new DefaultValuePipe(6), ParseIntPipe) limit: number,
+    @Query("offset", new DefaultValuePipe(0), ParseIntPipe) offset: number,
+  ): Promise<ProjectActivitiesPage> {
+    return await this.projectService.getProjectActivities(companyId, projectId, limit, offset);
   }
 
   @Get(":projectId")

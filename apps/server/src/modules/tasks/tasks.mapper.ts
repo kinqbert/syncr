@@ -1,4 +1,4 @@
-import { TaskActivity, TaskComment } from "@syncr/packages";
+import { ProjectActivity, TaskActivity, TaskComment } from "@syncr/packages";
 import {
   projectLabels,
   taskAcceptanceCriteria,
@@ -100,5 +100,21 @@ export const mapTaskActivityToDto = (activity: TaskActivityRecord): TaskActivity
         }
       : null,
     createdAt: activity.createdAt.toISOString(),
+  };
+};
+
+type ProjectTaskActivityRecord = TaskActivityRecord & {
+  task: {
+    id: number;
+    name: string;
+  };
+};
+
+export const mapProjectTaskActivityToDto = (
+  activity: ProjectTaskActivityRecord,
+): ProjectActivity => {
+  return {
+    ...mapTaskActivityToDto(activity),
+    task: activity.task,
   };
 };

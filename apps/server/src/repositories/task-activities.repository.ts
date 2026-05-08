@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { desc, eq } from "drizzle-orm";
 
 import db from "../db/drizzle";
-import { taskActivities, users } from "../db/schema";
+import { taskActivities, tasks, users } from "../db/schema";
 
 const taskActivityColumns = {
   id: taskActivities.id,
@@ -17,6 +17,14 @@ const taskActivityColumns = {
     email: users.email,
     name: users.name,
     surname: users.surname,
+  },
+};
+
+const projectTaskActivityColumns = {
+  ...taskActivityColumns,
+  task: {
+    id: tasks.id,
+    name: tasks.name,
   },
 };
 
@@ -49,6 +57,20 @@ export class TaskActivitiesRepository {
       .from(taskActivities)
       .leftJoin(users, eq(taskActivities.userId, users.id))
       .where(eq(taskActivities.taskId, taskId))
+      .orderBy(desc(taskActivities.createdAt), desc(taskActivities.id))
+      .limit(limit + 1)
+      .offset(offset);
+
+    return activities;
+  }
+
+  async getProjectTaskActivities(projectId: number, limit: number, offset: number) {
+    const activities = await db
+      .select(projectTaskActivityColumns)
+      .from(taskActivities)
+      .innerJoin(tasks, eq(taskActivities.taskId, tasks.id))
+      .leftJoin(users, eq(taskActivities.userId, users.id))
+      .where(eq(tasks.projectId, projectId))
       .orderBy(desc(taskActivities.createdAt), desc(taskActivities.id))
       .limit(limit + 1)
       .offset(offset);

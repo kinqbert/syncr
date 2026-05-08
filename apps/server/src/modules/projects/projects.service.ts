@@ -3,7 +3,9 @@ import { ProjectStatus } from "@syncr/packages";
 
 import { LabelsRepository } from "../../repositories/labels.repository";
 import { ProjectsRepository } from "../../repositories/projects.repository";
+import { TaskActivitiesRepository } from "../../repositories/task-activities.repository";
 import { NotificationsService } from "../notifications/notifications.service";
+import { mapProjectTaskActivityToDto } from "../tasks/tasks.mapper";
 import { AddProjectMemberDto, CreateProjectDto, UpdateProjectDto } from "./projects.dto";
 import { mapProjectToDto } from "./projects.mapper";
 
@@ -13,6 +15,7 @@ export class ProjectsService {
     private readonly projectRepository: ProjectsRepository,
     private readonly labelsRepository: LabelsRepository,
     private readonly notificationsService: NotificationsService,
+    private readonly taskActivitiesRepository: TaskActivitiesRepository,
   ) {}
 
   async getCompanyProjects(companyId: number) {
@@ -53,6 +56,23 @@ export class ProjectsService {
     await this.ensureProjectExists(companyId, projectId);
 
     return await this.projectRepository.getProjectMemberCandidates(companyId);
+  }
+
+  async getProjectActivities(companyId: number, projectId: number, limit: number, offset: number) {
+    await this.ensureProjectExists(companyId, projectId);
+
+    const validatedLimit = this.getValidActivityLimit(limit);
+    const validatedOffset = this.getValidActivityOffset(offset);
+    const activities = await this.taskActivitiesRepository.getProjectTaskActivities(
+      projectId,
+      validatedLimit,
+      validatedOffset,
+    );
+
+    return {
+      items: activities.slice(0, validatedLimit).map(mapProjectTaskActivityToDto),
+      hasMore: activities.length > validatedLimit,
+    };
   }
 
   async addProjectMember(
@@ -212,5 +232,21 @@ export class ProjectsService {
     if (!isUserInCompany) {
       throw new BadRequestException("Project member must belong to the company");
     }
+  }
+
+  private getValidActivityLimit(value: number) {
+    if (!Number.isInteger(value) || value < 1) {
+      throw new BadRequestException("Limit must be a positive number");
+    }
+
+    return value;
+  }
+
+  private getValidActivityOffset(value: number) {
+    if (!Number.isInteger(value) || value < 0) {
+      throw new BadRequestException("Offset must be a non-negative number");
+    }
+
+    return value;
   }
 }

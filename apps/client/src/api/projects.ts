@@ -2,13 +2,19 @@ import type {
   AddProjectMemberBody,
   CreateProjectBody,
   Project,
+  ProjectActivitiesPage,
   ProjectAssignee,
   ProjectLabel,
   ProjectManagerCandidate,
   ProjectMemberCandidate,
   UpdateProjectBody,
 } from "@syncr/packages";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  type InfiniteData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
 
 import api from "@/lib/axios";
 import { queryClient } from "@/lib/react-query";
@@ -20,6 +26,8 @@ export const projectsKeys = {
     ["projects", projectId, "assignees"] as const,
   projectLabels: (projectId: number) =>
     ["projects", projectId, "labels"] as const,
+  projectActivities: (projectId: number) =>
+    ["projects", projectId, "activity"] as const,
   projectMemberCandidates: (projectId: number) =>
     ["projects", projectId, "member-candidates"] as const,
   managerCandidates: ["projects-manager-candidates"],
@@ -64,6 +72,25 @@ const getProjectLabels = async (projectId: number) => {
 const getProjectMemberCandidates = async (projectId: number) => {
   const response = await api.get<ProjectMemberCandidate[]>(
     `projects/${projectId}/member-candidates`,
+  );
+
+  return response.data;
+};
+
+const getProjectActivities = async ({
+  projectId,
+  limit,
+  offset,
+}: {
+  projectId: number;
+  limit: number;
+  offset: number;
+}) => {
+  const response = await api.get<ProjectActivitiesPage>(
+    `projects/${projectId}/activity`,
+    {
+      params: { limit, offset },
+    },
   );
 
   return response.data;
@@ -198,6 +225,30 @@ export const useAddProjectMember = () => {
       });
       void queryClient.invalidateQueries({ queryKey: projectsKeys.projects });
     },
+  });
+};
+
+export const useGetProjectActivities = (
+  projectId: number,
+  limit = 5,
+  enabled = true,
+) => {
+  return useInfiniteQuery<
+    ProjectActivitiesPage,
+    Error,
+    InfiniteData<ProjectActivitiesPage>,
+    ReturnType<typeof projectsKeys.projectActivities>,
+    number
+  >({
+    enabled,
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.hasMore
+        ? pages.reduce((count, page) => count + page.items.length, 0)
+        : undefined,
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
+      getProjectActivities({ projectId, limit, offset: pageParam }),
+    queryKey: projectsKeys.projectActivities(projectId),
   });
 };
 

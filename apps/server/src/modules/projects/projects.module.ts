@@ -5,6 +5,7 @@ import { AuthRepository } from "../../repositories/auth.repository";
 import { LabelsRepository } from "../../repositories/labels.repository";
 import { ProjectsRepository } from "../../repositories/projects.repository";
 import { RoleRepository } from "../../repositories/role.repository";
+import { TaskActivitiesRepository } from "../../repositories/task-activities.repository";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { ProjectsController } from "./projects.controller";
 import { ProjectsService } from "./projects.service";
@@ -20,6 +21,7 @@ import { ProjectsService } from "./projects.service";
     RoleRepository,
     ProjectsRepository,
     LabelsRepository,
+    TaskActivitiesRepository,
   ],
 })
 export class ProjectsModule {}
