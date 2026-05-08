@@ -24,6 +24,7 @@ export const Step2 = () => {
       <TextField
         sx={{ flex: 1 }}
         label="Password"
+        placeholder="Enter password"
         type={fieldType}
         {...register("password")}
         error={!!errors.password}
@@ -31,7 +32,12 @@ export const Step2 = () => {
         slotProps={{
           input: {
             endAdornment: (
-              <IconButton onClick={togglePasswordVisible}>
+              <IconButton
+                aria-label={passwordVisible ? "Hide password" : "Show password"}
+                edge="end"
+                onClick={togglePasswordVisible}
+                sx={{ color: "primary.main" }}
+              >
                 {passwordVisible ? <EyeOff /> : <Eye />}
               </IconButton>
             ),
@@ -40,6 +46,7 @@ export const Step2 = () => {
       />
       <TextField
         label="Password confirm"
+        placeholder="Confirm password"
         type={fieldType}
         {...register("passwordConfirmation")}
         error={!!errors.passwordConfirmation}

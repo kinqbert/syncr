@@ -13,6 +13,7 @@ export const Step1 = () => {
     <Stack gap={2}>
       <TextField
         label="Email"
+        placeholder="you@example.com"
         {...register("email")}
         error={!!errors.email}
         helperText={errors.email?.message}

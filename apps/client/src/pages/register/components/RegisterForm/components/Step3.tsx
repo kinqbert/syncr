@@ -13,12 +13,14 @@ export const Step3 = () => {
     <Stack gap={2}>
       <TextField
         label="First Name"
+        placeholder="Enter first name"
         {...register("name")}
         error={!!errors.name}
         helperText={errors.name?.message}
       />
       <TextField
         label="Surname"
+        placeholder="Enter surname"
         {...register("surname")}
         error={!!errors.surname}
         helperText={errors.surname?.message}

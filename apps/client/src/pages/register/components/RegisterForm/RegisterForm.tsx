@@ -1,4 +1,12 @@
-import { Alert, Button, Link, Snackbar, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Link,
+  Snackbar,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Link as RouterLink, useNavigate } from "react-router";
@@ -96,10 +104,28 @@ export const RegisterForm = () => {
     <FormProvider {...methods}>
       <form>
         <Stack gap={2.5}>
-          <Stack gap={0.5}>
-            <Typography color="text.secondary">
+          <Stack gap={1}>
+            <Typography color="text.secondary" fontWeight={500}>
               Step {step + 1} of {registerStepSchemas.length}
             </Typography>
+            <Box
+              aria-hidden
+              sx={{
+                bgcolor: "#EEF2FF",
+                borderRadius: 999,
+                height: 6,
+                overflow: "hidden",
+              }}
+            >
+              <Box
+                sx={{
+                  bgcolor: "primary.main",
+                  height: "100%",
+                  transition: "width 180ms ease",
+                  width: `${((step + 1) / registerStepSchemas.length) * 100}%`,
+                }}
+              />
+            </Box>
           </Stack>
 
           <StepRenderer step={step} />

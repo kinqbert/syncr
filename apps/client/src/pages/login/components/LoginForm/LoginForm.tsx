@@ -36,6 +36,7 @@ export const LoginForm = () => {
       <TextField
         {...register("email")}
         label="Email"
+        placeholder="you@example.com"
         error={Boolean(errors.email)}
         helperText={errors.email?.message}
       />
@@ -43,6 +44,7 @@ export const LoginForm = () => {
       <TextField
         {...register("password")}
         label="Password"
+        placeholder="Enter password"
         type="password"
         error={Boolean(errors.password)}
         helperText={errors.password?.message}
