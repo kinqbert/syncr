@@ -140,17 +140,15 @@ export const NotificationsPage = () => {
         direction={{ xs: "column", sm: "row" }}
         gap={2}
         justifyContent="space-between"
-        mb={4}
+        mb={3}
       >
-        <Box>
-          <Typography fontWeight={700} variant="h5">
-            Notifications
-          </Typography>
-          <Typography color="text.secondary" mt={0.75}>
+        <Stack gap={0.5}>
+          <Typography variant="h4">Notifications</Typography>
+          <Typography color="text.secondary">
             You have {unreadCount} unread notification
             {unreadCount === 1 ? "" : "s"}
           </Typography>
-        </Box>
+        </Stack>
         <Button
           disabled={unreadCount === 0 || markAllNotificationsRead.isPending}
           onClick={() => markAllNotificationsRead.mutate()}
