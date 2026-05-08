@@ -15,6 +15,9 @@ export type Project = {
   status: ProjectStatus;
   startDate: string;
   endDate: string | null;
+  assignedPeopleCount: number;
+  completedTasksCount: number;
+  totalTasksCount: number;
 };
 
 export type CreateProjectBody = {

@@ -28,7 +28,6 @@ import { getErrorMessage } from "@/utils/getErrorMessage";
 
 type ProjectFormState = {
   name: string;
-  description: string;
   managerId: string;
   startDate: string;
   endDate: string;
@@ -54,7 +53,6 @@ const createInitialFormState = (
   project?: Project | null,
 ): ProjectFormState => ({
   name: project?.name ?? "",
-  description: project?.description ?? "",
   managerId: project?.managerId ? String(project.managerId) : "",
   startDate: project?.startDate
     ? toDateInputValue(new Date(project.startDate))
@@ -99,7 +97,6 @@ export const ProjectFormDialog = ({
     try {
       await onSave(project?.id ?? null, {
         name: formState.name.trim(),
-        description: formState.description.trim() || null,
         managerId: formState.managerId ? Number(formState.managerId) : null,
         startDate: formState.startDate,
         endDate: formState.endDate || null,
@@ -145,14 +142,6 @@ export const ProjectFormDialog = ({
             fullWidth
             helperText={errors.name?.message}
             label="Project name"
-          />
-          <TextField
-            {...register("description")}
-            disabled={isSaving}
-            fullWidth
-            label="Description"
-            minRows={3}
-            multiline
           />
           <TextField
             {...register("startDate", {

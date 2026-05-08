@@ -18,10 +18,6 @@ export class ProjectDto implements Project {
   @IsString()
   name: string;
 
-  @IsString()
-  @IsOptional()
-  description: string | null;
-
   @IsNumber()
   @IsOptional()
   managerId: number | null;
@@ -38,15 +34,20 @@ export class ProjectDto implements Project {
   @IsDateString()
   @IsOptional()
   endDate: string | null;
+
+  @IsNumber()
+  assignedPeopleCount: number;
+
+  @IsNumber()
+  completedTasksCount: number;
+
+  @IsNumber()
+  totalTasksCount: number;
 }
 
 export class CreateProjectDto implements CreateProjectBody {
   @IsString()
   name: string;
-
-  @IsString()
-  @IsOptional()
-  description?: string | null;
 
   @IsNumber()
   @IsOptional()
@@ -64,10 +65,6 @@ export class UpdateProjectDto implements UpdateProjectBody {
   @IsString()
   @IsOptional()
   name?: string;
-
-  @IsString()
-  @IsOptional()
-  description?: string | null;
 
   @IsNumber()
   @IsOptional()

@@ -5,9 +5,15 @@ interface AuthLayoutProps {
   title: string;
   subtitle: string;
   children: ReactNode;
+  footer?: ReactNode;
 }
 
-export const AuthLayout = ({ title, subtitle, children }: AuthLayoutProps) => {
+export const AuthLayout = ({
+  title,
+  subtitle,
+  children,
+  footer,
+}: AuthLayoutProps) => {
   return (
     <Box
       component="main"
@@ -51,6 +57,8 @@ export const AuthLayout = ({ title, subtitle, children }: AuthLayoutProps) => {
           >
             {children}
           </Paper>
+
+          {footer}
         </Stack>
       </Container>
     </Box>

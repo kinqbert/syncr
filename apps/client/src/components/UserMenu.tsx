@@ -6,7 +6,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { LogOut, Settings, UserRound } from "lucide-mui";
+import { Info, LogOut, Settings, UserRound } from "lucide-mui";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -42,6 +42,11 @@ export const UserMenu = () => {
   const handleOpenSettings = () => {
     closeMenu();
     navigate("/settings");
+  };
+
+  const handleOpenAbout = () => {
+    closeMenu();
+    navigate("/about");
   };
 
   const handleLogout = async () => {
@@ -135,6 +140,18 @@ export const UserMenu = () => {
         </Stack>
 
         <Divider sx={{ m: 0 }} />
+        <MenuItem
+          onClick={handleOpenAbout}
+          sx={{
+            gap: 1,
+            minHeight: 36,
+            px: 1.75,
+          }}
+        >
+          <Info sx={{ color: "text.secondary", fontSize: 16 }} />
+          <Typography sx={{ fontSize: 13 }}>About Syncr</Typography>
+        </MenuItem>
+
         <MenuItem
           onClick={handleOpenSettings}
           sx={{

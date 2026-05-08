@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { RoleKey } from "@syncr/packages";
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { RoleKey, TaskStatus } from "@syncr/packages";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 
 import db from "../db/drizzle";
 import {
@@ -18,9 +18,17 @@ import { DEFAULT_PROJECT_LABELS } from "./labels.repository";
 export class ProjectsRepository {
   async getCompanyProjects(companyId: number) {
     return await db
-      .select()
+      .select({
+        project: projects,
+        assignedPeopleCount: sql<number>`count(distinct ${projectUsers.userId})::int`,
+        completedTasksCount: sql<number>`count(distinct ${tasks.id}) filter (where ${tasks.status} = ${TaskStatus.Done})::int`,
+        totalTasksCount: sql<number>`count(distinct ${tasks.id})::int`,
+      })
       .from(projects)
+      .leftJoin(projectUsers, eq(projectUsers.projectId, projects.id))
+      .leftJoin(tasks, eq(tasks.projectId, projects.id))
       .where(eq(projects.companyId, companyId))
+      .groupBy(projects.id)
       .orderBy(asc(projects.startDate), asc(projects.name));
   }
 

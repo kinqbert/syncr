@@ -230,6 +230,10 @@ const invalidateProjectLabels = (projectId: number) => {
   });
 };
 
+const invalidateProjectSummaries = () => {
+  void queryClient.invalidateQueries({ queryKey: ["projects"] as const });
+};
+
 export const useGetProjectTasks = (projectId: number, enabled = true) => {
   return useQuery({
     enabled,
@@ -245,6 +249,7 @@ export const useCreateTask = () => {
       void queryClient.invalidateQueries({
         queryKey: taskKeys.lists(projectId),
       });
+      invalidateProjectSummaries();
     },
   });
 };
@@ -262,6 +267,8 @@ export const useUpdateTask = () => {
       if (body.labelNames) {
         invalidateProjectLabels(projectId);
       }
+
+      invalidateProjectSummaries();
     },
   });
 };
@@ -287,6 +294,7 @@ export const useDeleteTask = () => {
       queryClient.removeQueries({
         queryKey: taskKeys.detail(variables.projectId, variables.taskId),
       });
+      invalidateProjectSummaries();
     },
   });
 };

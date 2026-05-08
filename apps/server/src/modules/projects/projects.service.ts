@@ -18,7 +18,7 @@ export class ProjectsService {
   async getCompanyProjects(companyId: number) {
     const projects = await this.projectRepository.getCompanyProjects(companyId);
 
-    return projects.map(mapProjectToDto);
+    return projects.map(({ project, ...stats }) => mapProjectToDto(project, stats));
   }
 
   async getCompanyProject(companyId: number, projectId: number) {
@@ -109,7 +109,6 @@ export class ProjectsService {
       name,
       companyId,
       managerId,
-      description: createProjectDto.description?.trim() ?? "",
       status: ProjectStatus.Active,
       startDate: this.getValidDate(createProjectDto.startDate, "Start date"),
       endDate: createProjectDto.endDate
@@ -129,10 +128,6 @@ export class ProjectsService {
 
     if (updateProjectDto.name !== undefined) {
       updateData.name = this.getValidName(updateProjectDto.name);
-    }
-
-    if (updateProjectDto.description !== undefined) {
-      updateData.description = updateProjectDto.description?.trim() ?? "";
     }
 
     if (updateProjectDto.managerId !== undefined) {

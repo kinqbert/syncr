@@ -1,18 +1,12 @@
 import {
   Box,
   Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
   CircularProgress,
-  IconButton,
   Stack,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import type { CreateProjectBody, Project } from "@syncr/packages";
-import { FolderPlus, Pencil, SquareCheckBig } from "lucide-mui";
+import { FolderPlus } from "lucide-mui";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -22,9 +16,8 @@ import {
   useGetProjectManagerCandidates,
   useUpdateProject,
 } from "@/api/projects";
-import { formatDate } from "@/utils/formatDate";
 
-import { NoProjectsCard, ProjectFormDialog } from "./components";
+import { NoProjectsCard, ProjectCard, ProjectFormDialog } from "./components";
 
 export const ProjectsPage = () => {
   const navigate = useNavigate();
@@ -89,10 +82,10 @@ export const ProjectsPage = () => {
     <Box component="main" sx={{ width: "100%", p: 3 }}>
       <Stack gap={3}>
         <Stack
+          alignItems="center"
           direction={{ xs: "column", sm: "row" }}
           gap={2}
           justifyContent="space-between"
-          alignItems="center"
         >
           <Stack gap={0.5}>
             <Typography variant="h4">Projects</Typography>
@@ -130,66 +123,17 @@ export const ProjectsPage = () => {
           }}
         >
           {projects.map((project) => (
-            <Card
+            <ProjectCard
               key={project.id}
-              variant="outlined"
-              sx={{
-                borderRadius: 2,
-                display: "flex",
-                flexDirection: "column",
-                minHeight: 220,
-              }}
-            >
-              <CardContent sx={{ flex: 1 }}>
-                <Stack direction="row" gap={1} justifyContent="space-between">
-                  <Typography variant="h6">{project.name}</Typography>
-                  <Chip
-                    color="success"
-                    label={project.status}
-                    size="small"
-                    variant="outlined"
-                  />
-                </Stack>
-
-                <Typography color="text.secondary" mt={1.5}>
-                  {project.description || "No description"}
-                </Typography>
-
-                <Stack gap={0.75} mt={3}>
-                  <Typography variant="body2">
-                    Manager:{" "}
-                    {project.managerId
-                      ? (managerById.get(project.managerId) ?? "Unknown")
-                      : "Unassigned"}
-                  </Typography>
-                  <Typography variant="body2">
-                    Starts: {formatDate(project.startDate)}
-                  </Typography>
-                  <Typography variant="body2">
-                    Deadline:{" "}
-                    {project.endDate ? formatDate(project.endDate) : "Not set"}
-                  </Typography>
-                </Stack>
-              </CardContent>
-              <CardActions sx={{ justifyContent: "flex-end", px: 2, pb: 2 }}>
-                <Tooltip title="Open tasks">
-                  <IconButton
-                    aria-label="Edit project"
-                    onClick={() => handleClickTasksButton(project)}
-                  >
-                    <SquareCheckBig fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Edit project">
-                  <IconButton
-                    aria-label="Edit project"
-                    onClick={() => handleOpenEditDialog(project)}
-                  >
-                    <Pencil fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </CardActions>
-            </Card>
+              managerName={
+                project.managerId
+                  ? (managerById.get(project.managerId) ?? "Unknown")
+                  : "Unassigned"
+              }
+              onEdit={handleOpenEditDialog}
+              onOpenTasks={handleClickTasksButton}
+              project={project}
+            />
           ))}
         </Box>
       </Stack>

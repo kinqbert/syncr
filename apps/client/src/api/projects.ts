@@ -196,6 +196,7 @@ export const useAddProjectMember = () => {
       void queryClient.invalidateQueries({
         queryKey: projectsKeys.projectAssignees(variables.projectId),
       });
+      void queryClient.invalidateQueries({ queryKey: projectsKeys.projects });
     },
   });
 };
@@ -217,6 +218,7 @@ export const useRemoveProjectMember = () => {
       void queryClient.invalidateQueries({
         queryKey: ["projects", variables.projectId, "tasks"],
       });
+      void queryClient.invalidateQueries({ queryKey: projectsKeys.projects });
     },
   });
 };
