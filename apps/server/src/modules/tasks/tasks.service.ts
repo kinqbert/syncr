@@ -170,6 +170,10 @@ export class TasksService {
         ? await this.taskRepository.updateTask(taskId, updateData)
         : await this.taskRepository.getTask(taskId);
 
+    if (!task) {
+      throw new NotFoundException("Task not found");
+    }
+
     if (labelNames !== undefined) {
       await this.labelsRepository.setTaskLabels(taskId, projectId, labelNames);
     }
@@ -334,6 +338,11 @@ export class TasksService {
     }
 
     const task = await this.taskRepository.getTask(taskId);
+
+    if (!task) {
+      throw new NotFoundException("Task not found");
+    }
+
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
@@ -369,7 +378,14 @@ export class TasksService {
       throw new BadRequestException("No acceptance criterion fields to update");
     }
 
-    await this.acceptanceCriteriaRepository.updateAcceptanceCriterion(criterionId, updateData);
+    const criterion = await this.acceptanceCriteriaRepository.updateAcceptanceCriterion(
+      criterionId,
+      updateData,
+    );
+
+    if (!criterion) {
+      throw new NotFoundException("Acceptance criterion not found");
+    }
 
     await this.taskActivitiesRepository.createTaskActivity({
       taskId,
@@ -378,6 +394,11 @@ export class TasksService {
     });
 
     const task = await this.taskRepository.getTask(taskId);
+
+    if (!task) {
+      throw new NotFoundException("Task not found");
+    }
+
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
@@ -392,7 +413,12 @@ export class TasksService {
   ) {
     await this.ensureAcceptanceCriterionExists(criterionId, taskId, projectId, companyId);
 
-    await this.acceptanceCriteriaRepository.deleteAcceptanceCriterion(criterionId);
+    const criterion =
+      await this.acceptanceCriteriaRepository.deleteAcceptanceCriterion(criterionId);
+
+    if (!criterion) {
+      throw new NotFoundException("Acceptance criterion not found");
+    }
 
     await this.taskActivitiesRepository.createTaskActivity({
       taskId,
@@ -401,6 +427,11 @@ export class TasksService {
     });
 
     const task = await this.taskRepository.getTask(taskId);
+
+    if (!task) {
+      throw new NotFoundException("Task not found");
+    }
+
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
@@ -409,7 +440,11 @@ export class TasksService {
   async deleteTask(companyId: number, projectId: number, taskId: number) {
     await this.ensureTaskExists(taskId, projectId, companyId);
 
-    await this.taskRepository.deleteTask(taskId);
+    const task = await this.taskRepository.deleteTask(taskId);
+
+    if (!task) {
+      throw new NotFoundException("Task not found");
+    }
   }
 
   private async ensureProjectExists(projectId: number, companyId: number) {

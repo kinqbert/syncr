@@ -27,6 +27,10 @@ export class ProjectsService {
   async getCompanyProject(companyId: number, projectId: number) {
     const project = await this.projectRepository.getCompanyProject(companyId, projectId);
 
+    if (!project) {
+      throw new NotFoundException("Project not found");
+    }
+
     return mapProjectToDto(project);
   }
 
@@ -144,6 +148,8 @@ export class ProjectsService {
   }
 
   async updateProject(companyId: number, projectId: number, updateProjectDto: UpdateProjectDto) {
+    await this.ensureProjectExists(companyId, projectId);
+
     const updateData: Parameters<ProjectsRepository["updateProject"]>[2] = {};
 
     if (updateProjectDto.name !== undefined) {

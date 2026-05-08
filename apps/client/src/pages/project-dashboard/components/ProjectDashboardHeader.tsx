@@ -70,6 +70,37 @@ export const ProjectDashboardHeader = ({
   const managerName = getManagerName(project.managerId, members);
   const completionProgress = getCompletionProgress(project);
 
+  const STATS: {
+    id: number;
+    label: string;
+    value: string;
+    icon?: React.ComponentType<{ sx: { color: string; fontSize: number } }>;
+  }[] = [
+    {
+      id: 0,
+      label: "Project Manager",
+      value: managerName,
+    },
+    {
+      id: 1,
+      label: "Deadline",
+      value: project.endDate ? formatDate(project.endDate) : "No deadline",
+      icon: CalendarDays,
+    },
+    {
+      id: 2,
+      label: "Status",
+      value: capitalize(project.status),
+      icon: Info,
+    },
+    {
+      id: 3,
+      label: "Team Size",
+      value: `${members.length} ${members.length === 1 ? "member" : "members"}`,
+      icon: Users,
+    },
+  ];
+
   return (
     <Paper
       elevation={0}
@@ -87,47 +118,23 @@ export const ProjectDashboardHeader = ({
           justifyContent="space-between"
         >
           <Stack direction={{ xs: "column", sm: "row" }} gap={4}>
-            <Stack gap={0.75}>
-              <Typography color="text.secondary" fontSize={13}>
-                Project Manager
-              </Typography>
-              <Typography fontWeight={700}>{managerName}</Typography>
-            </Stack>
-            <Stack gap={0.75}>
-              <Typography color="text.secondary" fontSize={13}>
-                Deadline
-              </Typography>
-              <Stack alignItems="center" direction="row" gap={0.75}>
-                <CalendarDays sx={{ color: "text.secondary", fontSize: 17 }} />
-                <Typography fontWeight={700}>
-                  {project.endDate
-                    ? formatDate(project.endDate)
-                    : "No deadline"}
-                </Typography>
-              </Stack>
-            </Stack>
-            <Stack gap={0.75}>
-              <Typography color="text.secondary" fontSize={13}>
-                Status
-              </Typography>
-              <Stack alignItems="center" direction="row" gap={0.75}>
-                <Info sx={{ color: "text.secondary", fontSize: 17 }} />
-                <Typography fontWeight={700}>
-                  {capitalize(project.status)}
-                </Typography>
-              </Stack>
-            </Stack>
-            <Stack gap={0.75}>
-              <Typography color="text.secondary" fontSize={13}>
-                Team Size
-              </Typography>
-              <Stack alignItems="center" direction="row" gap={0.75}>
-                <Users sx={{ color: "text.secondary", fontSize: 17 }} />
-                <Typography fontWeight={700}>
-                  {members.length} {members.length === 1 ? "member" : "members"}
-                </Typography>
-              </Stack>
-            </Stack>
+            {STATS.map((stat) => {
+              const Icon = stat.icon;
+
+              return (
+                <Stack key={stat.id} gap={0.75}>
+                  <Typography color="text.secondary" fontSize={13}>
+                    {stat.label}
+                  </Typography>
+                  <Stack alignItems="center" direction="row" gap={0.75}>
+                    {Icon && (
+                      <Icon sx={{ color: "text.secondary", fontSize: 17 }} />
+                    )}
+                    <Typography fontWeight={700}>{stat.value}</Typography>
+                  </Stack>
+                </Stack>
+              );
+            })}
           </Stack>
 
           <Stack gap={1} minWidth={{ xs: "100%", md: 300 }}>

@@ -104,6 +104,10 @@ export class NotificationsService {
   async notifyProjectAdded(recipientId: number, actorId: number, projectId: number) {
     const project = await this.projectsRepository.getProject(projectId);
 
+    if (!project) {
+      throw new NotFoundException("Project not found");
+    }
+
     await this.createAndSendNotification({
       recipientId,
       actorId,
@@ -119,6 +123,10 @@ export class NotificationsService {
 
   private async getTaskMetadata(taskId: number): Promise<NotificationMetadata> {
     const task = await this.tasksRepository.getTask(taskId);
+
+    if (!task) {
+      throw new NotFoundException("Task not found");
+    }
 
     return {
       projectId: task.projectId,
