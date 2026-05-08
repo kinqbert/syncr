@@ -11,6 +11,8 @@ export const PermissionKey = {
   UserInvite: "user:invite",
   UserRemove: "user:remove",
 
+  TeamView: "team:view",
+
   ProjectCreate: "project:create",
   ProjectUpdate: "project:update",
   ProjectDelete: "project:delete",

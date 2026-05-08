@@ -12,6 +12,7 @@ import {
   TaskDetailsPage,
   TasksPage,
 } from "@/pages";
+import { TeamPage } from "@/pages/team";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
       {
         path: "notifications",
         element: <NotificationsPage />,
+      },
+      {
+        path: "team",
+        element: <TeamPage />,
       },
       {
         path: "projects/:projectId",

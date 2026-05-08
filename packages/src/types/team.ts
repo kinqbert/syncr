@@ -1,12 +1,19 @@
-import { type RoleKey } from "./role";
 import { type User } from "./user";
 
 export type TeamUser = Pick<
   User,
   "id" | "email" | "name" | "surname" | "status"
 > & {
-  role: RoleKey;
+  roleName: string;
   assignedTasks: number;
   completedTasks: number;
   workload: number;
+};
+
+export type TeamResponse = {
+  totalMembers: number;
+  activeProjects: number;
+  averageWorkload: number;
+  tasksCompleted: number;
+  members: TeamUser[];
 };

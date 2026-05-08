@@ -7,6 +7,7 @@ import { TaskCommentsRepository } from "src/repositories/task-comments.repositor
 import { AcceptanceCriteriaRepository } from "../../repositories/acceptance-criteria.repository";
 import { LabelsRepository } from "../../repositories/labels.repository";
 import { TasksRepository } from "../../repositories/tasks.repository";
+import { UsersRepository } from "../../repositories/users.repository";
 import { NotificationsService } from "../notifications/notifications.service";
 import {
   CreateTaskAcceptanceCriterionDto,
@@ -26,6 +27,7 @@ export class TasksService {
     private readonly taskCommentsRepository: TaskCommentsRepository,
     private readonly acceptanceCriteriaRepository: AcceptanceCriteriaRepository,
     private readonly labelsRepository: LabelsRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -495,7 +497,7 @@ export class TasksService {
   }
 
   private async ensureAssigneeInCompany(assigneeId: number, companyId: number) {
-    const isUserInCompany = await this.taskRepository.isUserInCompany(assigneeId, companyId);
+    const isUserInCompany = await this.usersRepository.isUserInCompany(assigneeId, companyId);
 
     if (!isUserInCompany) {
       throw new BadRequestException("Task assignee must belong to the company");
@@ -505,7 +507,7 @@ export class TasksService {
   private async ensureAssigneeInProject(assigneeId: number, projectId: number, companyId: number) {
     await this.ensureAssigneeInCompany(assigneeId, companyId);
 
-    const isUserAssignedToProject = await this.taskRepository.isUserAssignedToProject(
+    const isUserAssignedToProject = await this.usersRepository.isUserAssignedToProject(
       assigneeId,
       projectId,
       companyId,

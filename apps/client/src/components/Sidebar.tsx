@@ -2,6 +2,7 @@ import CasesIcon from "@mui/icons-material/Cases";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import PeopleIcon from "@mui/icons-material/People";
 import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
 import {
   Drawer,
@@ -36,6 +37,12 @@ const SIDEBAR_ITEMS: {
     label: "Notifications",
     to: "notifications",
     icon: <NotificationsIcon />,
+  },
+  {
+    id: 3,
+    label: "Team",
+    to: "team",
+    icon: <PeopleIcon />,
   },
 ];
 

@@ -7,9 +7,10 @@ import { CompaniesModule } from "./modules/companies/companies.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { ProjectsModule } from "./modules/projects/projects.module";
 import { TasksModule } from "./modules/tasks/tasks.module";
+import { TeamModule } from './modules/team/team.module';
 
 @Module({
-  imports: [AuthModule, CompaniesModule, ProjectsModule, TasksModule, NotificationsModule],
+  imports: [AuthModule, CompaniesModule, ProjectsModule, TasksModule, NotificationsModule, TeamModule],
   controllers: [AppController],
   providers: [AppService],
 })

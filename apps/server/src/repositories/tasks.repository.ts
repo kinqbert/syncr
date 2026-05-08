@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { and, asc, count, eq, inArray } from "drizzle-orm";
+import { ProjectStatus, TaskStatus } from "@syncr/packages";
+import { and, asc, count, eq, inArray, sql } from "drizzle-orm";
 
 import db from "../db/drizzle";
-import { projects, projectUsers, tasks, userCompanyRoles, users } from "../db/schema";
+import { projects, tasks, users } from "../db/schema";
 
 const taskWithAssigneeColumns = {
   id: tasks.id,
@@ -74,32 +75,17 @@ export class TasksRepository {
     return task;
   }
 
-  // TODO -- move into users repository
-  async isUserInCompany(userId: number, companyId: number) {
-    const [userCompanyRole] = await db
-      .select({ userId: userCompanyRoles.userId })
-      .from(userCompanyRoles)
-      .where(and(eq(userCompanyRoles.userId, userId), eq(userCompanyRoles.companyId, companyId)))
-      .limit(1);
+  async getCompanyTeamTasksData(companyId: number) {
+    const [data] = await db
+      .select({
+        activeProjects: sql<number>`count(distinct ${projects.id}) filter (where ${projects.status} = ${ProjectStatus.Active})::int`,
+        tasksCompleted: sql<number>`count(${tasks.id}) filter (where ${tasks.status} = ${TaskStatus.Done})::int`,
+      })
+      .from(projects)
+      .leftJoin(tasks, eq(tasks.projectId, projects.id))
+      .where(eq(projects.companyId, companyId));
 
-    return Boolean(userCompanyRole);
-  }
-
-  async isUserAssignedToProject(userId: number, projectId: number, companyId: number) {
-    const [projectUser] = await db
-      .select({ userId: projectUsers.userId })
-      .from(projectUsers)
-      .innerJoin(projects, eq(projectUsers.projectId, projects.id))
-      .where(
-        and(
-          eq(projectUsers.userId, userId),
-          eq(projectUsers.projectId, projectId),
-          eq(projects.companyId, companyId),
-        ),
-      )
-      .limit(1);
-
-    return Boolean(projectUser);
+    return data;
   }
 
   async getNextPosition(projectId: number, status: typeof tasks.$inferSelect.status) {

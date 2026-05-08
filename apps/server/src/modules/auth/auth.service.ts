@@ -14,7 +14,7 @@ import {
   verifyRefreshToken,
 } from "../../common/utils/jwt";
 import { AuthRepository } from "../../repositories/auth.repository";
-import { UserRepository } from "../../repositories/user.repository";
+import { UsersRepository } from "../../repositories/users.repository";
 import { LoginDto, RegisterDto } from "./auth.dto";
 import { mapMeResponseDto } from "./auth.mapper";
 
@@ -23,7 +23,7 @@ export class AuthService {
   private readonly SALT_ROUNDS = 10;
 
   constructor(
-    private readonly userRepository: UserRepository,
+    private readonly userRepository: UsersRepository,
 
     private readonly authRepository: AuthRepository,
   ) {}
