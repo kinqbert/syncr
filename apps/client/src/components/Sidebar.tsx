@@ -254,6 +254,8 @@ export const Sidebar = () => {
             borderRadius: 100,
 
             bgcolor: "background.paper",
+
+            transform: "translateY(-50%)",
           }}
         >
           {open ? (
