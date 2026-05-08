@@ -101,7 +101,7 @@ export const UserMenu = () => {
               boxShadow: "0 10px 24px rgba(17, 24, 39, 0.14)",
               mt: 0.75,
               overflow: "hidden",
-              width: 180,
+              width: 200,
             },
           },
           list: {
