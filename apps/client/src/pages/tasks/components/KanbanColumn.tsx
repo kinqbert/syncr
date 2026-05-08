@@ -55,6 +55,7 @@ export const KanbanColumn = ({
         maxWidth: TASK_CARD_WIDTH + PADDING * 2,
         width: "100%",
         borderRadius: 2,
+        position: "relative",
         transition: "background-color 160ms ease",
       }}
     >
@@ -79,13 +80,23 @@ export const KanbanColumn = ({
       </Stack>
 
       {isFormOpen && (
-        <TaskCreateForm
-          isCreating={isCreating}
-          onClose={handleCloseForm}
-          onCreateTask={onCreateTask}
-          projectAssignees={projectAssignees}
-          status={column.status}
-        />
+        <Box
+          sx={{
+            left: 0,
+            position: "absolute",
+            right: 0,
+            top: 40,
+            zIndex: 2,
+          }}
+        >
+          <TaskCreateForm
+            isCreating={isCreating}
+            onClose={handleCloseForm}
+            onCreateTask={onCreateTask}
+            projectAssignees={projectAssignees}
+            status={column.status}
+          />
+        </Box>
       )}
 
       <Box

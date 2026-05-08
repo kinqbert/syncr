@@ -1,6 +1,5 @@
 import {
   Autocomplete,
-  Avatar,
   Button,
   Chip,
   MenuItem,
@@ -21,11 +20,11 @@ import {
 import { useMemo, useState } from "react";
 
 import { useUpdateTask } from "@/api/tasks";
+import { UserAvatar } from "@/components/UserAvatar";
 import { useProject } from "@/hooks";
 import { formatDuration } from "@/utils/formatDuration";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { getUserFullName } from "@/utils/getUserFullName";
-import { getUserInitials } from "@/utils/getUserInitials";
 
 import { Panel } from "../../../components/Panel";
 import { toDateInputValue } from "../utils/format";
@@ -169,14 +168,18 @@ export const TaskDetailsPanel = ({
             size="small"
             value={form.assigneeId ?? ""}
           >
-            <MenuItem value="">Unassigned</MenuItem>
+            <MenuItem divider value="">
+              Unassigned
+            </MenuItem>
 
             {projectAssignees.map((user) => (
               <MenuItem key={user.id} value={user.id}>
                 <Stack alignItems="center" direction="row" gap={1.25}>
-                  <Avatar sx={{ height: 28, width: 28 }}>
-                    {getUserInitials(user.name, user.surname)}
-                  </Avatar>
+                  <UserAvatar
+                    name={user.name}
+                    size={28}
+                    surname={user.surname}
+                  />
 
                   <Stack minWidth={0}>
                     <Typography variant="body2">

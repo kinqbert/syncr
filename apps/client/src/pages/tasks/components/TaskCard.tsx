@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Card,
   Chip,
   IconButton,
@@ -13,9 +12,9 @@ import { Calendar, GripVertical, MoreVertical, UserX } from "lucide-mui";
 import { useState } from "react";
 import { Link as RouterLink } from "react-router";
 
+import { UserAvatar } from "@/components/UserAvatar";
 import { formatDateShort } from "@/utils/formatDate";
 import { getUserFullName } from "@/utils/getUserFullName";
-import { getUserInitials } from "@/utils/getUserInitials";
 
 import { TaskCardMenu } from "./TaskCardMenu";
 
@@ -168,22 +167,12 @@ export const TaskCard = ({
             gap={1.5}
           >
             <Stack direction="row" alignItems="center" gap={1.25} minWidth={0}>
-              <Avatar
-                sx={{
-                  bgcolor: "#e6e7ff",
-                  color: "#6d5dfc",
-                  fontSize: 15,
-                  fontWeight: 700,
-                  height: 34,
-                  width: 34,
-                }}
-              >
-                {task.assignee ? (
-                  getUserInitials(task.assignee.name, task.assignee.surname)
-                ) : (
-                  <UserX fontSize="small" />
-                )}
-              </Avatar>
+              <UserAvatar
+                fallback={<UserX fontSize="small" />}
+                name={task.assignee?.name}
+                size={34}
+                surname={task.assignee?.surname}
+              />
               <Typography color="text.secondary" noWrap variant="body2">
                 {assigneeName}
               </Typography>

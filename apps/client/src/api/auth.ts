@@ -9,6 +9,7 @@ export const authKeys = {
 
 const register = async (body: RegisterBody) => await api.post("register", body);
 const login = async (body: LoginBody) => await api.post("login", body);
+const logout = async () => await api.post("logout");
 
 const me = async () => {
   const response = await api.get<MeResponse>("me");
@@ -25,6 +26,12 @@ export const useRegister = () => {
 export const useLogin = () => {
   return useMutation({
     mutationFn: login,
+  });
+};
+
+export const useLogout = () => {
+  return useMutation({
+    mutationFn: logout,
   });
 };
 

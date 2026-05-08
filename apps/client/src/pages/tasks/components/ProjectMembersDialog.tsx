@@ -1,23 +1,21 @@
 import {
   Alert,
-  Avatar,
+  Autocomplete,
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
-  FormControl,
   IconButton,
-  InputLabel,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  MenuItem,
-  Select,
   Stack,
+  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -25,6 +23,7 @@ import type { ProjectAssignee, ProjectMemberCandidate } from "@syncr/packages";
 import { Trash2, UserPlus } from "lucide-mui";
 import { useMemo, useState } from "react";
 
+import { UserAvatar } from "@/components/UserAvatar";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 type ProjectMembersDialogProps = {
@@ -38,10 +37,6 @@ type ProjectMembersDialogProps = {
   onAddMember: (userId: number) => Promise<void>;
   onClose: () => void;
   onRemoveMember: (userId: number) => Promise<void>;
-};
-
-const getInitials = (person: Pick<ProjectAssignee, "name" | "surname">) => {
-  return `${person.name.at(0) ?? ""}${person.surname.at(0) ?? ""}`.toUpperCase();
 };
 
 const getFullName = (person: Pick<ProjectAssignee, "name" | "surname">) => {
@@ -60,7 +55,9 @@ export const ProjectMembersDialog = ({
   onClose,
   onRemoveMember,
 }: ProjectMembersDialogProps) => {
-  const [selectedUserId, setSelectedUserId] = useState("");
+  const [selectedCandidates, setSelectedCandidates] = useState<
+    ProjectMemberCandidate[]
+  >([]);
   const [formError, setFormError] = useState<string | null>(null);
   const memberIds = useMemo(
     () => new Set(members.map((member) => member.id)),
@@ -71,18 +68,21 @@ export const ProjectMembersDialog = ({
   );
   const isLoading = isMembersLoading || isCandidatesLoading;
 
-  const handleAddMember = async () => {
-    if (!selectedUserId) {
+  const handleAddMembers = async () => {
+    if (selectedCandidates.length === 0) {
       return;
     }
 
     setFormError(null);
 
     try {
-      await onAddMember(Number(selectedUserId));
-      setSelectedUserId("");
+      for (const candidate of selectedCandidates) {
+        await onAddMember(candidate.id);
+      }
+
+      setSelectedCandidates([]);
     } catch (error) {
-      setFormError(getErrorMessage(error, "Could not add member."));
+      setFormError(getErrorMessage(error, "Could not add members."));
     }
   };
 
@@ -107,35 +107,73 @@ export const ProjectMembersDialog = ({
               display: "grid",
               gap: 1,
               gridTemplateColumns: { xs: "1fr", sm: "1fr auto" },
+              alignItems: "end",
             }}
           >
-            <FormControl fullWidth size="small">
-              <InputLabel id="project-member-label">Add person</InputLabel>
-              <Select
-                disabled={
-                  isLoading || isAdding || addableCandidates.length === 0
-                }
-                label="Add person"
-                labelId="project-member-label"
-                onChange={(event) => setSelectedUserId(event.target.value)}
-                value={selectedUserId}
-              >
-                {addableCandidates.map((candidate) => (
-                  <MenuItem key={candidate.id} value={String(candidate.id)}>
-                    {getFullName(candidate)}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete<ProjectMemberCandidate, true, false, false>
+              disabled={isLoading || isAdding || addableCandidates.length === 0}
+              filterSelectedOptions
+              getOptionLabel={getFullName}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              multiple
+              onChange={(_, value) => setSelectedCandidates(value)}
+              options={addableCandidates}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Add people"
+                  placeholder={
+                    selectedCandidates.length === 0 ? "Select people" : ""
+                  }
+                  size="small"
+                />
+              )}
+              renderOption={(props, option) => {
+                const { key, ...optionProps } = props;
+
+                return (
+                  <Box component="li" key={key} {...optionProps}>
+                    <Stack minWidth={0}>
+                      <Typography noWrap>{getFullName(option)}</Typography>
+                      <Typography color="text.secondary" noWrap variant="body2">
+                        {option.email}
+                      </Typography>
+                    </Stack>
+                  </Box>
+                );
+              }}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => {
+                  const { key, ...tagProps } = getTagProps({ index });
+
+                  return (
+                    <Chip
+                      key={key}
+                      label={getFullName(option)}
+                      size="small"
+                      {...tagProps}
+                    />
+                  );
+                })
+              }
+              size="small"
+              value={selectedCandidates}
+            />
             <Button
-              disabled={!selectedUserId || isAdding}
-              onClick={handleAddMember}
+              disabled={selectedCandidates.length === 0 || isAdding}
+              onClick={() => void handleAddMembers()}
               startIcon={<UserPlus />}
-              sx={{ minHeight: 40, whiteSpace: "nowrap" }}
+              sx={{
+                minWidth: 80,
+                width: { xs: "100%", sm: "auto" },
+                whiteSpace: "nowrap",
+              }}
               type="button"
               variant="contained"
             >
-              Add
+              {selectedCandidates.length > 1
+                ? `Add ${selectedCandidates.length}`
+                : "Add"}
             </Button>
           </Box>
           <Divider />
@@ -165,7 +203,7 @@ export const ProjectMembersDialog = ({
                   }
                 >
                   <ListItemAvatar>
-                    <Avatar>{getInitials(member)}</Avatar>
+                    <UserAvatar name={member.name} surname={member.surname} />
                   </ListItemAvatar>
                   <ListItemText
                     primary={getFullName(member)}

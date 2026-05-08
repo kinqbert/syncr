@@ -1,3 +1,3 @@
 export const getUserInitials = (name: string, surname: string) => {
-  return `${name.charAt(0)}${surname.charAt(0)}`.toUpperCase();
+  return `${name.trim().charAt(0)}${surname.trim().charAt(0)}`.toUpperCase();
 };

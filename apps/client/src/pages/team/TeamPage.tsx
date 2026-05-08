@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Button,
   Chip,
@@ -20,8 +19,8 @@ import {
 import { CircleCheck, Mail, MoreVertical } from "lucide-mui";
 
 import { useGetTeam } from "@/api/team";
+import { UserAvatar } from "@/components/UserAvatar";
 import { getUserFullName } from "@/utils/getUserFullName";
-import { getUserInitials } from "@/utils/getUserInitials";
 
 import { StatCard } from "./components/StatCard";
 import { formatPercent, normalizeWorkload } from "./utils/format";
@@ -156,18 +155,11 @@ export const TeamPage = () => {
                   >
                     <TableCell>
                       <Stack alignItems="center" direction="row" gap={1.5}>
-                        <Avatar
-                          sx={{
-                            bgcolor: "rgba(79, 70, 229, 0.16)",
-                            color: "primary.main",
-                            fontSize: 13,
-                            fontWeight: 500,
-                            height: 36,
-                            width: 36,
-                          }}
-                        >
-                          {getUserInitials(member.name, member.surname)}
-                        </Avatar>
+                        <UserAvatar
+                          name={member.name}
+                          size={36}
+                          surname={member.surname}
+                        />
                         <Typography variant="subtitle2">
                           {getUserFullName(member.name, member.surname)}
                         </Typography>

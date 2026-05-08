@@ -12,6 +12,7 @@ import {
   Select,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import type {
   CreateProjectBody,
@@ -21,6 +22,7 @@ import type {
 import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
+import { UserAvatar } from "@/components/UserAvatar";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
@@ -119,7 +121,7 @@ export const ProjectFormDialog = ({
   };
 
   return (
-    <Dialog fullWidth maxWidth="sm" onClose={onClose} open={isOpen}>
+    <Dialog fullWidth maxWidth="xs" onClose={onClose} open={isOpen}>
       <DialogTitle>{project ? "Update project" : "Create project"}</DialogTitle>
       <DialogContent>
         <Stack
@@ -174,6 +176,7 @@ export const ProjectFormDialog = ({
           />
           <Box
             sx={{
+              alignItems: "end",
               display: "grid",
               gap: 1,
               gridTemplateColumns: { xs: "1fr", sm: "1fr auto" },
@@ -193,10 +196,30 @@ export const ProjectFormDialog = ({
                     label="Project manager"
                     labelId="project-manager-label"
                   >
-                    <MenuItem value="">Unassigned</MenuItem>
+                    <MenuItem divider value="">
+                      Unassigned
+                    </MenuItem>
                     {managerCandidates.map((manager) => (
                       <MenuItem key={manager.id} value={String(manager.id)}>
-                        {manager.name} {manager.surname}
+                        <Stack alignItems="center" direction="row" gap={1.25}>
+                          <UserAvatar
+                            name={manager.name}
+                            size={28}
+                            surname={manager.surname}
+                          />
+                          <Stack minWidth={0}>
+                            <Typography noWrap variant="body2">
+                              {manager.name} {manager.surname}
+                            </Typography>
+                            <Typography
+                              color="text.secondary"
+                              noWrap
+                              variant="caption"
+                            >
+                              {manager.email}
+                            </Typography>
+                          </Stack>
+                        </Stack>
                       </MenuItem>
                     ))}
                   </Select>
@@ -206,7 +229,6 @@ export const ProjectFormDialog = ({
             <Button
               disabled={!canAssignCurrentUser || isCurrentUserSelected}
               onClick={handleAssignCurrentUser}
-              sx={{ minHeight: 56, whiteSpace: "nowrap" }}
               type="button"
               variant="outlined"
             >

@@ -1,6 +1,5 @@
 import {
   Alert,
-  Avatar,
   Button,
   CircularProgress,
   Divider,
@@ -13,6 +12,7 @@ import { MessageCircle } from "lucide-mui";
 import { useState } from "react";
 
 import { useCreateTaskComment, useGetTaskComments } from "@/api/tasks";
+import { UserAvatar } from "@/components/UserAvatar";
 import { useProject } from "@/hooks";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
 import { getErrorMessage } from "@/utils/getErrorMessage";
@@ -21,14 +21,6 @@ import { Panel } from "../../../components/Panel";
 
 type TaskCommentsPanelProps = {
   taskId: number;
-};
-
-const getInitials = (author: TaskComment["author"]) => {
-  if (!author) {
-    return "?";
-  }
-
-  return `${author.name.at(0) ?? ""}${author.surname.at(0) ?? ""}`.toUpperCase();
 };
 
 const getAuthorName = (author: TaskComment["author"]) => {
@@ -97,17 +89,19 @@ export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
             gap={1.25}
             key={item.id}
           >
-            <Avatar sx={{ height: 24, width: 24 }}>
-              {getInitials(item.author)}
-            </Avatar>
-            <Stack minWidth={0}>
+            <UserAvatar
+              name={item.author?.name}
+              size={24}
+              surname={item.author?.surname}
+            />
+            <Stack minWidth={0} gap={0.75}>
               <Stack
-                alignItems="baseline"
+                alignItems="center"
                 direction="row"
                 flexWrap="wrap"
                 gap={0.75}
               >
-                <Typography variant="caption">
+                <Typography variant="caption" fontWeight={500}>
                   {getAuthorName(item.author)}
                 </Typography>
                 <Typography color="text.secondary" variant="caption">
@@ -135,7 +129,6 @@ export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
             disabled={createTaskComment.isPending}
             fullWidth
             minRows={2}
-            multiline
             onChange={(event) => setComment(event.target.value)}
             placeholder="Add a comment..."
             size="small"

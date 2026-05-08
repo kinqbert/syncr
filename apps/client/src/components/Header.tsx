@@ -6,6 +6,7 @@ import { useSidebarStore } from "@/store/useSidebarStore";
 
 import { CompanySwitcher } from "./CompanySwitcher";
 import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "./Sidebar";
+import { UserMenu } from "./UserMenu";
 
 export const HEADER_HEIGHT = 64;
 
@@ -83,8 +84,16 @@ export const Header = () => {
           </Typography>
         </Stack>
 
-        <Stack px={2}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          flex={1}
+          minWidth={0}
+          px={2}
+        >
           <CompanySwitcher />
+          <UserMenu />
         </Stack>
       </Toolbar>
     </AppBar>

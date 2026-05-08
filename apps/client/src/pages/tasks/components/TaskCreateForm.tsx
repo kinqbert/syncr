@@ -6,6 +6,7 @@ import {
   MenuItem,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import type {
   CreateTaskBody,
@@ -16,6 +17,7 @@ import type {
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import { UserAvatar } from "@/components/UserAvatar";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { getUserFullName } from "@/utils/getUserFullName";
 
@@ -99,10 +101,13 @@ export const TaskCreateForm = ({
         component="form"
         onSubmit={handleSubmit(handleCreateTask)}
         sx={{
+          bgcolor: "background.paper",
           border: "1px solid",
           borderColor: "divider",
-          borderRadius: 2,
-          mt: 1.5,
+          borderRadius: 1.5,
+          boxShadow: "0 16px 32px rgba(15, 23, 42, 0.14)",
+          mt: 1,
+          mx: 1,
           p: 1.5,
         }}
       >
@@ -156,10 +161,30 @@ export const TaskCreateForm = ({
                   },
                 }}
               >
-                <MenuItem value="">Unassigned</MenuItem>
+                <MenuItem divider value="">
+                  Unassigned
+                </MenuItem>
                 {projectAssignees.map((assignee) => (
                   <MenuItem key={assignee.id} value={String(assignee.id)}>
-                    {getUserFullName(assignee.name, assignee.surname)}
+                    <Stack alignItems="center" direction="row" gap={1.25}>
+                      <UserAvatar
+                        name={assignee.name}
+                        size={28}
+                        surname={assignee.surname}
+                      />
+                      <Stack minWidth={0}>
+                        <Typography noWrap variant="body2">
+                          {getUserFullName(assignee.name, assignee.surname)}
+                        </Typography>
+                        <Typography
+                          color="text.secondary"
+                          noWrap
+                          variant="caption"
+                        >
+                          {assignee.email}
+                        </Typography>
+                      </Stack>
+                    </Stack>
                   </MenuItem>
                 ))}
               </TextField>

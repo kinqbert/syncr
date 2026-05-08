@@ -235,11 +235,11 @@ export const Sidebar = () => {
           onClick={toggleSidebar}
           color="info"
           sx={{
-            width: 32,
-            height: 32,
-
             minWidth: 32,
             maxWidth: 32,
+
+            minHeight: 32,
+            maxHeight: 32,
 
             p: 0,
 
