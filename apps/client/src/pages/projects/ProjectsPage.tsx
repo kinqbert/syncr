@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { CreateProjectBody, Project } from "@syncr/packages";
-import { FolderPlus, SquareCheckBig, SquarePen } from "lucide-mui";
+import { FolderPlus, Pencil, SquareCheckBig } from "lucide-mui";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -185,7 +185,7 @@ export const ProjectsPage = () => {
                     aria-label="Edit project"
                     onClick={() => handleOpenEditDialog(project)}
                   >
-                    <SquarePen fontSize="small" />
+                    <Pencil fontSize="small" />
                   </IconButton>
                 </Tooltip>
               </CardActions>

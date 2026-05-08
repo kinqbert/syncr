@@ -15,12 +15,15 @@ export const Header = () => {
   return (
     <AppBar
       color="default"
-      elevation={1}
+      elevation={0}
       position="sticky"
       sx={{
         height: HEADER_HEIGHT,
         backgroundColor: "background.paper",
         p: 0,
+
+        borderBottom: 1,
+        borderColor: "divider",
       }}
     >
       <Toolbar
