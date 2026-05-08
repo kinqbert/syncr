@@ -51,7 +51,7 @@ const formatPriority = (priority: TaskPriority) => {
   return priority.charAt(0).toUpperCase() + priority.slice(1);
 };
 
-export const TASK_CARD_WIDTH = 320;
+export const TASK_CARD_WIDTH = 360;
 
 export const TaskCard = ({
   detailsPath,
