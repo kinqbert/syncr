@@ -4,12 +4,17 @@ import type {
   CreateTaskCommentBody,
   ReorderTasksBody,
   Task,
-  TaskActivity,
+  TaskActivitiesPage,
   TaskComment,
   UpdateTaskAcceptanceCriterionBody,
   UpdateTaskBody,
 } from "@syncr/packages";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  type InfiniteData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
 
 import api from "@/lib/axios";
 import { queryClient } from "@/lib/react-query";
@@ -201,12 +206,19 @@ const getTaskComments = async ({
 const getTaskActivities = async ({
   projectId,
   taskId,
+  limit,
+  offset,
 }: {
   projectId: number;
   taskId: number;
+  limit: number;
+  offset: number;
 }) => {
-  const response = await api.get<TaskActivity[]>(
+  const response = await api.get<TaskActivitiesPage>(
     `projects/${projectId}/tasks/${taskId}/activities`,
+    {
+      params: { limit, offset },
+    },
   );
 
   return response.data;
@@ -348,11 +360,24 @@ export const useCreateTaskComment = () => {
 export const useGetTaskActivities = (
   projectId: number,
   taskId: number,
+  limit: number,
   enabled = true,
 ) => {
-  return useQuery({
+  return useInfiniteQuery<
+    TaskActivitiesPage,
+    Error,
+    InfiniteData<TaskActivitiesPage>,
+    ReturnType<typeof taskKeys.activities>,
+    number
+  >({
     enabled,
-    queryFn: () => getTaskActivities({ projectId, taskId }),
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.hasMore
+        ? pages.reduce((count, page) => count + page.items.length, 0)
+        : undefined,
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
+      getTaskActivities({ projectId, taskId, limit, offset: pageParam }),
     queryKey: taskKeys.activities(projectId, taskId),
   });
 };

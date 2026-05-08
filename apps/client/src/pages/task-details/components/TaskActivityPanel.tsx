@@ -1,4 +1,10 @@
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { type TaskActivity, TaskActivityAction } from "@syncr/packages";
 
 import { useGetTaskActivities } from "@/api/tasks";
@@ -6,6 +12,8 @@ import { useProject } from "@/hooks";
 import { formatDuration } from "@/utils/formatDuration";
 
 import { Panel } from "../../../components/Panel";
+
+const ACTIVITY_PAGE_SIZE = 5;
 
 type TaskActivityPanelProps = {
   taskId: number;
@@ -71,10 +79,10 @@ const getEstimateChangeText = (activity: TaskActivity) => {
 export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
   const { projectId } = useProject();
 
-  const { data: activities = [], isPending } = useGetTaskActivities(
-    projectId,
-    taskId,
-  );
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending } =
+    useGetTaskActivities(projectId, taskId, ACTIVITY_PAGE_SIZE);
+
+  const activities = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
     <Panel>
@@ -134,6 +142,17 @@ export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
             </Stack>
           );
         })}
+
+        {hasNextPage ? (
+          <Button
+            disabled={isFetchingNextPage}
+            onClick={() => void fetchNextPage()}
+            size="small"
+            sx={{ alignSelf: "flex-start" }}
+          >
+            {isFetchingNextPage ? "Loading..." : "Load more"}
+          </Button>
+        ) : null}
       </Stack>
     </Panel>
   );

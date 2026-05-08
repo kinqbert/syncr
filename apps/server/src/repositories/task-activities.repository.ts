@@ -43,13 +43,15 @@ export class TaskActivitiesRepository {
     return activity;
   }
 
-  async getTaskActivities(taskId: number) {
+  async getTaskActivities(taskId: number, limit: number, offset: number) {
     const activities = await db
       .select(taskActivityColumns)
       .from(taskActivities)
       .leftJoin(users, eq(taskActivities.userId, users.id))
       .where(eq(taskActivities.taskId, taskId))
-      .orderBy(desc(taskActivities.createdAt), desc(taskActivities.id));
+      .orderBy(desc(taskActivities.createdAt), desc(taskActivities.id))
+      .limit(limit + 1)
+      .offset(offset);
 
     return activities;
   }

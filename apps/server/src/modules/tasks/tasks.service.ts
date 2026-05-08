@@ -199,12 +199,27 @@ export class TasksService {
     return comments.map(mapTaskCommentToDto);
   }
 
-  async getTaskActivities(companyId: number, projectId: number, taskId: number) {
+  async getTaskActivities(
+    companyId: number,
+    projectId: number,
+    taskId: number,
+    limit: number,
+    offset: number,
+  ) {
     await this.ensureTaskExists(taskId, projectId, companyId);
 
-    const activities = await this.taskActivitiesRepository.getTaskActivities(taskId);
+    const validatedLimit = this.getValidActivityLimit(limit);
+    const validatedOffset = this.getValidActivityOffset(offset);
+    const activities = await this.taskActivitiesRepository.getTaskActivities(
+      taskId,
+      validatedLimit,
+      validatedOffset,
+    );
 
-    return activities.map(mapTaskActivityToDto);
+    return {
+      items: activities.slice(0, validatedLimit).map(mapTaskActivityToDto),
+      hasMore: activities.length > validatedLimit,
+    };
   }
 
   async createTaskComment(
@@ -487,6 +502,22 @@ export class TasksService {
 
     if (!Number.isInteger(value) || value < 0 || value % 15 !== 0) {
       throw new BadRequestException("Task estimate must be divisible by 15 minutes");
+    }
+
+    return value;
+  }
+
+  private getValidActivityLimit(value: number) {
+    if (!Number.isInteger(value) || value < 1) {
+      throw new BadRequestException("Limit must be a positive number");
+    }
+
+    return value;
+  }
+
+  private getValidActivityOffset(value: number) {
+    if (!Number.isInteger(value) || value < 0) {
+      throw new BadRequestException("Offset must be a non-negative number");
     }
 
     return value;

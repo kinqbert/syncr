@@ -95,6 +95,11 @@ export type TaskActivity = {
   createdAt: string;
 };
 
+export type TaskActivitiesPage = {
+  items: TaskActivity[];
+  hasMore: boolean;
+};
+
 export type Task = {
   id: number;
   name: string;

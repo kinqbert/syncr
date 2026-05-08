@@ -5,6 +5,7 @@ import {
   ReorderTaskItem,
   ReorderTasksBody,
   Task,
+  TaskActivitiesPage,
   TaskAcceptanceCriterion,
   TaskActivity,
   TaskActivityAction,
@@ -100,6 +101,15 @@ export class TaskActivityDto implements TaskActivity {
 
   @IsDateString()
   createdAt: string;
+}
+
+export class TaskActivitiesPageDto implements TaskActivitiesPage {
+  @ValidateNested({ each: true })
+  @Type(() => TaskActivityDto)
+  items: TaskActivityDto[];
+
+  @IsBoolean()
+  hasMore: boolean;
 }
 
 export class TaskLabelDto implements TaskLabel {

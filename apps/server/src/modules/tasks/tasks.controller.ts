@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
@@ -9,9 +10,10 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
-import { PermissionKey, TaskActivity, TaskComment } from "@syncr/packages";
+import { PermissionKey, TaskActivitiesPage, TaskComment } from "@syncr/packages";
 import { UserId } from "src/common/decorators/user-id.decorator";
 
 import { CompanyId } from "../../common/decorators/company-id.decorator";
@@ -91,8 +93,10 @@ export class TasksController {
     @CompanyId() companyId: number,
     @Param("projectId", ParseIntPipe) projectId: number,
     @Param("taskId", ParseIntPipe) taskId: number,
-  ): Promise<TaskActivity[]> {
-    return await this.taskService.getTaskActivities(companyId, projectId, taskId);
+    @Query("limit", new DefaultValuePipe(5), ParseIntPipe) limit: number,
+    @Query("offset", new DefaultValuePipe(0), ParseIntPipe) offset: number,
+  ): Promise<TaskActivitiesPage> {
+    return await this.taskService.getTaskActivities(companyId, projectId, taskId, limit, offset);
   }
 
   @Get(":taskId/comments")
