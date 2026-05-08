@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Folders,
   LayoutDashboard,
+  Settings,
   Users,
 } from "lucide-mui";
 import { NavLink } from "react-router";
@@ -49,6 +50,12 @@ const SIDEBAR_ITEMS: {
     label: "Notifications",
     to: "notifications",
     icon: <Bell />,
+  },
+  {
+    id: 3,
+    label: "Settings",
+    to: "settings",
+    icon: <Settings />,
   },
 ];
 

@@ -4,5 +4,6 @@ export * from "./not-found";
 export * from "./notifications";
 export * from "./projects";
 export * from "./register";
+export * from "./settings";
 export * from "./task-details";
 export * from "./tasks";
