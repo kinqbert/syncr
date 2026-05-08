@@ -21,3 +21,15 @@ export type NotificationEntityType =
   (typeof NotificationEntityType)[keyof typeof NotificationEntityType];
 
 export type NotificationMetadata = { taskName?: string; projectName?: string };
+
+export type NotificationPayload = {
+  id?: number;
+  recipientId?: number;
+  actorId?: number | null;
+  type: NotificationType;
+  entityType: NotificationEntityType;
+  entityId: number;
+  metadata?: NotificationMetadata | null;
+  isRead?: boolean;
+  createdAt?: Date | string;
+};
