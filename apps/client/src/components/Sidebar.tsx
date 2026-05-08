@@ -1,9 +1,3 @@
-import CasesIcon from "@mui/icons-material/Cases";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import PeopleIcon from "@mui/icons-material/People";
-import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
 import {
   Box,
   Button,
@@ -17,6 +11,14 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import {
+  Bell,
+  ChevronLeft,
+  ChevronRight,
+  Folders,
+  LayoutDashboard,
+  Users,
+} from "lucide-mui";
 import { NavLink } from "react-router";
 
 import { useGetNotifications } from "@/api/notifications";
@@ -33,19 +35,19 @@ const SIDEBAR_ITEMS: {
   to: string;
   icon: React.ReactNode;
 }[] = [
-  { id: 0, label: "Dashboard", to: "/", icon: <SpaceDashboardIcon /> },
-  { id: 1, label: "Projects", to: "projects", icon: <CasesIcon /> },
+  { id: 0, label: "Dashboard", to: "/", icon: <LayoutDashboard /> },
+  { id: 1, label: "Projects", to: "projects", icon: <Folders /> },
   {
     id: 3,
     label: "Team",
     to: "team",
-    icon: <PeopleIcon />,
+    icon: <Users />,
   },
   {
     id: 2,
     label: "Notifications",
     to: "notifications",
-    icon: <NotificationsIcon />,
+    icon: <Bell />,
   },
 ];
 
@@ -73,7 +75,7 @@ export const Sidebar = () => {
           display: "flex",
           flexDirection: "column",
           overflowX: "hidden",
-          top: { xs: 56, sm: HEADER_HEIGHT },
+          top: HEADER_HEIGHT,
           height: {
             xs: "calc(100% - 56px)",
             sm: `calc(100% - ${HEADER_HEIGHT}px)`,
@@ -224,6 +226,7 @@ export const Sidebar = () => {
               disableRipple
               aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
               onClick={toggleSidebar}
+              color="info"
               sx={{
                 width: "100%",
                 height: "100%",
@@ -234,7 +237,7 @@ export const Sidebar = () => {
                 borderRadius: 0,
               }}
             >
-              {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+              {open ? <ChevronLeft /> : <ChevronRight />}
             </Button>
           </Tooltip>
         </ListItem>

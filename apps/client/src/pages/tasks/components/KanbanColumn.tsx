@@ -1,12 +1,11 @@
 import { useDroppable } from "@dnd-kit/core";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import type {
   CreateTaskBody,
   ProjectAssignee,
   TaskStatus,
 } from "@syncr/packages";
+import { Plus, X } from "lucide-mui";
 import { useState } from "react";
 
 import { TASK_CARD_WIDTH } from "./TaskCard";
@@ -74,7 +73,7 @@ export const KanbanColumn = ({
             disabled={isCreating}
             onClick={isFormOpen ? handleCloseForm : handleOpenForm}
           >
-            {isFormOpen ? <CloseIcon /> : <AddIcon />}
+            {isFormOpen ? <X /> : <Plus />}
           </IconButton>
         </Tooltip>
       </Stack>

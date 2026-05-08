@@ -1,4 +1,3 @@
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import {
   Alert,
   Avatar,
@@ -10,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { TaskComment } from "@syncr/packages";
+import { MessageCircle } from "lucide-mui";
 import { useState } from "react";
 
 import { useCreateTaskComment, useGetTaskComments } from "@/api/tasks";
@@ -72,7 +72,7 @@ export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
     <Panel>
       <Stack gap={2}>
         <Stack alignItems="center" direction="row" gap={1}>
-          <ChatBubbleOutlineIcon fontSize="small" />
+          <MessageCircle fontSize="small" />
           <Typography variant="subtitle1">Comments</Typography>
         </Stack>
 

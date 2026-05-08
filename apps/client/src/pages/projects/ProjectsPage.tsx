@@ -1,6 +1,3 @@
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import {
   Box,
   Button,
@@ -15,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { CreateProjectBody, Project } from "@syncr/packages";
+import { FolderPlus, SquareCheckBig, SquarePen } from "lucide-mui";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -105,7 +103,7 @@ export const ProjectsPage = () => {
           </Stack>
           <Button
             onClick={handleOpenCreateDialog}
-            startIcon={<AddIcon />}
+            startIcon={<FolderPlus />}
             variant="contained"
           >
             Create project
@@ -179,7 +177,7 @@ export const ProjectsPage = () => {
                     aria-label="Edit project"
                     onClick={() => handleClickTasksButton(project)}
                   >
-                    <TaskAltIcon />
+                    <SquareCheckBig fontSize="small" />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Edit project">
@@ -187,7 +185,7 @@ export const ProjectsPage = () => {
                     aria-label="Edit project"
                     onClick={() => handleOpenEditDialog(project)}
                   >
-                    <EditIcon />
+                    <SquarePen fontSize="small" />
                   </IconButton>
                 </Tooltip>
               </CardActions>

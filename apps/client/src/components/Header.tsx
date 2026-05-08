@@ -1,5 +1,5 @@
-import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
-import { AppBar, Stack, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Stack, Toolbar, Typography } from "@mui/material";
+import { FolderKanban } from "lucide-mui";
 
 import { theme } from "@/lib/theme";
 import { useSidebarStore } from "@/store/useSidebarStore";
@@ -23,7 +23,16 @@ export const Header = () => {
         p: 0,
       }}
     >
-      <Toolbar disableGutters>
+      <Toolbar
+        disableGutters
+        sx={{
+          height: HEADER_HEIGHT,
+          minHeight: {
+            xs: HEADER_HEIGHT,
+            sm: HEADER_HEIGHT,
+          },
+        }}
+      >
         <Stack
           height="100%"
           width={open ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH}
@@ -33,7 +42,7 @@ export const Header = () => {
           borderRight={1}
           borderColor="divider"
           boxSizing="border-box"
-          px={1.75}
+          px={2}
           sx={{
             transition: theme.transitions.create("width", {
               duration: theme.transitions.duration.enteringScreen,
@@ -41,7 +50,21 @@ export const Header = () => {
             }),
           }}
         >
-          <ViewKanbanIcon fontSize="large" color="primary" />
+          <Box
+            sx={{
+              width: 32,
+              minWidth: 32,
+              minHeight: 32,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              color: "primary.contrastText",
+              bgcolor: "primary.main",
+              borderRadius: 2,
+            }}
+          >
+            <FolderKanban sx={{ fontSize: 20 }} />
+          </Box>
           <Typography
             variant="h6"
             color="primary"

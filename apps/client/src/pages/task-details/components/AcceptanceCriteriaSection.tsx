@@ -1,5 +1,3 @@
-import AddIcon from "@mui/icons-material/Add";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
   Box,
   Checkbox,
@@ -13,6 +11,7 @@ import type {
   TaskAcceptanceCriterion,
   UpdateTaskAcceptanceCriterionBody,
 } from "@syncr/packages";
+import { Plus, Trash2 } from "lucide-mui";
 import { useState } from "react";
 
 import { EditableText } from "../../../components/EditableText";
@@ -100,7 +99,7 @@ export const AcceptanceCriteriaSection = ({
                 onClick={() => void onDelete(criterion.id)}
                 size="small"
               >
-                <DeleteOutlineIcon fontSize="small" />
+                <Trash2 fontSize="small" />
               </IconButton>
             </span>
           </Tooltip>
@@ -130,7 +129,7 @@ export const AcceptanceCriteriaSection = ({
               disabled={isCreating || !newCriterion.trim()}
               type="submit"
             >
-              <AddIcon />
+              <Plus />
             </IconButton>
           </span>
         </Tooltip>

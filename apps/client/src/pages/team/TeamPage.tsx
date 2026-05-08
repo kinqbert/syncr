@@ -1,6 +1,3 @@
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   Avatar,
   Box,
@@ -20,6 +17,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { CircleCheck, Mail, MoreVertical } from "lucide-mui";
 
 import { useGetTeam } from "@/api/team";
 import { getUserFullName } from "@/utils/getUserFullName";
@@ -59,7 +57,7 @@ export const TeamPage = () => {
             Manage team members and their workload
           </Typography>
         </Stack>
-        <Button startIcon={<MailOutlineIcon />} variant="contained">
+        <Button startIcon={<Mail />} variant="contained">
           Invite Member
         </Button>
       </Stack>
@@ -192,7 +190,7 @@ export const TeamPage = () => {
                     </TableCell>
                     <TableCell>
                       <Stack alignItems="center" direction="row" gap={0.75}>
-                        <CheckCircleOutlineIcon
+                        <CircleCheck
                           color="success"
                           sx={{ fontSize: 17 }}
                         />
@@ -236,7 +234,7 @@ export const TeamPage = () => {
                     <TableCell align="right">
                       <Tooltip title="Member actions">
                         <IconButton aria-label="Member actions" size="small">
-                          <MoreVertIcon />
+                          <MoreVertical />
                         </IconButton>
                       </Tooltip>
                     </TableCell>

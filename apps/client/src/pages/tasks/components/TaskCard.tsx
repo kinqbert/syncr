@@ -1,7 +1,3 @@
-import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import PersonOffOutlinedIcon from "@mui/icons-material/PersonOffOutlined";
 import {
   Avatar,
   Card,
@@ -13,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { Task, TaskPriority } from "@syncr/packages";
+import { Calendar, GripVertical, MoreVertical, UserX } from "lucide-mui";
 import { useState } from "react";
 import { Link as RouterLink } from "react-router";
 
@@ -114,7 +111,7 @@ export const TaskCard = ({
                 sx={{ width: "34px", p: 0, mt: 0.25, cursor: "inherit" }}
                 {...dragHandleProps}
               >
-                <DragIndicatorIcon />
+                <GripVertical />
               </IconButton>
               {detailsPath ? (
                 <MuiLink
@@ -159,7 +156,7 @@ export const TaskCard = ({
                   event.stopPropagation();
                 }}
               >
-                <MoreVertIcon fontSize="small" />
+                <MoreVertical fontSize="small" />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -184,7 +181,7 @@ export const TaskCard = ({
                 {task.assignee ? (
                   getUserInitials(task.assignee.name, task.assignee.surname)
                 ) : (
-                  <PersonOffOutlinedIcon fontSize="small" />
+                  <UserX fontSize="small" />
                 )}
               </Avatar>
               <Typography color="text.secondary" noWrap variant="body2">
@@ -204,7 +201,7 @@ export const TaskCard = ({
               />
 
               <Stack direction="row" alignItems="center" gap={0.5}>
-                <CalendarTodayOutlinedIcon
+                <Calendar
                   sx={{ color: "text.secondary", fontSize: 18 }}
                 />
                 <Typography color="text.secondary">

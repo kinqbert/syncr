@@ -1,5 +1,5 @@
-import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import { Box, Button, Stack, Typography } from "@mui/material";
+import { Users } from "lucide-mui";
 import { useState } from "react";
 import { useParams } from "react-router";
 
@@ -66,7 +66,7 @@ export const TasksPage = () => {
         </Stack>
         <Button
           onClick={() => setIsMembersDialogOpen(true)}
-          startIcon={<GroupsOutlinedIcon />}
+          startIcon={<Users />}
           sx={{ whiteSpace: "nowrap" }}
           variant="outlined"
         >

@@ -1,9 +1,3 @@
-import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import EventOutlinedIcon from "@mui/icons-material/EventOutlined";
-import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
-import RuleOutlinedIcon from "@mui/icons-material/RuleOutlined";
 import {
   Box,
   Button,
@@ -15,6 +9,14 @@ import {
   Typography,
 } from "@mui/material";
 import { type NotificationPayload, NotificationType } from "@syncr/packages";
+import {
+  CalendarClock,
+  CircleCheck,
+  ClipboardCheck,
+  FolderPlus,
+  ListChecks,
+  MessageCircle,
+} from "lucide-mui";
 import { useMemo, useState } from "react";
 
 import {
@@ -63,19 +65,19 @@ const getNotificationTitle = (notification: NotificationPayload) => {
 const getNotificationIcon = (notification: NotificationPayload) => {
   switch (notification.type) {
     case NotificationType.TaskAssigned:
-      return <AssignmentTurnedInOutlinedIcon fontSize="small" />;
+      return <ClipboardCheck fontSize="small" />;
     case NotificationType.TaskCommented:
-      return <ChatBubbleOutlineIcon fontSize="small" />;
+      return <MessageCircle fontSize="small" />;
     case NotificationType.TaskStatusChanged:
-      return <CheckCircleOutlineIcon fontSize="small" />;
+      return <CircleCheck fontSize="small" />;
     case NotificationType.TaskDeadlineChanged:
-      return <EventOutlinedIcon fontSize="small" />;
+      return <CalendarClock fontSize="small" />;
     case NotificationType.TaskAcceptanceCriterionAdded:
-      return <RuleOutlinedIcon fontSize="small" />;
+      return <ListChecks fontSize="small" />;
     case NotificationType.ProjectAdded:
-      return <GroupAddOutlinedIcon fontSize="small" />;
+      return <FolderPlus fontSize="small" />;
     default:
-      return <CheckCircleOutlineIcon fontSize="small" />;
+      return <CircleCheck fontSize="small" />;
   }
 };
 

@@ -1,5 +1,3 @@
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import PersonAddAlt1OutlinedIcon from "@mui/icons-material/PersonAddAlt1Outlined";
 import {
   Alert,
   Avatar,
@@ -24,6 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { ProjectAssignee, ProjectMemberCandidate } from "@syncr/packages";
+import { Trash2, UserPlus } from "lucide-mui";
 import { useMemo, useState } from "react";
 
 import { getErrorMessage } from "@/utils/getErrorMessage";
@@ -131,7 +130,7 @@ export const ProjectMembersDialog = ({
             <Button
               disabled={!selectedUserId || isAdding}
               onClick={handleAddMember}
-              startIcon={<PersonAddAlt1OutlinedIcon />}
+              startIcon={<UserPlus />}
               sx={{ minHeight: 40, whiteSpace: "nowrap" }}
               type="button"
               variant="contained"
@@ -159,7 +158,7 @@ export const ProjectMembersDialog = ({
                           edge="end"
                           onClick={() => void handleRemoveMember(member.id)}
                         >
-                          <DeleteOutlineIcon fontSize="small" />
+                          <Trash2 fontSize="small" />
                         </IconButton>
                       </span>
                     </Tooltip>

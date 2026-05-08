@@ -1,6 +1,6 @@
-import DeleteIcon from "@mui/icons-material/Delete";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import type { Task } from "@syncr/packages";
+import { Trash2 } from "lucide-mui";
 import { useState } from "react";
 
 import { TaskDeleteDialog } from "./TaskDeleteDialog";
@@ -41,7 +41,7 @@ export const TaskCardMenu = ({
           }}
         >
           <ListItemIcon>
-            <DeleteIcon color="error" fontSize="small" />
+            <Trash2 color="error" fontSize="small" />
           </ListItemIcon>
 
           <ListItemText

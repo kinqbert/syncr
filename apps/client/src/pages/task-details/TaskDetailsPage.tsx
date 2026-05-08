@@ -1,4 +1,3 @@
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   Box,
   CircularProgress,
@@ -6,6 +5,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { ArrowLeft } from "lucide-mui";
 import { Link, useParams } from "react-router";
 
 import { useGetProjectAssignees, useGetProjectLabels } from "@/api/projects";
@@ -69,7 +69,7 @@ export const TaskDetailsPage = () => {
         underline="none"
         sx={{ alignItems: "center", display: "inline-flex", gap: 0.75 }}
       >
-        <ArrowBackIcon fontSize="small" />
+        <ArrowLeft fontSize="small" />
         Back to Task Board
       </MuiLink>
 

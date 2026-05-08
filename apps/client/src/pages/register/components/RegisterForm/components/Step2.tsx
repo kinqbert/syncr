@@ -1,6 +1,5 @@
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { IconButton, Stack, TextField } from "@mui/material";
+import { Eye, EyeOff } from "lucide-mui";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -33,7 +32,7 @@ export const Step2 = () => {
           input: {
             endAdornment: (
               <IconButton onClick={togglePasswordVisible}>
-                {passwordVisible ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                {passwordVisible ? <EyeOff /> : <Eye />}
               </IconButton>
             ),
           },
