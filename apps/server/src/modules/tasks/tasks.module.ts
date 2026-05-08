@@ -8,10 +8,12 @@ import { AuthRepository } from "../../repositories/auth.repository";
 import { LabelsRepository } from "../../repositories/labels.repository";
 import { RoleRepository } from "../../repositories/role.repository";
 import { TasksRepository } from "../../repositories/tasks.repository";
+import { NotificationsModule } from "../notifications/notifications.module";
 import { TasksController } from "./tasks.controller";
 import { TasksService } from "./tasks.service";
 
 @Module({
+  imports: [NotificationsModule],
   controllers: [TasksController],
   providers: [
     TasksService,

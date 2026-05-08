@@ -34,6 +34,12 @@ export class ProjectsRepository {
     return project;
   }
 
+  async getProject(projectId: number) {
+    const [project] = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1);
+
+    return project;
+  }
+
   async getProjectManagerCandidates(companyId: number) {
     const candidates = await db
       .select({

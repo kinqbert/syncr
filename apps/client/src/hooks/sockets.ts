@@ -15,9 +15,8 @@ export const useNotificationsSocket = () => {
   return socket;
 };
 
-export const useNotificationsSocketEvent = (
-  eventName: keyof ServerToClientEvents,
-  handler: ServerToClientEvents[keyof ServerToClientEvents],
+export const useNotificationEvent = (
+  handler: ServerToClientEvents["notification"],
   enabled = true,
 ) => {
   const socket = useNotificationsSocket();
@@ -27,10 +26,10 @@ export const useNotificationsSocketEvent = (
       return;
     }
 
-    socket.on(eventName, handler);
+    socket.on("notification", handler);
 
     return () => {
-      socket.off(eventName, handler);
+      socket.off("notification", handler);
     };
-  }, [enabled, eventName, handler, socket]);
+  }, [enabled, handler, socket]);
 };

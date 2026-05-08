@@ -232,7 +232,7 @@ export const notifications = pgTable("notifications", {
   entityType: notificationEntityTypeEnum().notNull(),
   entityId: integer().notNull(),
   metadata: jsonb().$type<NotificationMetadata>(),
-  isRead: boolean().default(false),
+  isRead: boolean().notNull().default(false),
   createdAt: timestamp().notNull().defaultNow(),
 });
 

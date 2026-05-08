@@ -7,6 +7,7 @@ import { TaskCommentsRepository } from "src/repositories/task-comments.repositor
 import { AcceptanceCriteriaRepository } from "../../repositories/acceptance-criteria.repository";
 import { LabelsRepository } from "../../repositories/labels.repository";
 import { TasksRepository } from "../../repositories/tasks.repository";
+import { NotificationsService } from "../notifications/notifications.service";
 import {
   CreateTaskAcceptanceCriterionDto,
   CreateTaskCommentDto,
@@ -25,6 +26,7 @@ export class TasksService {
     private readonly taskCommentsRepository: TaskCommentsRepository,
     private readonly acceptanceCriteriaRepository: AcceptanceCriteriaRepository,
     private readonly labelsRepository: LabelsRepository,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async getProjectTasks(companyId: number, projectId: number) {
@@ -81,6 +83,10 @@ export class TasksService {
       userId,
       action: TaskActivityAction.TaskCreated,
     });
+
+    if (task.assignee?.id && task.assignee.id !== userId) {
+      await this.notificationsService.notifyTaskAssigned(task.assignee.id, userId, task.id);
+    }
 
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
@@ -148,7 +154,7 @@ export class TasksService {
     const task =
       Object.keys(updateData).length > 0
         ? await this.taskRepository.updateTask(taskId, updateData)
-        : await this.taskRepository.getTask(taskId, projectId, companyId);
+        : await this.taskRepository.getTask(taskId);
 
     if (labelNames !== undefined) {
       await this.labelsRepository.setTaskLabels(taskId, projectId, labelNames);
@@ -158,6 +164,33 @@ export class TasksService {
 
     if (activityActions) {
       await this.taskActivitiesRepository.createTaskActivities(activityActions);
+    }
+
+    if (
+      updateTaskDto.assigneeId !== undefined &&
+      updateTaskDto.assigneeId !== null &&
+      updateTaskDto.assigneeId !== existingTask.assignee?.id &&
+      updateTaskDto.assigneeId !== userId
+    ) {
+      await this.notificationsService.notifyTaskAssigned(updateTaskDto.assigneeId, userId, taskId);
+    }
+
+    if (
+      updateTaskDto.status !== undefined &&
+      updateTaskDto.status !== existingTask.status &&
+      task.assignee?.id &&
+      task.assignee.id !== userId
+    ) {
+      await this.notificationsService.notifyTaskStatusChanged(task.assignee.id, userId, taskId);
+    }
+
+    if (
+      updateTaskDto.endDate !== undefined &&
+      this.hasDateChanged(updateData.endDate, existingTask.endDate) &&
+      task.assignee?.id &&
+      task.assignee.id !== userId
+    ) {
+      await this.notificationsService.notifyTaskDeadlineChanged(task.assignee.id, userId, taskId);
     }
 
     const [taskWithCriteria] = await this.withTaskRelations([task]);
@@ -229,7 +262,7 @@ export class TasksService {
     userId: number,
     createTaskCommentDto: CreateTaskCommentDto,
   ) {
-    await this.ensureTaskExists(taskId, projectId, companyId);
+    const task = await this.ensureTaskExists(taskId, projectId, companyId);
 
     const comment = await this.taskCommentsRepository.createTaskComment({
       taskId,
@@ -243,6 +276,10 @@ export class TasksService {
       action: TaskActivityAction.TaskCommentAdded,
     });
 
+    if (task.assignee?.id && task.assignee.id !== userId) {
+      await this.notificationsService.notifyTaskCommented(task.assignee.id, userId, taskId);
+    }
+
     return mapTaskCommentToDto(comment);
   }
 
@@ -253,7 +290,7 @@ export class TasksService {
     userId: number,
     createAcceptanceCriterionDto: CreateTaskAcceptanceCriterionDto,
   ) {
-    await this.ensureTaskExists(taskId, projectId, companyId);
+    const existingTask = await this.ensureTaskExists(taskId, projectId, companyId);
 
     const position =
       createAcceptanceCriterionDto.position ??
@@ -274,7 +311,15 @@ export class TasksService {
       action: TaskActivityAction.AcceptanceCriterionCreated,
     });
 
-    const task = await this.taskRepository.getTask(taskId, projectId, companyId);
+    if (existingTask.assignee?.id && existingTask.assignee.id !== userId) {
+      await this.notificationsService.notifyTaskAcceptanceCriterionAdded(
+        existingTask.assignee.id,
+        userId,
+        taskId,
+      );
+    }
+
+    const task = await this.taskRepository.getTask(taskId);
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
@@ -318,7 +363,7 @@ export class TasksService {
       action: TaskActivityAction.AcceptanceCriterionUpdated,
     });
 
-    const task = await this.taskRepository.getTask(taskId, projectId, companyId);
+    const task = await this.taskRepository.getTask(taskId);
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
@@ -341,7 +386,7 @@ export class TasksService {
       action: TaskActivityAction.AcceptanceCriterionDeleted,
     });
 
-    const task = await this.taskRepository.getTask(taskId, projectId, companyId);
+    const task = await this.taskRepository.getTask(taskId);
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
@@ -362,13 +407,21 @@ export class TasksService {
   }
 
   private async ensureTaskExists(taskId: number, projectId: number, companyId: number) {
-    const task = await this.taskRepository.getTask(taskId, projectId, companyId);
+    const task = await this.taskRepository.getCompanyTask(taskId, projectId, companyId);
 
     if (!task) {
       throw new NotFoundException("Task not found");
     }
 
     return task;
+  }
+
+  private hasDateChanged(nextDate: Date | null | undefined, previousDate: Date | null) {
+    if (nextDate === undefined) {
+      return false;
+    }
+
+    return nextDate?.getTime() !== previousDate?.getTime();
   }
 
   private async ensureAcceptanceCriterionExists(

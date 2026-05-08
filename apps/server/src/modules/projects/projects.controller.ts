@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { PermissionKey, Project } from "@syncr/packages";
+import { UserId } from "src/common/decorators/user-id.decorator";
 
 import { CompanyId } from "../../common/decorators/company-id.decorator";
 import { RequirePermission } from "../../common/decorators/require-permission.decorator";
@@ -101,9 +102,10 @@ export class ProjectsController {
   @HttpCode(HttpStatus.CREATED)
   async createProject(
     @CompanyId() companyId: number,
+    @UserId() userId: number,
     @Body() createProjectDto: CreateProjectDto,
   ): Promise<Project> {
-    return await this.projectService.createProject(companyId, createProjectDto);
+    return await this.projectService.createProject(companyId, userId, createProjectDto);
   }
 
   @Post(":projectId/members")
@@ -113,9 +115,15 @@ export class ProjectsController {
   async addProjectMember(
     @CompanyId() companyId: number,
     @Param("projectId", ParseIntPipe) projectId: number,
+    @UserId() userId: number,
     @Body() addProjectMemberDto: AddProjectMemberDto,
   ): Promise<ProjectAssigneeDto[]> {
-    return await this.projectService.addProjectMember(companyId, projectId, addProjectMemberDto);
+    return await this.projectService.addProjectMember(
+      companyId,
+      projectId,
+      userId,
+      addProjectMemberDto,
+    );
   }
 
   @Delete(":projectId/members/:userId")

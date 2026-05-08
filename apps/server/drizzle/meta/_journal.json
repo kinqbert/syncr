@@ -85,6 +85,13 @@
       "when": 1778208026041,
       "tag": "0011_hot_wong",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1778242053484,
+      "tag": "0012_yielding_scorpion",
+      "breakpoints": true
     }
   ]
 }

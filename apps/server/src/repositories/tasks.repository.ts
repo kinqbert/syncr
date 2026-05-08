@@ -44,7 +44,19 @@ export class TasksRepository {
     return project;
   }
 
-  async getTask(taskId: number, projectId: number, companyId: number) {
+  async getTask(taskId: number) {
+    const [task] = await db
+      .select(taskWithAssigneeColumns)
+      .from(tasks)
+      .innerJoin(projects, eq(tasks.projectId, projects.id))
+      .leftJoin(users, eq(tasks.assigneeId, users.id))
+      .where(and(eq(tasks.id, taskId)))
+      .limit(1);
+
+    return task;
+  }
+
+  async getCompanyTask(taskId: number, projectId: number, companyId: number) {
     const [task] = await db
       .select(taskWithAssigneeColumns)
       .from(tasks)
@@ -62,6 +74,7 @@ export class TasksRepository {
     return task;
   }
 
+  // TODO -- move into users repository
   async isUserInCompany(userId: number, companyId: number) {
     const [userCompanyRole] = await db
       .select({ userId: userCompanyRoles.userId })

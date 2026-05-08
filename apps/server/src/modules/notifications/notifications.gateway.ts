@@ -49,8 +49,6 @@ export class NotificationsGateway implements OnGatewayConnection {
       client.data.userId = payload.userId;
 
       await client.join(this.getUserRoom(payload.userId));
-
-      console.log("connected user", payload.userId);
     } catch {
       client.disconnect();
     }

@@ -1,7 +1,9 @@
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { Outlet } from "react-router";
+import { Toaster } from "sonner";
 
 import { useGetMyCompanies } from "@/api/companies";
+import { NotificationsListener } from "@/context/NotificationSocketContext/NotificationsListener";
 import { NotificationsSocketProvider } from "@/context/NotificationSocketContext/NotificationSocketProvider";
 import { AuthenticatedLayout } from "@/providers/auth";
 import { useCompanyStore } from "@/store/useCompanyStore";
@@ -58,6 +60,10 @@ export const AppLayout = () => {
   return (
     <AuthenticatedLayout>
       <NotificationsSocketProvider>
+        <>
+          <Toaster />
+          <NotificationsListener />
+        </>
         <Header />
         <Box display="flex" sx={{ overflow: "hidden" }}>
           <Sidebar />

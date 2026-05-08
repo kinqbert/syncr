@@ -3,6 +3,7 @@ import { ProjectStatus } from "@syncr/packages";
 
 import { LabelsRepository } from "../../repositories/labels.repository";
 import { ProjectsRepository } from "../../repositories/projects.repository";
+import { NotificationsService } from "../notifications/notifications.service";
 import { AddProjectMemberDto, CreateProjectDto, UpdateProjectDto } from "./projects.dto";
 import { mapProjectToDto } from "./projects.mapper";
 
@@ -11,6 +12,7 @@ export class ProjectsService {
   constructor(
     private readonly projectRepository: ProjectsRepository,
     private readonly labelsRepository: LabelsRepository,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async getCompanyProjects(companyId: number) {
@@ -56,6 +58,7 @@ export class ProjectsService {
   async addProjectMember(
     companyId: number,
     projectId: number,
+    actorId: number,
     addProjectMemberDto: AddProjectMemberDto,
   ) {
     await this.ensureProjectExists(companyId, projectId);
@@ -69,6 +72,14 @@ export class ProjectsService {
 
     if (!isAlreadyMember) {
       await this.projectRepository.addProjectMember(projectId, addProjectMemberDto.userId);
+
+      if (addProjectMemberDto.userId !== actorId) {
+        await this.notificationsService.notifyProjectAdded(
+          addProjectMemberDto.userId,
+          actorId,
+          projectId,
+        );
+      }
     }
 
     return await this.projectRepository.getProjectAssignees(companyId, projectId);
@@ -90,7 +101,7 @@ export class ProjectsService {
     return await this.projectRepository.getProjectAssignees(companyId, projectId);
   }
 
-  async createProject(companyId: number, createProjectDto: CreateProjectDto) {
+  async createProject(companyId: number, actorId: number, createProjectDto: CreateProjectDto) {
     const name = this.getValidName(createProjectDto.name);
     const managerId = await this.getValidManagerId(companyId, createProjectDto.managerId ?? null);
 
@@ -105,6 +116,10 @@ export class ProjectsService {
         ? this.getValidDate(createProjectDto.endDate, "End date")
         : null,
     });
+
+    if (managerId && managerId !== actorId) {
+      await this.notificationsService.notifyProjectAdded(managerId, actorId, project.id);
+    }
 
     return mapProjectToDto(project);
   }
