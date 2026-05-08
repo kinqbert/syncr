@@ -1,12 +1,11 @@
 import type { EventInput } from "@fullcalendar/core";
-import { Button, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import type { Task } from "@syncr/packages";
-import { Columns3 } from "lucide-mui";
-import { Link } from "react-router";
 
 import { useGetProject } from "@/api/projects";
 import { useGetProjectTasks } from "@/api/tasks";
 import { TaskDeadlineCalendar } from "@/components/calendar";
+import { ProjectViewNav } from "@/components/ProjectViewNav";
 import { useProject } from "@/hooks";
 import { getPriorityEventClassName, toCalendarDate } from "@/utils/calendar";
 
@@ -51,7 +50,12 @@ export const ProjectCalendarPage = () => {
   const isLoading = isProjectLoading || areTasksLoading;
 
   return (
-    <Stack height="100%" minWidth={0} p={3} width="100%">
+    <Stack
+      height="100%"
+      minWidth={0}
+      p={3}
+      width="100%"
+    >
       <Stack
         alignItems={{ xs: "flex-start", sm: "center" }}
         direction={{ xs: "column", sm: "row" }}
@@ -59,23 +63,15 @@ export const ProjectCalendarPage = () => {
         justifyContent="space-between"
         mb={2}
       >
-        <Stack minWidth={0}>
-          <Typography variant="h5">
-            {project ? `${project.name} calendar` : "Project calendar"}
+        <Stack minWidth={0} gap={0.5}>
+          <Typography variant="h4">
+            {project ? `${project.name}` : "Project calendar"}
           </Typography>
-          <Typography color="text.secondary" variant="subtitle1">
+          <Typography color="text.secondary">
             See every task deadline placed on the day it is due.
           </Typography>
         </Stack>
-        <Button
-          component={Link}
-          startIcon={<Columns3 />}
-          sx={{ whiteSpace: "nowrap" }}
-          to={`/projects/${projectId}/tasks`}
-          variant="outlined"
-        >
-          Task board
-        </Button>
+        <ProjectViewNav projectId={projectId} />
       </Stack>
 
       <TaskDeadlineCalendar events={events} isLoading={isLoading} />

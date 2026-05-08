@@ -1,7 +1,7 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { CalendarDays, LayoutDashboard, Users } from "lucide-mui";
+import { Users } from "lucide-mui";
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 
 import {
   useAddProjectMember,
@@ -10,6 +10,7 @@ import {
   useGetProjectMemberCandidates,
   useRemoveProjectMember,
 } from "@/api/projects";
+import { ProjectViewNav } from "@/components/ProjectViewNav";
 
 import { Kanban } from "./components/Kanban";
 import { ProjectMembersDialog } from "./components/ProjectMembersDialog";
@@ -50,7 +51,12 @@ export const TasksPage = () => {
   };
 
   return (
-    <Stack height="100%" minWidth={0} width="100%" p={3}>
+    <Stack
+      height="100%"
+      minWidth={0}
+      p={3}
+      width="100%"
+    >
       <Stack
         alignItems={{ xs: "flex-start", sm: "center" }}
         direction={{ xs: "column", sm: "row" }}
@@ -58,31 +64,13 @@ export const TasksPage = () => {
         mb={2}
         gap={2}
       >
-        <Stack minWidth={0}>
-          <Typography variant="h5">{project?.name}</Typography>
-          <Typography variant="subtitle1" color="text.secondary">
+        <Stack minWidth={0} gap={0.5}>
+          <Typography variant="h4">{project?.name}</Typography>
+          <Typography color="text.secondary">
             Drag and drop tasks to update their status
           </Typography>
         </Stack>
-        <Stack direction="row" gap={1}>
-          <Button
-            component={Link}
-            startIcon={<CalendarDays />}
-            sx={{ whiteSpace: "nowrap" }}
-            to={`/projects/${numericProjectId}/calendar`}
-            variant="outlined"
-          >
-            Calendar
-          </Button>
-          <Button
-            component={Link}
-            startIcon={<LayoutDashboard />}
-            sx={{ whiteSpace: "nowrap" }}
-            to={`/projects/${numericProjectId}`}
-            variant="outlined"
-          >
-            Dashboard
-          </Button>
+        <Stack alignItems="center" direction="row" flexWrap="wrap" gap={1}>
           <Button
             onClick={() => setIsMembersDialogOpen(true)}
             startIcon={<Users />}
@@ -91,6 +79,7 @@ export const TasksPage = () => {
           >
             {members.length} members
           </Button>
+          <ProjectViewNav projectId={numericProjectId} />
         </Stack>
       </Stack>
       <Box minHeight={0} minWidth={0} sx={{ flex: 1, overflowX: "scroll" }}>

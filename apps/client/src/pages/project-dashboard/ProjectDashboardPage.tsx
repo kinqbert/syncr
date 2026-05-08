@@ -1,5 +1,7 @@
-import { Box, Stack } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 
+import { useGetProject } from "@/api/projects";
+import { ProjectViewNav } from "@/components/ProjectViewNav";
 import { useProject } from "@/hooks";
 
 import {
@@ -10,18 +12,53 @@ import {
 
 export const ProjectDashboardPage = () => {
   const { projectId } = useProject();
+  const { data: project, isLoading: isProjectLoading } =
+    useGetProject(projectId);
 
   return (
     <Box
       component="main"
-      sx={{ height: "100%", overflow: "auto", p: 3, width: "100%" }}
+      sx={{
+        p: 3,
+        width: "100%",
+      }}
     >
       <Stack gap={3}>
-        <ProjectDashboardHeader projectId={projectId} />
+        <Stack
+          alignItems="center"
+          direction={{ xs: "column", sm: "row" }}
+          gap={2}
+          justifyContent="space-between"
+        >
+          <Stack minWidth={0} gap={0.5}>
+            <Typography variant="h4">
+              {project?.name ?? "Project dashboard"}
+            </Typography>
+            <Typography color="text.secondary">
+              Project dashboard, task progress, and team workload
+            </Typography>
+          </Stack>
 
-        <ProjectOverviewGrid projectId={projectId} />
+          <ProjectViewNav projectId={projectId} />
+        </Stack>
 
-        <ActivityTimeline projectId={projectId} />
+        <ProjectDashboardHeader
+          project={project}
+          isProjectLoading={isProjectLoading}
+        />
+
+        {!isProjectLoading && project ? (
+          <>
+            <ProjectOverviewGrid projectId={projectId} />
+            <ActivityTimeline projectId={projectId} />
+          </>
+        ) : null}
+
+        {!isProjectLoading && !project ? (
+          <Stack alignItems="center" py={6}>
+            <Typography color="text.secondary">Project not found.</Typography>
+          </Stack>
+        ) : null}
       </Stack>
     </Box>
   );

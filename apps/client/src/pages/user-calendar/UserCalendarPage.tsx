@@ -39,10 +39,15 @@ export const UserCalendarPage = () => {
   const events = toTaskEvents(tasks);
 
   return (
-    <Stack height="100%" minWidth={0} p={3} width="100%">
-      <Stack mb={2} minWidth={0}>
-        <Typography variant="h5">My calendar</Typography>
-        <Typography color="text.secondary" variant="subtitle1">
+    <Stack
+      height="100%"
+      minWidth={0}
+      p={3}
+      width="100%"
+    >
+      <Stack mb={3} minWidth={0} gap={0.5}>
+        <Typography variant="h4">My calendar</Typography>
+        <Typography color="text.secondary">
           All tasks assigned to you across projects, placed on their deadline.
         </Typography>
       </Stack>

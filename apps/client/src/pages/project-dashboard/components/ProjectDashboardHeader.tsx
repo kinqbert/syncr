@@ -1,6 +1,5 @@
 import {
-  Button,
-  Chip,
+  capitalize,
   CircularProgress,
   LinearProgress,
   Paper,
@@ -8,15 +7,15 @@ import {
   Typography,
 } from "@mui/material";
 import type { Project, ProjectAssignee } from "@syncr/packages";
-import { ArrowRight, CalendarDays, Users } from "lucide-mui";
-import { Link } from "react-router";
+import { CalendarDays, Info, Users } from "lucide-mui";
 
-import { useGetProject, useGetProjectAssignees } from "@/api/projects";
+import { useGetProjectAssignees } from "@/api/projects";
 import { formatDate } from "@/utils/formatDate";
 import { getUserFullName } from "@/utils/getUserFullName";
 
 type ProjectDashboardHeaderProps = {
-  projectId: number;
+  project?: Project | null;
+  isProjectLoading?: boolean;
 };
 
 const getManagerName = (
@@ -43,12 +42,11 @@ const getCompletionProgress = (project: Project) => {
 };
 
 export const ProjectDashboardHeader = ({
-  projectId,
+  project,
+  isProjectLoading = false,
 }: ProjectDashboardHeaderProps) => {
-  const { data: project, isLoading: isProjectLoading } =
-    useGetProject(projectId);
   const { data: members = [], isLoading: areMembersLoading } =
-    useGetProjectAssignees(projectId);
+    useGetProjectAssignees(project?.id ?? 0, Boolean(project));
 
   const isLoading = isProjectLoading || areMembersLoading;
 
@@ -66,14 +64,7 @@ export const ProjectDashboardHeader = ({
   }
 
   if (!project) {
-    return (
-      <Paper
-        elevation={0}
-        sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 3 }}
-      >
-        <Typography color="text.secondary">Project not found.</Typography>
-      </Paper>
-    );
+    return null;
   }
 
   const managerName = getManagerName(project.managerId, members);
@@ -90,43 +81,6 @@ export const ProjectDashboardHeader = ({
       }}
     >
       <Stack gap={3}>
-        <Stack
-          alignItems={{ xs: "flex-start", sm: "center" }}
-          direction={{ xs: "column", sm: "row" }}
-          gap={2}
-          justifyContent="space-between"
-        >
-          <Stack gap={0.75}>
-            <Stack alignItems="center" direction="row" gap={1}>
-              <Typography fontSize={24} fontWeight={800}>
-                {project.name}
-              </Typography>
-              <Chip
-                label={project.status}
-                size="small"
-                sx={{
-                  bgcolor: "#EEF2FF",
-                  color: "primary.main",
-                  fontWeight: 700,
-                  textTransform: "capitalize",
-                }}
-              />
-            </Stack>
-            <Typography color="text.secondary">
-              Project dashboard, task progress, and team workload at a glance.
-            </Typography>
-          </Stack>
-
-          <Button
-            component={Link}
-            endIcon={<ArrowRight />}
-            to={`/projects/${projectId}/tasks`}
-            variant="contained"
-          >
-            Open task board
-          </Button>
-        </Stack>
-
         <Stack
           direction={{ xs: "column", md: "row" }}
           gap={3}
@@ -149,6 +103,17 @@ export const ProjectDashboardHeader = ({
                   {project.endDate
                     ? formatDate(project.endDate)
                     : "No deadline"}
+                </Typography>
+              </Stack>
+            </Stack>
+            <Stack gap={0.75}>
+              <Typography color="text.secondary" fontSize={13}>
+                Status
+              </Typography>
+              <Stack alignItems="center" direction="row" gap={0.75}>
+                <Info sx={{ color: "text.secondary", fontSize: 17 }} />
+                <Typography fontWeight={700}>
+                  {capitalize(project.status)}
                 </Typography>
               </Stack>
             </Stack>

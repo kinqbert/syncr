@@ -60,7 +60,6 @@ export const TaskDetailsPage = () => {
       sx={{
         bgcolor: "background.default",
         height: "100%",
-        overflow: "auto",
       }}
     >
       <MuiLink
