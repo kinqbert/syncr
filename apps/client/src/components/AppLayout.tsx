@@ -2,6 +2,7 @@ import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { Outlet } from "react-router";
 
 import { useGetMyCompanies } from "@/api/companies";
+import { NotificationsSocketProvider } from "@/context/NotificationSocketContext/NotificationSocketProvider";
 import { AuthenticatedLayout } from "@/providers/auth";
 import { useCompanyStore } from "@/store/useCompanyStore";
 
@@ -56,11 +57,13 @@ const CompanyContent = () => {
 export const AppLayout = () => {
   return (
     <AuthenticatedLayout>
-      <Header />
-      <Box display="flex" sx={{ overflow: "hidden" }}>
-        <Sidebar />
-        <CompanyContent />
-      </Box>
+      <NotificationsSocketProvider>
+        <Header />
+        <Box display="flex" sx={{ overflow: "hidden" }}>
+          <Sidebar />
+          <CompanyContent />
+        </Box>
+      </NotificationsSocketProvider>
     </AuthenticatedLayout>
   );
 };
