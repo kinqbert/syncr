@@ -1,10 +1,14 @@
 import {
   InvitationStatus,
+  NotificationEntityType,
+  NotificationMetadata,
+  NotificationType,
   ProjectStatus,
   TaskActivityAction,
   TaskPriority,
   TaskStatus,
 } from "@syncr/packages";
+import { jsonb } from "drizzle-orm/pg-core";
 import {
   boolean,
   integer,
@@ -206,6 +210,39 @@ export const invitations = pgTable("invitations", {
   roleId: integer()
     .notNull()
     .references(() => roles.id, { onDelete: "cascade" }),
+});
+
+// NOTIFICATIONS
+
+export const notificationTypeEnum = pgEnum("notification_type", enumToPgEnum(NotificationType));
+export const notificationEntityTypeEnum = pgEnum(
+  "notification_entity_type",
+  enumToPgEnum(NotificationEntityType),
+);
+
+export const notifications = pgTable("notifications", {
+  id: serial().primaryKey(),
+  recipientId: integer()
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  actorId: integer()
+    .notNull()
+    .references(() => users.id, { onDelete: "set null" }),
+  type: notificationTypeEnum().notNull(),
+  entityType: notificationEntityTypeEnum().notNull(),
+  entityId: integer().notNull(),
+  metadata: jsonb().$type<NotificationMetadata>(),
+  isRead: boolean().default(false),
+  createdAt: timestamp().notNull().defaultNow(),
+});
+
+export const taskWatchers = pgTable("task_watchers", {
+  userId: integer()
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  taskId: integer()
+    .notNull()
+    .references(() => tasks.id, { onDelete: "cascade" }),
 });
 
 // HELPERS
