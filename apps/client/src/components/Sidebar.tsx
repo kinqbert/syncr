@@ -1,6 +1,7 @@
 import CasesIcon from "@mui/icons-material/Cases";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
 import {
   Drawer,
@@ -30,6 +31,12 @@ const SIDEBAR_ITEMS: {
 }[] = [
   { id: 0, label: "Dashboard", to: "/", icon: <SpaceDashboardIcon /> },
   { id: 1, label: "Projects", to: "projects", icon: <CasesIcon /> },
+  {
+    id: 2,
+    label: "Notifications",
+    to: "notifications",
+    icon: <NotificationsIcon />,
+  },
 ];
 
 export const Sidebar = () => {

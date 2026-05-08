@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import {
   NotificationEntityType,
   type NotificationMetadata,
@@ -20,6 +20,31 @@ export class NotificationsService {
     private readonly projectsRepository: ProjectsRepository,
     private readonly notificationsGateway: NotificationsGateway,
   ) {}
+
+  async getUserNotifications(userId: number) {
+    const notifications = await this.notificationsRepository.getUserNotifications(userId);
+
+    return notifications.map(mapNotificationToPayload);
+  }
+
+  async markNotificationAsRead(userId: number, notificationId: number) {
+    const notification = await this.notificationsRepository.markNotificationAsRead(
+      userId,
+      notificationId,
+    );
+
+    if (!notification) {
+      throw new NotFoundException("Notification not found");
+    }
+
+    return mapNotificationToPayload(notification);
+  }
+
+  async markAllUserNotificationsRead(userId: number) {
+    const notifications = await this.notificationsRepository.markAllUserNotificationsRead(userId);
+
+    return notifications.map(mapNotificationToPayload);
+  }
 
   async notifyTaskAssigned(recipientId: number, actorId: number, taskId: number) {
     await this.createAndSendNotification({

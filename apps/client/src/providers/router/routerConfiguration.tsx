@@ -6,6 +6,7 @@ import {
   DashboardPage,
   LoginPage,
   NotFoundPage,
+  NotificationsPage,
   ProjectsPage,
   RegisterPage,
   TaskDetailsPage,
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       {
         path: "projects",
         element: <ProjectsPage />,
+      },
+      {
+        path: "notifications",
+        element: <NotificationsPage />,
       },
       {
         path: "projects/:projectId",

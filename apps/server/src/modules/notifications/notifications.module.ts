@@ -4,10 +4,12 @@ import { ProjectsRepository } from "src/repositories/projects.repository";
 import { TasksRepository } from "src/repositories/tasks.repository";
 
 import { AuthRepository } from "../../repositories/auth.repository";
+import { NotificationsController } from "./notifications.controller";
 import { NotificationsGateway } from "./notifications.gateway";
 import { NotificationsService } from "./notifications.service";
 
 @Module({
+  controllers: [NotificationsController],
   providers: [
     NotificationsGateway,
     AuthRepository,
