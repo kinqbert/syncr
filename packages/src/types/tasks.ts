@@ -127,6 +127,15 @@ export type Task = {
   estimateMinutes: number | null;
 };
 
+export type AssignedTaskProject = {
+  id: number;
+  name: string;
+};
+
+export type AssignedTask = Task & {
+  project: AssignedTaskProject;
+};
+
 export type CreateTaskBody = {
   name: string;
   description?: string | null;

@@ -10,12 +10,12 @@ import { RoleRepository } from "../../repositories/role.repository";
 import { TasksRepository } from "../../repositories/tasks.repository";
 import { UsersRepository } from "../../repositories/users.repository";
 import { NotificationsModule } from "../notifications/notifications.module";
-import { TasksController } from "./tasks.controller";
+import { TasksController, UserTasksController } from "./tasks.controller";
 import { TasksService } from "./tasks.service";
 
 @Module({
   imports: [NotificationsModule],
-  controllers: [TasksController],
+  controllers: [TasksController, UserTasksController],
   providers: [
     TasksService,
     TasksRepository,

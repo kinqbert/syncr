@@ -21,6 +21,7 @@ import { RequirePermission } from "../../common/decorators/require-permission.de
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { PermissionGuard } from "../../common/guards/permission-guard.guard";
 import {
+  AssignedTaskDto,
   CreateTaskAcceptanceCriterionDto,
   CreateTaskCommentDto,
   CreateTaskDto,
@@ -30,6 +31,22 @@ import {
   UpdateTaskDto,
 } from "./tasks.dto";
 import { TasksService } from "./tasks.service";
+
+@Controller("tasks")
+export class UserTasksController {
+  constructor(private readonly taskService: TasksService) {}
+
+  @Get("assigned-to-me")
+  @RequirePermission(PermissionKey.TaskView)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async getAssignedTasks(
+    @CompanyId() companyId: number,
+    @UserId() userId: number,
+  ): Promise<AssignedTaskDto[]> {
+    return await this.taskService.getAssignedTasks(companyId, userId);
+  }
+}
 
 @Controller("projects/:projectId/tasks")
 export class TasksController {

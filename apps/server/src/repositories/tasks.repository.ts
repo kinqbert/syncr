@@ -23,6 +23,14 @@ const taskWithAssigneeColumns = {
   estimateMinutes: tasks.estimateMinutes,
 };
 
+const assignedTaskColumns = {
+  ...taskWithAssigneeColumns,
+  project: {
+    id: projects.id,
+    name: projects.name,
+  },
+};
+
 @Injectable()
 export class TasksRepository {
   async getProjectTasks(projectId: number, companyId: number) {
@@ -33,6 +41,16 @@ export class TasksRepository {
       .leftJoin(users, eq(tasks.assigneeId, users.id))
       .where(and(eq(tasks.projectId, projectId), eq(projects.companyId, companyId)))
       .orderBy(asc(tasks.status), asc(tasks.position), asc(tasks.id));
+  }
+
+  async getAssignedTasks(userId: number, companyId: number) {
+    return await db
+      .select(assignedTaskColumns)
+      .from(tasks)
+      .innerJoin(projects, eq(tasks.projectId, projects.id))
+      .leftJoin(users, eq(tasks.assigneeId, users.id))
+      .where(and(eq(tasks.assigneeId, userId), eq(projects.companyId, companyId)))
+      .orderBy(asc(tasks.endDate), asc(tasks.priority), asc(tasks.id));
   }
 
   async getProject(projectId: number, companyId: number) {

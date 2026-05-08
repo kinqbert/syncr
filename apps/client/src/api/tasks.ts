@@ -1,4 +1,5 @@
 import type {
+  AssignedTask,
   CreateTaskAcceptanceCriterionBody,
   CreateTaskBody,
   CreateTaskCommentBody,
@@ -18,6 +19,7 @@ import {
 
 import api from "@/lib/axios";
 import { queryClient } from "@/lib/react-query";
+import { useCompanyStore } from "@/store/useCompanyStore";
 
 export const taskKeys = {
   all: ["tasks"] as const,
@@ -27,6 +29,11 @@ export const taskKeys = {
 
   lists: (projectId: number) =>
     [...taskKeys.project(projectId), "list"] as const,
+
+  assignedToMe: () => [...taskKeys.all, "assigned-to-me"] as const,
+
+  assignedToMeForCompany: (companyId: number | null) =>
+    [...taskKeys.assignedToMe(), companyId] as const,
 
   detail: (projectId: number, taskId: number) =>
     [...taskKeys.project(projectId), taskId] as const,
@@ -62,6 +69,12 @@ const handleTaskMutationSuccess = ({
 
 const getProjectTasks = async (projectId: number) => {
   const response = await api.get<Task[]>(`projects/${projectId}/tasks`);
+
+  return response.data;
+};
+
+const getMyAssignedTasks = async () => {
+  const response = await api.get<AssignedTask[]>("tasks/assigned-to-me");
 
   return response.data;
 };
@@ -240,11 +253,27 @@ const invalidateProjectActivities = (projectId: number) => {
   });
 };
 
+const invalidateAssignedTasks = () => {
+  void queryClient.invalidateQueries({
+    queryKey: taskKeys.assignedToMe(),
+  });
+};
+
 export const useGetProjectTasks = (projectId: number, enabled = true) => {
   return useQuery({
     enabled,
     queryFn: () => getProjectTasks(projectId),
     queryKey: taskKeys.lists(projectId),
+  });
+};
+
+export const useGetMyAssignedTasks = (enabled = true) => {
+  const selectedCompanyId = useCompanyStore((state) => state.selectedCompanyId);
+
+  return useQuery({
+    enabled: enabled && Boolean(selectedCompanyId),
+    queryFn: getMyAssignedTasks,
+    queryKey: taskKeys.assignedToMeForCompany(selectedCompanyId),
   });
 };
 
@@ -255,6 +284,7 @@ export const useCreateTask = () => {
       void queryClient.invalidateQueries({
         queryKey: taskKeys.lists(projectId),
       });
+      invalidateAssignedTasks();
       invalidateProjectSummaries();
       invalidateProjectActivities(projectId);
     },
@@ -275,6 +305,7 @@ export const useUpdateTask = () => {
         invalidateProjectLabels(projectId);
       }
 
+      invalidateAssignedTasks();
       invalidateProjectSummaries();
       invalidateProjectActivities(projectId);
     },
@@ -286,6 +317,7 @@ export const useReorderTasks = () => {
     mutationFn: reorderTasks,
     onSuccess: (tasks, variables) => {
       queryClient.setQueryData(taskKeys.lists(variables.projectId), tasks);
+      invalidateAssignedTasks();
       invalidateProjectSummaries();
       invalidateProjectActivities(variables.projectId);
     },
@@ -304,6 +336,7 @@ export const useDeleteTask = () => {
       queryClient.removeQueries({
         queryKey: taskKeys.detail(variables.projectId, variables.taskId),
       });
+      invalidateAssignedTasks();
       invalidateProjectSummaries();
       invalidateProjectActivities(variables.projectId);
     },

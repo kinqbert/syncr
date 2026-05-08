@@ -17,7 +17,12 @@ import {
   UpdateTaskAcceptanceCriterionDto,
   UpdateTaskDto,
 } from "./tasks.dto";
-import { mapTaskActivityToDto, mapTaskCommentToDto, mapTaskToDto } from "./tasks.mapper";
+import {
+  mapAssignedTaskToDto,
+  mapTaskActivityToDto,
+  mapTaskCommentToDto,
+  mapTaskToDto,
+} from "./tasks.mapper";
 
 @Injectable()
 export class TasksService {
@@ -38,6 +43,13 @@ export class TasksService {
     const tasksWithCriteria = await this.withTaskRelations(tasks);
 
     return tasksWithCriteria.map(mapTaskToDto);
+  }
+
+  async getAssignedTasks(companyId: number, userId: number) {
+    const tasks = await this.taskRepository.getAssignedTasks(userId, companyId);
+    const tasksWithCriteria = await this.withTaskRelations(tasks);
+
+    return tasksWithCriteria.map(mapAssignedTaskToDto);
   }
 
   async createTask(

@@ -1,5 +1,5 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { LayoutDashboard, Users } from "lucide-mui";
+import { CalendarDays, LayoutDashboard, Users } from "lucide-mui";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 
@@ -65,6 +65,15 @@ export const TasksPage = () => {
           </Typography>
         </Stack>
         <Stack direction="row" gap={1}>
+          <Button
+            component={Link}
+            startIcon={<CalendarDays />}
+            sx={{ whiteSpace: "nowrap" }}
+            to={`/projects/${numericProjectId}/calendar`}
+            variant="outlined"
+          >
+            Calendar
+          </Button>
           <Button
             component={Link}
             startIcon={<LayoutDashboard />}

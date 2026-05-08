@@ -15,5 +15,6 @@
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
   "js/ts.suggest.autoImports": true,
   "js/ts.preferences.includePackageJsonAutoImports": "on",
-  "js/ts.preferences.autoImportFileExcludePatterns": ["**/packages/dist/**"]
+  "js/ts.preferences.autoImportFileExcludePatterns": ["**/packages/dist/**"],
+  "cSpell.words": ["daygrid", "fullcalendar"]
 }

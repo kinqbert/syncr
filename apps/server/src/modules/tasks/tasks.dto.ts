@@ -1,4 +1,6 @@
 import {
+  AssignedTask,
+  AssignedTaskProject,
   CreateTaskAcceptanceCriterionBody,
   CreateTaskBody,
   CreateTaskCommentBody,
@@ -167,6 +169,20 @@ export class TaskDto implements Task {
   @IsInt()
   @IsOptional()
   estimateMinutes: number | null;
+}
+
+class AssignedTaskProjectDto implements AssignedTaskProject {
+  @IsInt()
+  id: number;
+
+  @IsString()
+  name: string;
+}
+
+export class AssignedTaskDto extends TaskDto implements AssignedTask {
+  @ValidateNested()
+  @Type(() => AssignedTaskProjectDto)
+  project: AssignedTaskProjectDto;
 }
 
 export class CreateTaskDto implements CreateTaskBody {

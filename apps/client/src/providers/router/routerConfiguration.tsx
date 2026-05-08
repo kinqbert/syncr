@@ -8,12 +8,14 @@ import {
   LoginPage,
   NotFoundPage,
   NotificationsPage,
+  ProjectCalendarPage,
   ProjectDashboardPage,
   ProjectsPage,
   RegisterPage,
   SettingsPage,
   TaskDetailsPage,
   TasksPage,
+  UserCalendarPage,
 } from "@/pages";
 import { TeamPage } from "@/pages/team";
 
@@ -29,6 +31,10 @@ const router = createBrowserRouter([
       {
         path: "projects",
         element: <ProjectsPage />,
+      },
+      {
+        path: "calendar",
+        element: <UserCalendarPage />,
       },
       {
         path: "notifications",
@@ -53,6 +59,10 @@ const router = createBrowserRouter([
           {
             path: "tasks",
             element: <TasksPage />,
+          },
+          {
+            path: "calendar",
+            element: <ProjectCalendarPage />,
           },
           {
             path: "tasks/:taskId",

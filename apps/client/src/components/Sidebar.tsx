@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import {
   Bell,
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
   Folders,
@@ -39,6 +40,7 @@ const SIDEBAR_ITEMS: {
 }[] = [
   { id: 0, label: "Dashboard", to: "/", icon: <LayoutDashboard /> },
   { id: 1, label: "Projects", to: "projects", icon: <Folders /> },
+  { id: 2, label: "Calendar", to: "calendar", icon: <CalendarDays /> },
   {
     id: 3,
     label: "Team",
@@ -46,13 +48,13 @@ const SIDEBAR_ITEMS: {
     icon: <Users />,
   },
   {
-    id: 2,
+    id: 4,
     label: "Notifications",
     to: "notifications",
     icon: <Bell />,
   },
   {
-    id: 3,
+    id: 5,
     label: "Settings",
     to: "settings",
     icon: <Settings />,
