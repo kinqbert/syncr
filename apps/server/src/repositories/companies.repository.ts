@@ -13,12 +13,17 @@ const OWNER_ROLE = {
 export class CompaniesRepository {
   async getUserCompanies(userId: number) {
     const userCompanies = await db
-      .select()
+      .select({
+        id: companies.id,
+        name: companies.name,
+        roleName: roles.name,
+      })
       .from(userCompanyRoles)
       .where(eq(userCompanyRoles.userId, userId))
-      .innerJoin(companies, eq(userCompanyRoles.companyId, companies.id));
+      .innerJoin(companies, eq(userCompanyRoles.companyId, companies.id))
+      .innerJoin(roles, eq(userCompanyRoles.roleId, roles.id));
 
-    return userCompanies.map((company) => company.companies);
+    return userCompanies;
   }
 
   async createUserCompany(userId: number, name: string) {

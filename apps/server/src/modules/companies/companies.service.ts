@@ -1,15 +1,18 @@
 import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
+import { UserCompany } from "@syncr/packages";
 
 import { CompaniesRepository } from "../../repositories/companies.repository";
 import { CompanyDto, CreateCompanyDto } from "./companies.dto";
-import { mapCompanyToDto } from "./companies.mapper";
+import { mapCompanyToDto, mapUserCompanyToDto } from "./companies.mapper";
 
 @Injectable()
 export class CompaniesService {
   constructor(private readonly companyRepository: CompaniesRepository) {}
 
-  async getUserCompanies(userId: number): Promise<CompanyDto[]> {
-    return await this.companyRepository.getUserCompanies(userId);
+  async getUserCompanies(userId: number): Promise<UserCompany[]> {
+    const userCompanies = await this.companyRepository.getUserCompanies(userId);
+
+    return userCompanies.map(mapUserCompanyToDto);
   }
 
   async createUserCompany(userId: number, createCompanyDto: CreateCompanyDto): Promise<CompanyDto> {

@@ -1,4 +1,4 @@
-import { Company, CreateCompanyBody } from "@syncr/packages";
+import { Company, CreateCompanyBody, UserCompany } from "@syncr/packages";
 import { IsNumber, IsString, MinLength } from "class-validator";
 
 export class CompanyDto implements Company {
@@ -7,6 +7,11 @@ export class CompanyDto implements Company {
 
   @IsString()
   name: string;
+}
+
+export class UserCompanyDto extends CompanyDto implements UserCompany {
+  @IsString()
+  roleName: string;
 }
 
 export class CreateCompanyDto implements CreateCompanyBody {

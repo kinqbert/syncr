@@ -1,4 +1,4 @@
-import type { Company, CreateCompanyBody } from "@syncr/packages";
+import type { Company, CreateCompanyBody, UserCompany } from "@syncr/packages";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
@@ -9,7 +9,7 @@ export const companiesKeys = {
 };
 
 const getMyCompanies = async () => {
-  const response = await api.get<Company[]>("companies");
+  const response = await api.get<UserCompany[]>("companies");
 
   return response.data;
 };
