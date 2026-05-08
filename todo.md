@@ -1,0 +1,4 @@
+- Mobile adaptation
+- Implement menu for team page
+- Calendar page
+- Calendar integration
