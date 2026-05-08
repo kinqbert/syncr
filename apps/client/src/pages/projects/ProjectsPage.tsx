@@ -94,6 +94,7 @@ export const ProjectsPage = () => {
           direction={{ xs: "column", sm: "row" }}
           gap={2}
           justifyContent="space-between"
+          alignItems="center"
         >
           <Stack gap={0.5}>
             <Typography variant="h4">Projects</Typography>
@@ -105,7 +106,6 @@ export const ProjectsPage = () => {
           <Button
             onClick={handleOpenCreateDialog}
             startIcon={<AddIcon />}
-            sx={{ alignSelf: { xs: "stretch", sm: "center" } }}
             variant="contained"
           >
             Create project
