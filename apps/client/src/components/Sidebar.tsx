@@ -24,8 +24,8 @@ import { useSidebarStore } from "@/store/useSidebarStore";
 
 import { HEADER_HEIGHT } from "./Header";
 
-const SIDEBAR_WIDTH = 240;
-const SIDEBAR_COLLAPSED_WIDTH = 65;
+export const SIDEBAR_WIDTH = 240;
+export const SIDEBAR_COLLAPSED_WIDTH = 65;
 
 const SIDEBAR_ITEMS: {
   id: number;
@@ -86,7 +86,16 @@ export const Sidebar = () => {
         },
       })}
     >
-      <List disablePadding sx={{ flex: 1, px: 1.75, pt: 1.5 }}>
+      <List
+        disablePadding
+        sx={{
+          flex: 1,
+          px: 1.75,
+          pt: 1.5,
+          borderTop: 1,
+          borderColor: "divider",
+        }}
+      >
         {SIDEBAR_ITEMS.map((item) => (
           <Tooltip
             key={item.id}
