@@ -100,7 +100,6 @@ export const projectStatusEnum = pgEnum("project_status", enumToPgEnum(ProjectSt
 export const projects = pgTable("projects", {
   id: serial().primaryKey(),
   name: text().notNull(),
-  description: text().notNull(),
   managerId: integer().references(() => users.id, { onDelete: "set null" }),
   companyId: integer()
     .notNull()

@@ -1,5 +1,5 @@
 {
-  "id": "224a0871-6920-4c10-84eb-a6cf692d2576",
+  "id": "374497fd-3ddd-410d-a388-afc805216b49",
   "prevId": "8be95e32-df33-42c3-9739-29560165d9ba",
   "version": "7",
   "dialect": "postgresql",
@@ -383,12 +383,6 @@
         },
         "name": {
           "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -1281,6 +1275,14 @@
         "in_progress",
         "review",
         "done"
+      ]
+    },
+    "public.user_status": {
+      "name": "user_status",
+      "schema": "public",
+      "values": [
+        "active",
+        "inactive"
       ]
     }
   },

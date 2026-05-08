@@ -10,7 +10,6 @@ export type ProjectStatus = (typeof ProjectStatus)[keyof typeof ProjectStatus];
 export type Project = {
   id: number;
   name: string;
-  description: string | null;
   managerId: number | null;
   companyId: number;
   status: ProjectStatus;
@@ -20,7 +19,6 @@ export type Project = {
 
 export type CreateProjectBody = {
   name: string;
-  description?: string | null;
   managerId?: number | null;
   startDate: string;
   endDate?: string | null;
