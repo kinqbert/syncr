@@ -10,6 +10,7 @@ import { type TaskActivity, TaskActivityAction } from "@syncr/packages";
 import { useGetTaskActivities } from "@/api/tasks";
 import { useProject } from "@/hooks";
 import { formatDuration } from "@/utils/formatDuration";
+import { formatRelativeDate } from "@/utils/formatRelativeDate";
 
 import { Panel } from "../../../components/Panel";
 
@@ -42,13 +43,6 @@ const getActorName = (activity: TaskActivity) => {
   return activity.actor
     ? `${activity.actor.name} ${activity.actor.surname}`.trim()
     : "Deleted user";
-};
-
-const formatCreatedAt = (value: string) => {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
 };
 
 const getTitleChangeText = (activity: TaskActivity) => {
@@ -136,7 +130,7 @@ export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
 
                 <Typography color="text.secondary" variant="caption">
                   {getActorName(activity)} -{" "}
-                  {formatCreatedAt(activity.createdAt)}
+                  {formatRelativeDate(activity.createdAt)}
                 </Typography>
               </Stack>
             </Stack>

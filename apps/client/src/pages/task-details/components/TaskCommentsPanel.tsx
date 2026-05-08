@@ -14,6 +14,7 @@ import { useState } from "react";
 
 import { useCreateTaskComment, useGetTaskComments } from "@/api/tasks";
 import { useProject } from "@/hooks";
+import { formatRelativeDate } from "@/utils/formatRelativeDate";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { Panel } from "../../../components/Panel";
@@ -32,13 +33,6 @@ const getInitials = (author: TaskComment["author"]) => {
 
 const getAuthorName = (author: TaskComment["author"]) => {
   return author ? `${author.name} ${author.surname}`.trim() : "Deleted user";
-};
-
-const formatCreatedAt = (value: string) => {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
 };
 
 export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
@@ -117,7 +111,7 @@ export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
                   {getAuthorName(item.author)}
                 </Typography>
                 <Typography color="text.secondary" variant="caption">
-                  {formatCreatedAt(item.createdAt)}
+                  {formatRelativeDate(item.createdAt)}
                 </Typography>
               </Stack>
               <Typography sx={{ whiteSpace: "pre-wrap" }} variant="body2">
