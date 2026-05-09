@@ -5,7 +5,10 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import { Box, CircularProgress, Paper, Stack, Typography } from "@mui/material";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
+
+import { useSidebarStore } from "@/store/useSidebarStore";
 
 type TaskDeadlineCalendarProps = {
   events: EventInput[];
@@ -33,6 +36,45 @@ export const TaskDeadlineCalendar = ({
   isLoading,
 }: TaskDeadlineCalendarProps) => {
   const navigate = useNavigate();
+  const isSidebarOpen = useSidebarStore((state) => state.isOpen);
+  const calendarRef = useRef<FullCalendar>(null);
+  const calendarContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    const updateCalendarSize = () => {
+      calendarRef.current?.getApi().updateSize();
+    };
+
+    const frameId = window.requestAnimationFrame(updateCalendarSize);
+    const transitionEndId = window.setTimeout(updateCalendarSize, 260);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(transitionEndId);
+    };
+  }, [isLoading, isSidebarOpen]);
+
+  useEffect(() => {
+    const calendarContainer = calendarContainerRef.current;
+
+    if (!calendarContainer || isLoading) {
+      return;
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      calendarRef.current?.getApi().updateSize();
+    });
+
+    resizeObserver.observe(calendarContainer);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [isLoading]);
 
   return (
     <Paper
@@ -51,8 +93,14 @@ export const TaskDeadlineCalendar = ({
           <CircularProgress size={28} />
         </Stack>
       ) : (
-        <Box className="syncr-calendar" height="100%" minHeight={0}>
+        <Box
+          ref={calendarContainerRef}
+          className="syncr-calendar"
+          height="100%"
+          minHeight={0}
+        >
           <FullCalendar
+            ref={calendarRef}
             dayMaxEvents={3}
             eventClick={(eventInfo) => {
               eventInfo.jsEvent.preventDefault();
