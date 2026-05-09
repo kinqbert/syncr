@@ -1,6 +1,7 @@
 export * from "./about";
 export * from "./dashboard";
 export * from "./login";
+export * from "./my-calendar";
 export * from "./not-found";
 export * from "./notifications";
 export * from "./project-calendar";
@@ -10,4 +11,3 @@ export * from "./register";
 export * from "./settings";
 export * from "./task-details";
 export * from "./tasks";
-export * from "./user-calendar";

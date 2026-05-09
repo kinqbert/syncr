@@ -6,6 +6,7 @@ import {
   AboutPage,
   DashboardPage,
   LoginPage,
+  MyCalendarPage,
   NotFoundPage,
   NotificationsPage,
   ProjectCalendarPage,
@@ -15,7 +16,6 @@ import {
   SettingsPage,
   TaskDetailsPage,
   TasksPage,
-  UserCalendarPage,
 } from "@/pages";
 import { TeamPage } from "@/pages/team";
 
@@ -34,7 +34,7 @@ const router = createBrowserRouter([
       },
       {
         path: "calendar",
-        element: <UserCalendarPage />,
+        element: <MyCalendarPage />,
       },
       {
         path: "notifications",
@@ -91,4 +91,3 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
-
