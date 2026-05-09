@@ -3,5 +3,7 @@
 - Settings page
 - Live activity feed for tasks and projects
 - Implement menu for team page
-- Calendar page
+- ~~Calendar page~~
 - Calendar integration
+- Chat feature for team communication
+- Invitations to the company

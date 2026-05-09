@@ -9,12 +9,13 @@ import { LabelsRepository } from "../../repositories/labels.repository";
 import { RoleRepository } from "../../repositories/role.repository";
 import { TasksRepository } from "../../repositories/tasks.repository";
 import { UsersRepository } from "../../repositories/users.repository";
+import { CalendarModule } from "../calendar/calendar.module";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { TasksController, UserTasksController } from "./tasks.controller";
 import { TasksService } from "./tasks.service";
 
 @Module({
-  imports: [NotificationsModule],
+  imports: [CalendarModule, NotificationsModule],
   controllers: [TasksController, UserTasksController],
   providers: [
     TasksService,

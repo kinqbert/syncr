@@ -51,6 +51,29 @@ export const userSessions = pgTable("user_sessions", {
   expiresAt: timestamp().notNull(),
 });
 
+// CALENDAR INTEGRATIONS
+
+export const calendarProviderEnum = pgEnum("calendar_provider", ["google"]);
+
+export const calendarConnections = pgTable(
+  "calendar_connections",
+  {
+    id: serial().primaryKey(),
+    userId: integer()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    provider: calendarProviderEnum().notNull(),
+    providerAccountEmail: text(),
+    calendarId: text().notNull().default("primary"),
+    accessToken: text().notNull(),
+    refreshToken: text().notNull(),
+    expiresAt: timestamp().notNull(),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp().notNull().defaultNow(),
+  },
+  (table) => [unique().on(table.userId, table.provider)],
+);
+
 // ROLES
 export const roles = pgTable("roles", {
   id: serial().primaryKey(),
@@ -250,6 +273,22 @@ export const taskWatchers = pgTable("task_watchers", {
     .notNull()
     .references(() => tasks.id, { onDelete: "cascade" }),
 });
+
+export const calendarTaskEvents = pgTable(
+  "calendar_task_events",
+  {
+    id: serial().primaryKey(),
+    connectionId: integer()
+      .notNull()
+      .references(() => calendarConnections.id, { onDelete: "cascade" }),
+    taskId: integer()
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    providerEventId: text().notNull(),
+    lastSyncedAt: timestamp().notNull().defaultNow(),
+  },
+  (table) => [unique().on(table.connectionId, table.taskId)],
+);
 
 // HELPERS
 

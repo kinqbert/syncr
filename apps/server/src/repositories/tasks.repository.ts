@@ -10,6 +10,10 @@ const taskWithAssigneeColumns = {
   name: tasks.name,
   description: tasks.description,
   projectId: tasks.projectId,
+  project: {
+    id: projects.id,
+    name: projects.name,
+  },
   assignee: {
     id: users.id,
     email: users.email,
@@ -25,10 +29,6 @@ const taskWithAssigneeColumns = {
 
 const assignedTaskColumns = {
   ...taskWithAssigneeColumns,
-  project: {
-    id: projects.id,
-    name: projects.name,
-  },
 };
 
 @Injectable()
@@ -50,6 +50,16 @@ export class TasksRepository {
       .innerJoin(projects, eq(tasks.projectId, projects.id))
       .leftJoin(users, eq(tasks.assigneeId, users.id))
       .where(and(eq(tasks.assigneeId, userId), eq(projects.companyId, companyId)))
+      .orderBy(asc(tasks.endDate), asc(tasks.priority), asc(tasks.id));
+  }
+
+  async getAssignedTasksWithDeadlines(userId: number) {
+    return await db
+      .select(taskWithAssigneeColumns)
+      .from(tasks)
+      .innerJoin(projects, eq(tasks.projectId, projects.id))
+      .leftJoin(users, eq(tasks.assigneeId, users.id))
+      .where(and(eq(tasks.assigneeId, userId), sql`${tasks.endDate} is not null`))
       .orderBy(asc(tasks.endDate), asc(tasks.priority), asc(tasks.id));
   }
 
@@ -177,6 +187,7 @@ export class TasksRepository {
       .select(taskWithAssigneeColumns)
       .from(tasks)
       .leftJoin(users, eq(tasks.assigneeId, users.id))
+      .innerJoin(projects, eq(tasks.projectId, projects.id))
       .where(eq(tasks.id, taskId))
       .limit(1);
 

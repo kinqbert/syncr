@@ -8,6 +8,7 @@ import { AcceptanceCriteriaRepository } from "../../repositories/acceptance-crit
 import { LabelsRepository } from "../../repositories/labels.repository";
 import { TasksRepository } from "../../repositories/tasks.repository";
 import { UsersRepository } from "../../repositories/users.repository";
+import { CalendarSyncService } from "../calendar/calendar-sync.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import {
   CreateTaskAcceptanceCriterionDto,
@@ -34,6 +35,7 @@ export class TasksService {
     private readonly labelsRepository: LabelsRepository,
     private readonly usersRepository: UsersRepository,
     private readonly notificationsService: NotificationsService,
+    private readonly calendarSyncService: CalendarSyncService,
   ) {}
 
   async getProjectTasks(companyId: number, projectId: number) {
@@ -101,6 +103,8 @@ export class TasksService {
     if (task.assignee?.id && task.assignee.id !== userId) {
       await this.notificationsService.notifyTaskAssigned(task.assignee.id, userId, task.id);
     }
+
+    await this.calendarSyncService.syncTaskDeadline(task);
 
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
@@ -209,6 +213,17 @@ export class TasksService {
       task.assignee.id !== userId
     ) {
       await this.notificationsService.notifyTaskDeadlineChanged(task.assignee.id, userId, taskId);
+    }
+
+    if (this.shouldSyncCalendar(updateTaskDto)) {
+      if (
+        updateTaskDto.assigneeId !== undefined &&
+        updateTaskDto.assigneeId !== existingTask.assignee?.id
+      ) {
+        await this.calendarSyncService.deleteTaskEvents(taskId);
+      }
+
+      await this.calendarSyncService.syncTaskDeadline(task);
     }
 
     const [taskWithCriteria] = await this.withTaskRelations([task]);
@@ -440,6 +455,8 @@ export class TasksService {
   async deleteTask(companyId: number, projectId: number, taskId: number) {
     await this.ensureTaskExists(taskId, projectId, companyId);
 
+    await this.calendarSyncService.deleteTaskEvents(taskId);
+
     const task = await this.taskRepository.deleteTask(taskId);
 
     if (!task) {
@@ -471,6 +488,15 @@ export class TasksService {
     }
 
     return nextDate?.getTime() !== previousDate?.getTime();
+  }
+
+  private shouldSyncCalendar(updateTaskDto: UpdateTaskDto) {
+    return (
+      updateTaskDto.name !== undefined ||
+      updateTaskDto.description !== undefined ||
+      updateTaskDto.assigneeId !== undefined ||
+      updateTaskDto.endDate !== undefined
+    );
   }
 
   private async ensureAcceptanceCriterionExists(

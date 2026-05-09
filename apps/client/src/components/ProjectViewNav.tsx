@@ -38,7 +38,7 @@ export const ProjectViewNav = ({ projectId }: ProjectViewNavProps) => {
         bgcolor: "#F9FAFB",
         border: 1,
         borderColor: "divider",
-        borderRadius: 1,
+        borderRadius: 2,
         maxWidth: "100%",
         overflowX: "auto",
         p: 0.5,
@@ -63,7 +63,7 @@ export const ProjectViewNav = ({ projectId }: ProjectViewNavProps) => {
             key={item.path}
             label={item.label}
             sx={{
-              borderRadius: 0.75,
+              borderRadius: 1,
               color: "text.secondary",
               fontSize: 14,
               fontWeight: 700,
