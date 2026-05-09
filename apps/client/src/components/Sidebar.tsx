@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Drawer,
   List,
   ListItem,
@@ -14,8 +13,6 @@ import {
 import {
   Bell,
   CalendarDays,
-  ChevronLeft,
-  ChevronRight,
   Folders,
   LayoutDashboard,
   Settings,
@@ -24,7 +21,6 @@ import {
 import { NavLink } from "react-router";
 
 import { useGetNotifications } from "@/api/notifications";
-import { theme } from "@/lib/theme";
 import { useSidebarStore } from "@/store/useSidebarStore";
 
 import { HEADER_HEIGHT } from "./Header";
@@ -63,7 +59,6 @@ const SIDEBAR_ITEMS: {
 
 export const Sidebar = () => {
   const open = useSidebarStore((state) => state.isOpen);
-  const toggleSidebar = useSidebarStore((state) => state.toggleIsOpen);
   const { data: notifications = [] } = useGetNotifications();
 
   const unreadNotificationsCount = notifications.filter(
@@ -230,43 +225,6 @@ export const Sidebar = () => {
           ))}
         </List>
       </Drawer>
-      <Tooltip title={open ? "Collapse sidebar" : "Expand sidebar"}>
-        <Button
-          disableRipple
-          aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
-          onClick={toggleSidebar}
-          color="info"
-          sx={{
-            minWidth: 32,
-            maxWidth: 32,
-
-            minHeight: 32,
-            maxHeight: 32,
-
-            p: 0,
-
-            zIndex: theme.zIndex.drawer + 1,
-
-            position: "absolute",
-            right: -16,
-            top: "50%",
-
-            border: 1,
-            borderColor: "divider",
-            borderRadius: 100,
-
-            bgcolor: "background.paper",
-
-            transform: "translateY(-50%)",
-          }}
-        >
-          {open ? (
-            <ChevronLeft sx={{ fontSize: 20 }} />
-          ) : (
-            <ChevronRight sx={{ fontSize: 20 }} />
-          )}
-        </Button>
-      </Tooltip>
     </Box>
   );
 };

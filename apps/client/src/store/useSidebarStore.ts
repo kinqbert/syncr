@@ -3,15 +3,19 @@ import { persist } from "zustand/middleware";
 
 type SidebarStore = {
   isOpen: boolean;
-  toggleIsOpen: () => void;
+  closeSidebar: () => void;
+  openSidebar: () => void;
 };
 
 export const useSidebarStore = create<SidebarStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       isOpen: false,
-      toggleIsOpen: () => {
-        set({ isOpen: !get().isOpen });
+      closeSidebar: () => {
+        set({ isOpen: false });
+      },
+      openSidebar: () => {
+        set({ isOpen: true });
       },
     }),
     { name: "syncr-sidebar" },
