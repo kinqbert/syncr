@@ -327,7 +327,7 @@ export const CompanySwitcher = () => {
             sx={{ width: 1, gap: 1, minHeight: 36, maxHeight: 36, px: 1.75 }}
           >
             <Plus sx={{ fontSize: 17 }} />
-            <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 600, lineHeight: 0 }}>
               Create New Workspace
             </Typography>
           </Stack>

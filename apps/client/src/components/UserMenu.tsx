@@ -149,7 +149,9 @@ export const UserMenu = () => {
           }}
         >
           <Info sx={{ color: "text.secondary", fontSize: 16 }} />
-          <Typography sx={{ fontSize: 13 }}>About Syncr</Typography>
+          <Typography sx={{ fontSize: 13, lineHeight: 0 }}>
+            About Syncr
+          </Typography>
         </MenuItem>
 
         <MenuItem
@@ -161,7 +163,7 @@ export const UserMenu = () => {
           }}
         >
           <Settings sx={{ color: "text.secondary", fontSize: 16 }} />
-          <Typography sx={{ fontSize: 13 }}>Settings</Typography>
+          <Typography sx={{ fontSize: 13, lineHeight: 0 }}>Settings</Typography>
         </MenuItem>
 
         <Divider sx={{ m: 0 }} />

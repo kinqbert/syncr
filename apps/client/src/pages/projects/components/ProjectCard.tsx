@@ -190,7 +190,7 @@ export const ProjectCard = ({
             <Button
               component={Link}
               startIcon={<LayoutDashboard />}
-              sx={{ flex: 1 }}
+              sx={{ flex: 1, borderRadius: 1 }}
               to={`/projects/${project.id}`}
               variant="contained"
             >
@@ -199,7 +199,7 @@ export const ProjectCard = ({
             <Button
               onClick={() => onOpenTasks(project)}
               startIcon={<SquareCheckBig />}
-              sx={{ flex: 1 }}
+              sx={{ flex: 1, borderRadius: 1 }}
               variant="outlined"
             >
               Tasks
@@ -207,7 +207,7 @@ export const ProjectCard = ({
             <Button
               component={Link}
               startIcon={<CalendarDays />}
-              sx={{ flex: 1 }}
+              sx={{ flex: 1, borderRadius: 1 }}
               to={`/projects/${project.id}/calendar`}
               variant="outlined"
             >
