@@ -193,46 +193,45 @@ export const CompanySwitcher = () => {
       </Button>
 
       <Menu
+        id="company-switcher-menu"
         anchorEl={menuAnchorEl}
         anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
-        id="company-switcher-menu"
         onClose={() => setMenuAnchorEl(null)}
         open={isMenuOpen}
         slotProps={{
           paper: {
             elevation: 3,
             sx: {
-              border: 1,
-              borderColor: "divider",
               borderRadius: 1.25,
-              boxShadow: "0 10px 24px rgba(17, 24, 39, 0.14)",
               mt: 0.75,
-              overflow: "hidden",
               width: 250,
             },
           },
           list: {
-            "aria-label": "Switch workspace",
-            dense: true,
             sx: { p: 0 },
           },
         }}
-        transformOrigin={{ horizontal: "left", vertical: "top" }}
       >
-        <Typography
+        <Box
           sx={{
-            color: "text.secondary",
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: 0,
-            lineHeight: "16px",
+            minHeight: 36,
+            maxHeight: 36,
+            display: "flex",
+            alignItems: "center",
             px: 1.75,
-            py: 1.25,
-            textTransform: "uppercase",
           }}
         >
-          Switch Workspace
-        </Typography>
+          <Typography
+            sx={{
+              color: "text.secondary",
+              fontSize: 11,
+              fontWeight: 700,
+              textTransform: "uppercase",
+            }}
+          >
+            Switch Workspace
+          </Typography>
+        </Box>
         <Divider />
 
         <Box sx={{ py: 1 }}>
@@ -254,9 +253,8 @@ export const CompanySwitcher = () => {
                 selected={isSelected}
                 sx={{
                   gap: 1.25,
-                  minHeight: 50,
                   mx: 0.75,
-                  px: 1,
+                  px: 0.75,
                   py: 0.75,
                   borderRadius: 1,
                   "&.Mui-selected": {
@@ -269,15 +267,17 @@ export const CompanySwitcher = () => {
               >
                 <Box
                   sx={{
-                    alignItems: "center",
-                    bgcolor: "secondary.main",
-                    borderRadius: 1.25,
-                    color: "secondary.contrastText",
+                    height: 32,
+                    width: 32,
+
                     display: "flex",
-                    flex: "0 0 auto",
-                    height: 30,
+                    alignItems: "center",
                     justifyContent: "center",
-                    width: 30,
+
+                    borderRadius: 1.25,
+
+                    bgcolor: "secondary.main",
+                    color: "secondary.contrastText",
                   }}
                 >
                   <Building2 sx={{ fontSize: 17 }} />
@@ -286,7 +286,6 @@ export const CompanySwitcher = () => {
                   <Typography
                     noWrap
                     sx={{
-                      color: "text.primary",
                       fontSize: 13,
                       fontWeight: 600,
                       lineHeight: "18px",
@@ -318,16 +317,20 @@ export const CompanySwitcher = () => {
           onClick={handleOpenCreateDialog}
           sx={{
             color: "primary.main",
-            gap: 1,
-            minHeight: 40,
-            px: 1.75,
-            py: 1,
+            p: 0,
           }}
         >
-          <Plus sx={{ fontSize: 17 }} />
-          <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
-            Create New Workspace
-          </Typography>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="start"
+            sx={{ width: 1, gap: 1, minHeight: 36, maxHeight: 36, px: 1.75 }}
+          >
+            <Plus sx={{ fontSize: 17 }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
+              Create New Workspace
+            </Typography>
+          </Stack>
         </MenuItem>
       </Menu>
 
