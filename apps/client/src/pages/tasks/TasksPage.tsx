@@ -1,5 +1,4 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
-import { Users } from "lucide-mui";
+import { Box, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router";
 
@@ -51,12 +50,7 @@ export const TasksPage = () => {
   };
 
   return (
-    <Stack
-      height="100%"
-      minWidth={0}
-      p={3}
-      width="100%"
-    >
+    <Stack height="100%" minWidth={0} p={3} width="100%">
       <Stack
         alignItems={{ xs: "flex-start", sm: "center" }}
         direction={{ xs: "column", sm: "row" }}
@@ -70,17 +64,7 @@ export const TasksPage = () => {
             Drag and drop tasks to update their status
           </Typography>
         </Stack>
-        <Stack alignItems="center" direction="row" flexWrap="wrap" gap={1}>
-          <Button
-            onClick={() => setIsMembersDialogOpen(true)}
-            startIcon={<Users />}
-            sx={{ whiteSpace: "nowrap" }}
-            variant="outlined"
-          >
-            {members.length} members
-          </Button>
-          <ProjectViewNav projectId={numericProjectId} />
-        </Stack>
+        <ProjectViewNav projectId={numericProjectId} />
       </Stack>
       <Box minHeight={0} minWidth={0} sx={{ flex: 1, overflowX: "scroll" }}>
         <Kanban projectAssignees={members} />
