@@ -16,5 +16,5 @@
   "js/ts.suggest.autoImports": true,
   "js/ts.preferences.includePackageJsonAutoImports": "on",
   "js/ts.preferences.autoImportFileExcludePatterns": ["**/packages/dist/**"],
-  "cSpell.words": ["daygrid", "fullcalendar"]
+  "cSpell.words": ["daygrid", "fullcalendar", "INVITABLE"]
 }

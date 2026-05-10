@@ -26,6 +26,12 @@ export class CompaniesRepository {
     return userCompanies;
   }
 
+  async findCompanyById(companyId: number) {
+    const [company] = await db.select().from(companies).where(eq(companies.id, companyId)).limit(1);
+
+    return company;
+  }
+
   async createUserCompany(userId: number, name: string) {
     return await db.transaction(async (tx) => {
       const [company] = await tx.insert(companies).values({ name }).returning();

@@ -28,6 +28,18 @@ const markAllNotificationsRead = async () => {
   return response.data;
 };
 
+export const updateNotificationInCache = (updatedNotification: NotificationPayload) => {
+  queryClient.setQueryData<NotificationPayload[]>(
+    notificationKeys.all,
+    (notifications = []) =>
+      notifications.map((notification) =>
+        notification.id === updatedNotification.id
+          ? updatedNotification
+          : notification,
+      ),
+  );
+};
+
 export const addNotificationToCache = (notification: NotificationPayload) => {
   queryClient.setQueryData<NotificationPayload[]>(
     notificationKeys.all,
@@ -52,15 +64,7 @@ export const useMarkNotificationAsRead = () => {
   return useMutation({
     mutationFn: markNotificationAsRead,
     onSuccess: (updatedNotification) => {
-      queryClient.setQueryData<NotificationPayload[]>(
-        notificationKeys.all,
-        (notifications = []) =>
-          notifications.map((notification) =>
-            notification.id === updatedNotification.id
-              ? updatedNotification
-              : notification,
-          ),
-      );
+      updateNotificationInCache(updatedNotification);
     },
   });
 };

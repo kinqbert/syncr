@@ -1,3 +1,5 @@
+import { type InvitationStatus } from "./invitations";
+
 export const NotificationType = {
   TaskAssigned: "task_assigned",
   TaskCommented: "task_commented",
@@ -5,6 +7,7 @@ export const NotificationType = {
   TaskDeadlineChanged: "task_deadline_changed",
   TaskAcceptanceCriterionAdded: "task_acceptance_criterion_added",
   ProjectAdded: "project_added",
+  CompanyInvitation: "company_invitation",
 } as const;
 
 export type NotificationType =
@@ -13,6 +16,7 @@ export type NotificationType =
 export const NotificationEntityType = {
   Task: "task",
   Project: "project",
+  Invitation: "invitation",
   TaskComment: "task_comment",
   AcceptanceCriterion: "acceptance_criterion",
 };
@@ -24,6 +28,11 @@ export type NotificationMetadata = {
   projectId?: number;
   taskName?: string;
   projectName?: string;
+  invitationId?: number;
+  invitationStatus?: InvitationStatus;
+  companyId?: number;
+  companyName?: string;
+  roleName?: string;
 };
 
 export type NotificationPayload = {

@@ -1,3 +1,4 @@
+import { type TeamInvitation } from "./invitations";
 import { type User } from "./user";
 
 export type TeamUser = Pick<
@@ -16,4 +17,5 @@ export type TeamResponse = {
   averageWorkload: number;
   tasksCompleted: number;
   members: TeamUser[];
+  invitations: TeamInvitation[];
 };

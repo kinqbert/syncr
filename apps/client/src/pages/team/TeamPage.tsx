@@ -1,11 +1,20 @@
 import {
+  Alert,
   Box,
   Button,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
   IconButton,
+  InputLabel,
   LinearProgress,
+  MenuItem,
   Paper,
+  Select,
   Stack,
   Table,
   TableBody,
@@ -13,13 +22,18 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
+import { RoleKey } from "@syncr/packages";
 import { CircleCheck, Mail, MoreVertical } from "lucide-mui";
+import { useState } from "react";
 
+import { useInviteTeamMembers } from "@/api/invitations";
 import { useGetTeam } from "@/api/team";
 import { UserAvatar } from "@/components/UserAvatar";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 import { getUserFullName } from "@/utils/getUserFullName";
 
 import { StatCard } from "./components/StatCard";
@@ -37,10 +51,61 @@ const getWorkloadColor = (workload: number) => {
   return "error";
 };
 
+const ROLE_OPTIONS = [
+  { label: "Project Manager", value: RoleKey.ProjectManager },
+  { label: "Developer", value: RoleKey.Developer },
+] as const;
+
+const parseEmails = (value: string) => {
+  return [
+    ...new Set(
+      value
+        .split(/[\s,;]+/)
+        .map((email) => email.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ];
+};
+
 export const TeamPage = () => {
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [emails, setEmails] = useState("");
+  const [roleKey, setRoleKey] = useState<RoleKey>(RoleKey.Developer);
+  const [formError, setFormError] = useState<string | null>(null);
   const { data, isLoading } = useGetTeam();
+  const inviteTeamMembers = useInviteTeamMembers();
 
   const members = data?.members ?? [];
+  const invitations = data?.invitations ?? [];
+
+  const handleInviteDialogClose = () => {
+    setIsInviteDialogOpen(false);
+    setEmails("");
+    setRoleKey(RoleKey.Developer);
+    setFormError(null);
+  };
+
+  const handleInviteSubmit = async () => {
+    setFormError(null);
+
+    const inviteEmails = parseEmails(emails);
+
+    if (inviteEmails.length === 0) {
+      setFormError("Enter at least one email address.");
+
+      return;
+    }
+
+    try {
+      await inviteTeamMembers.mutateAsync({
+        emails: inviteEmails,
+        roleKey,
+      });
+      handleInviteDialogClose();
+    } catch (error) {
+      setFormError(getErrorMessage(error, "Could not invite team members."));
+    }
+  };
 
   return (
     <Stack component="main" width="100%" minHeight="100%" p={3} gap={3}>
@@ -56,7 +121,11 @@ export const TeamPage = () => {
             Manage team members and their workload
           </Typography>
         </Stack>
-        <Button startIcon={<Mail />} variant="contained">
+        <Button
+          onClick={() => setIsInviteDialogOpen(true)}
+          startIcon={<Mail />}
+          variant="contained"
+        >
           Invite Member
         </Button>
       </Stack>
@@ -236,6 +305,120 @@ export const TeamPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+        <Stack
+          alignItems="center"
+          direction="row"
+          justifyContent="space-between"
+          px={2.5}
+          py={2}
+        >
+          <Typography variant="h6">Pending Invitations</Typography>
+          <Chip label={invitations.length} size="small" />
+        </Stack>
+        <Table sx={{ minWidth: 720 }}>
+          <TableHead>
+            <TableRow
+              sx={{
+                bgcolor: "background.default",
+                "& th": {
+                  borderBottomColor: "divider",
+                  color: "text.secondary",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  letterSpacing: 0,
+                  py: 1.5,
+                  textTransform: "uppercase",
+                },
+              }}
+            >
+              <TableCell>Email</TableCell>
+              <TableCell>Role</TableCell>
+              <TableCell>Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {invitations.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3}>
+                  <Stack alignItems="center" py={4}>
+                    <Typography color="text.secondary">
+                      No pending invitations.
+                    </Typography>
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            ) : (
+              invitations.map((invitation) => (
+                <TableRow key={invitation.id}>
+                  <TableCell>{invitation.email}</TableCell>
+                  <TableCell>{invitation.roleName}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={invitation.status}
+                      size="small"
+                      sx={{
+                        borderRadius: 999,
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Dialog
+        fullWidth
+        maxWidth="xs"
+        onClose={handleInviteDialogClose}
+        open={isInviteDialogOpen}
+      >
+        <DialogTitle>Invite team members</DialogTitle>
+        <DialogContent>
+          <Stack gap={2} pt={1}>
+            {formError && <Alert severity="error">{formError}</Alert>}
+            <TextField
+              autoFocus
+              label="Email addresses"
+              minRows={3}
+              multiline
+              onChange={(event) => setEmails(event.target.value)}
+              placeholder="name@example.com, teammate@example.com"
+              value={emails}
+            />
+            <FormControl fullWidth>
+              <InputLabel id="invite-role-label">Role</InputLabel>
+              <Select
+                label="Role"
+                labelId="invite-role-label"
+                onChange={(event) => setRoleKey(event.target.value as RoleKey)}
+                value={roleKey}
+              >
+                {ROLE_OPTIONS.map((role) => (
+                  <MenuItem key={role.value} value={role.value}>
+                    {role.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleInviteDialogClose}>Cancel</Button>
+          <Button
+            disabled={inviteTeamMembers.isPending}
+            onClick={() => void handleInviteSubmit()}
+            variant="contained"
+          >
+            Send Invite
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 };

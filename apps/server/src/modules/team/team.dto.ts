@@ -1,6 +1,19 @@
-import { type TeamResponse, type TeamUser, UserStatus } from "@syncr/packages";
+import {
+  InvitationStatus,
+  type TeamInvitation,
+  type TeamResponse,
+  type TeamUser,
+  UserStatus,
+} from "@syncr/packages";
 import { Type } from "class-transformer";
-import { IsArray, IsEmail, IsEnum, IsInt, IsString, ValidateNested } from "class-validator";
+import {
+  IsArray,
+  IsEmail,
+  IsEnum,
+  IsInt,
+  IsString,
+  ValidateNested,
+} from "class-validator";
 
 export class TeamUserDto implements TeamUser {
   @IsInt()
@@ -31,6 +44,23 @@ export class TeamUserDto implements TeamUser {
   workload: number;
 }
 
+export class TeamInvitationDto implements TeamInvitation {
+  @IsInt()
+  id: number;
+
+  @IsEmail({}, { message: "Email has to be valid." })
+  email: string;
+
+  @IsString()
+  roleKey: string;
+
+  @IsString()
+  roleName: string;
+
+  @IsEnum(InvitationStatus)
+  status: InvitationStatus;
+}
+
 export class TeamResponseDto implements TeamResponse {
   @IsInt()
   totalMembers: number;
@@ -48,4 +78,9 @@ export class TeamResponseDto implements TeamResponse {
   @ValidateNested({ each: true })
   @Type(() => TeamUserDto)
   members: TeamUserDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => TeamInvitationDto)
+  invitations: TeamInvitationDto[];
 }

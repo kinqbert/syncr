@@ -116,6 +116,17 @@ const ProjectAddedNotification = ({ notification }: NotificationProps) => {
   );
 };
 
+const CompanyInvitationNotification = ({ notification }: NotificationProps) => {
+  const companyName = notification.metadata?.companyName ?? "a company";
+  const roleName = notification.metadata?.roleName ?? "team member";
+
+  return (
+    <Box>
+      You have been invited to join {companyName} as {roleName}.
+    </Box>
+  );
+};
+
 const NOTIFICATIONS: Record<NotificationType, React.FC<NotificationProps>> = {
   [NotificationType.TaskAssigned]: TaskAssignedNotification,
   [NotificationType.TaskCommented]: TaskCommentedNotification,
@@ -124,6 +135,7 @@ const NOTIFICATIONS: Record<NotificationType, React.FC<NotificationProps>> = {
   [NotificationType.TaskAcceptanceCriterionAdded]:
     TaskAcceptanceCriterionAddedNotification,
   [NotificationType.ProjectAdded]: ProjectAddedNotification,
+  [NotificationType.CompanyInvitation]: CompanyInvitationNotification,
 };
 
 export const Notification = ({ notification }: NotificationProps) => {

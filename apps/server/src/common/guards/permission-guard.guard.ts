@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { BadRequestException, CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { PermissionKey } from "@syncr/packages";
 import { Request } from "express";
 
 import { RoleRepository } from "../../repositories/role.repository";
-import { REQUIRED_PERMISSION_KEY } from "../decorators/require-permission.decorator";
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
@@ -15,11 +13,6 @@ export class PermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredPermission = this.reflector.getAllAndOverride<PermissionKey>(
-      REQUIRED_PERMISSION_KEY,
-      [context.getHandler(), context.getClass()],
-    );
-
     const request = context.switchToHttp().getRequest();
 
     const headers = (request as Request).headers;
@@ -37,7 +30,6 @@ export class PermissionGuard implements CanActivate {
     const userCompanyPermission = await this.roleRepository.getUserCompanyPermission(
       userId,
       Number(companyId),
-      requiredPermission,
     );
 
     if (!userCompanyPermission) {

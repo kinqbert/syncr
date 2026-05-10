@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack } from "@mui/material";
 import { Outlet } from "react-router";
 import { Toaster } from "sonner";
 
@@ -8,26 +8,9 @@ import { NotificationsSocketProvider } from "@/context/NotificationSocketContext
 import { AuthenticatedLayout } from "@/providers/auth";
 import { useCompanyStore } from "@/store/useCompanyStore";
 
+import { CompanyRequiredPlaceholder } from "./CompanyRequiredPlaceholder";
 import { Header, HEADER_HEIGHT } from "./Header";
 import { Sidebar } from "./Sidebar";
-
-const CompanyRequiredPlaceholder = () => {
-  return (
-    <Stack
-      alignItems="center"
-      component="main"
-      gap={1}
-      justifyContent="center"
-      minHeight={`calc(100vh - ${HEADER_HEIGHT}px)`}
-      sx={{ width: "100%", p: 3, textAlign: "center" }}
-    >
-      <Typography variant="h5">Please select a company</Typography>
-      <Typography color="text.secondary">
-        Choose a company from the header to continue.
-      </Typography>
-    </Stack>
-  );
-};
 
 const CompanyContent = () => {
   const selectedCompanyId = useCompanyStore((state) => state.selectedCompanyId);

@@ -8,7 +8,11 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-import { type NotificationPayload, NotificationType } from "@syncr/packages";
+import {
+  InvitationStatus,
+  type NotificationPayload,
+  NotificationType,
+} from "@syncr/packages";
 import {
   CalendarClock,
   CircleCheck,
@@ -16,9 +20,11 @@ import {
   FolderPlus,
   ListChecks,
   MessageCircle,
+  UserPlus,
 } from "lucide-mui";
 import { useMemo, useState } from "react";
 
+import { useAcceptInvitation, useDeclineInvitation } from "@/api/invitations";
 import {
   useGetNotifications,
   useMarkAllNotificationsRead,
@@ -57,6 +63,8 @@ const getNotificationTitle = (notification: NotificationPayload) => {
       return "Acceptance Criterion Added";
     case NotificationType.ProjectAdded:
       return "Team Update";
+    case NotificationType.CompanyInvitation:
+      return "Company Invitation";
     default:
       return "Notification";
   }
@@ -76,6 +84,8 @@ const getNotificationIcon = (notification: NotificationPayload) => {
       return <ListChecks fontSize="small" />;
     case NotificationType.ProjectAdded:
       return <FolderPlus fontSize="small" />;
+    case NotificationType.CompanyInvitation:
+      return <UserPlus fontSize="small" />;
     default:
       return <CircleCheck fontSize="small" />;
   }
@@ -94,9 +104,23 @@ const getIconColors = (notification: NotificationPayload) => {
       return { bgcolor: "#F3E8FF", color: "#9333EA" };
     case NotificationType.ProjectAdded:
       return { bgcolor: "#E0E7FF", color: "#4F46E5" };
+    case NotificationType.CompanyInvitation:
+      return { bgcolor: "#ECFDF5", color: "#059669" };
     default:
       return { bgcolor: "action.hover", color: "text.secondary" };
   }
+};
+
+const isActiveInvitationNotification = (notification: NotificationPayload) => {
+  return (
+    notification.type === NotificationType.CompanyInvitation &&
+    Boolean(notification.metadata?.invitationId) &&
+    notification.metadata?.invitationStatus === InvitationStatus.Active
+  );
+};
+
+const getInvitationId = (notification: NotificationPayload) => {
+  return notification.metadata?.invitationId;
 };
 
 const matchesFilter = (
@@ -123,6 +147,8 @@ export const NotificationsPage = () => {
   const { data: notifications = [], isPending } = useGetNotifications();
   const markNotificationAsRead = useMarkNotificationAsRead();
   const markAllNotificationsRead = useMarkAllNotificationsRead();
+  const acceptInvitation = useAcceptInvitation();
+  const declineInvitation = useDeclineInvitation();
 
   const unreadCount = notifications.filter(
     (notification) => !notification.isRead,
@@ -251,6 +277,39 @@ export const NotificationsPage = () => {
                         </Button>
                       )}
                     </Stack>
+                    {isActiveInvitationNotification(notification) && (
+                      <Stack direction="row" gap={1} mt={1.5}>
+                        <Button
+                          disabled={acceptInvitation.isPending}
+                          onClick={() => {
+                            const invitationId = getInvitationId(notification);
+
+                            if (invitationId) {
+                              acceptInvitation.mutate(invitationId);
+                            }
+                          }}
+                          size="small"
+                          variant="contained"
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          color="inherit"
+                          disabled={declineInvitation.isPending}
+                          onClick={() => {
+                            const invitationId = getInvitationId(notification);
+
+                            if (invitationId) {
+                              declineInvitation.mutate(invitationId);
+                            }
+                          }}
+                          size="small"
+                          variant="outlined"
+                        >
+                          Decline
+                        </Button>
+                      </Stack>
+                    )}
                   </Box>
 
                   {!notification.isRead && (

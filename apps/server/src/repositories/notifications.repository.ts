@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { NotificationType, type NotificationMetadata } from "@syncr/packages";
 import { and, desc, eq } from "drizzle-orm";
 
 import db from "../db/drizzle";
@@ -42,5 +43,25 @@ export class NotificationsRepository {
       .set({ isRead: true })
       .where(eq(notifications.recipientId, userId))
       .returning();
+  }
+
+  async updateInvitationNotificationMetadata(
+    userId: number,
+    invitationId: number,
+    metadata: NotificationMetadata,
+  ) {
+    const [notification] = await db
+      .update(notifications)
+      .set({ isRead: true, metadata })
+      .where(
+        and(
+          eq(notifications.recipientId, userId),
+          eq(notifications.type, NotificationType.CompanyInvitation),
+          eq(notifications.entityId, invitationId),
+        ),
+      )
+      .returning();
+
+    return notification;
   }
 }

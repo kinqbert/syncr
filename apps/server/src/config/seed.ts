@@ -50,6 +50,7 @@ const ROLE_PERMISSION_RECORDS: Record<RoleKey, PermissionKey[]> = {
   [RoleKey.Owner]: Object.values(PermissionKey),
 
   [RoleKey.ProjectManager]: [
+    PermissionKey.UserInvite,
     PermissionKey.ProjectCreate,
     PermissionKey.ProjectUpdate,
     PermissionKey.ProjectDelete,

@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { InvitationsService } from "src/modules/invitations/invitations.service";
 import { TasksRepository } from "src/repositories/tasks.repository";
 import { UsersRepository } from "src/repositories/users.repository";
 
@@ -9,6 +10,7 @@ export class TeamService {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly tasksRepository: TasksRepository,
+    private readonly invitationsService: InvitationsService,
   ) {}
 
   async getCompanyTeamData(companyId: number, userId: number) {
@@ -16,8 +18,9 @@ export class TeamService {
 
     const usersData = await this.usersRepository.getCompanyTeamUserData(companyId);
     const tasksData = await this.tasksRepository.getCompanyTeamTasksData(companyId);
+    const invitationsData = await this.invitationsService.getCompanyActiveInvitations(companyId);
 
-    return mapToTeamDataResponseDto(usersData, tasksData);
+    return mapToTeamDataResponseDto(usersData, tasksData, invitationsData);
   }
 
   private async userBelongsToTheCompany(userId: number, companyId: number) {
