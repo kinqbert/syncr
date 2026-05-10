@@ -111,6 +111,13 @@ export class CalendarConnectionsRepository {
       );
   }
 
+  async getTaskEventLinksForConnection(connectionId: number) {
+    return await db
+      .select()
+      .from(calendarTaskEvents)
+      .where(eq(calendarTaskEvents.connectionId, connectionId));
+  }
+
   async getTaskEventLinks(taskId: number) {
     return await db
       .select({

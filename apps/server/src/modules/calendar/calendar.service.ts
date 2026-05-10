@@ -75,6 +75,12 @@ export class CalendarService {
   }
 
   async disconnect(userId: number, provider: CalendarProvider) {
+    const connection = await this.calendarConnectionsRepository.getConnection(userId, provider);
+
+    if (connection) {
+      await this.calendarSyncService.deleteConnectionEvents(connection);
+    }
+
     await this.calendarConnectionsRepository.deleteConnection(userId, provider);
   }
 

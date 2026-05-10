@@ -64,6 +64,22 @@ export class CalendarSyncService {
     );
   }
 
+  async deleteConnectionEvents(connection: CalendarConnection) {
+    const links = await this.calendarConnectionsRepository.getTaskEventLinksForConnection(
+      connection.id,
+    );
+    const accessToken = await this.getAccessToken(connection);
+    const client = this.calendarProviderRegistry.getClient(connection.provider);
+
+    await Promise.all(
+      links.map(async (link) => {
+        await client.deleteEvent(accessToken, connection.calendarId, link.providerEventId);
+
+        await this.calendarConnectionsRepository.deleteTaskEventLink(connection.id, link.taskId);
+      }),
+    );
+  }
+
   private async syncConnectionTaskDeadline(connection: CalendarConnection, task: CalendarTask) {
     const accessToken = await this.getAccessToken(connection);
     const event = this.toCalendarEvent(task);
