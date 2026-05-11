@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link as RouterLink, useNavigate } from "react-router";
 
-import { useLogin } from "@/api";
+import { authKeys, useLogin } from "@/api";
+import { queryClient } from "@/lib/react-query";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { loginSchema, type LoginSchemaType } from "./validation";
@@ -25,7 +26,8 @@ export const LoginForm = () => {
     try {
       setError(null);
       await login(data);
-      navigate("/");
+      await queryClient.invalidateQueries({ queryKey: authKeys.me });
+      navigate("/", { replace: true });
     } catch (error) {
       setError(getErrorMessage(error));
     }

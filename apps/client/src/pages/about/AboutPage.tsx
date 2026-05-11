@@ -19,9 +19,6 @@ import {
 } from "lucide-mui";
 import { Link } from "react-router";
 
-import { useMe } from "@/api";
-import { useAuthStore } from "@/store/useAuthStore";
-
 const features = [
   {
     title: "Shared project clarity",
@@ -98,12 +95,6 @@ const workflowSteps = [
 ];
 
 export const AboutPage = () => {
-  const storedUser = useAuthStore((state) => state.user);
-  const { data: currentUser } = useMe();
-  const isAuthorized = Boolean(storedUser || currentUser);
-  const loginTarget = isAuthorized ? "/" : "/login";
-  const registerTarget = isAuthorized ? "/" : "/register";
-
   return (
     <Box
       component="main"
@@ -141,10 +132,10 @@ export const AboutPage = () => {
           </Stack>
 
           <Stack direction="row" gap={1}>
-            <Button component={Link} to={loginTarget} variant="text">
+            <Button component={Link} to="/login" variant="text">
               Log in
             </Button>
-            <Button component={Link} to={registerTarget} variant="contained">
+            <Button component={Link} to="/login" variant="contained">
               Get started
             </Button>
           </Stack>
@@ -196,7 +187,7 @@ export const AboutPage = () => {
                   component={Link}
                   endIcon={<ArrowRight />}
                   size="large"
-                  to={registerTarget}
+                  to="/login"
                   variant="contained"
                 >
                   Start planning
@@ -204,7 +195,7 @@ export const AboutPage = () => {
                 <Button
                   component={Link}
                   size="large"
-                  to={loginTarget}
+                  to="/login"
                   variant="outlined"
                 >
                   I already have an account
@@ -535,7 +526,7 @@ export const AboutPage = () => {
                     component={Link}
                     endIcon={<ArrowRight />}
                     size="large"
-                    to={registerTarget}
+                    to="/login"
                     variant="contained"
                   >
                     Create your workspace
@@ -578,7 +569,7 @@ export const AboutPage = () => {
                 component={Link}
                 fontSize={13}
                 fontWeight={700}
-                to={loginTarget}
+                to="/login"
               >
                 Log in
               </Typography>
@@ -587,7 +578,7 @@ export const AboutPage = () => {
                 component={Link}
                 fontSize={13}
                 fontWeight={700}
-                to={registerTarget}
+                to="/login"
               >
                 Get started
               </Typography>

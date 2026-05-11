@@ -1,17 +1,10 @@
 import { CircularProgress, Stack } from "@mui/material";
-import type { MeResponse } from "@syncr/packages";
 import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router";
 
 import { useMe } from "@/api";
-import { type StoreUser, useAuthStore } from "@/store/useAuthStore";
-
-const buildStoreUserFromMe = (response: MeResponse): StoreUser => {
-  return {
-    id: response.id,
-    email: response.email,
-  };
-};
+import { useAuthStore } from "@/store/useAuthStore";
+import { buildStoreUserFromMe } from "@/utils/buildStoreUserFromMe";
 
 export const AuthenticatedLayout = ({
   children,
@@ -20,7 +13,7 @@ export const AuthenticatedLayout = ({
 }) => {
   const location = useLocation();
   const setUser = useAuthStore((state) => state.setUser);
-  const { data: user, isPending, isSuccess } = useMe();
+  const { data: user, isFetching, isPending, isSuccess } = useMe();
 
   useEffect(() => {
     if (!isSuccess || !user) {
@@ -32,7 +25,7 @@ export const AuthenticatedLayout = ({
     setUser(storeUser);
   }, [isSuccess, setUser, user]);
 
-  if (isPending) {
+  if (isPending || (!user && isFetching)) {
     return (
       <Stack minHeight="100vh" alignItems="center" justifyContent="center">
         <CircularProgress />
