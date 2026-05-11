@@ -3,8 +3,17 @@ import { ConversationsRepository } from "src/repositories/conversations.reposito
 import { MessagesRepository } from "src/repositories/messages.repository";
 import { UsersRepository } from "src/repositories/users.repository";
 
-import { CreateDirectConversationDto, CreateGroupConversationDto } from "./conversations.dto";
-import { mapConversationMessageToDto, mapListConversationToDto } from "./conversations.mapper";
+import {
+  CreateDirectConversationDto,
+  CreateGroupConversationDto,
+  SendMessageDto,
+} from "./conversations.dto";
+import { ConversationsGateway } from "./conversations.gateway";
+import {
+  mapConversationMessageToDto,
+  mapCreatedMessageToPayload,
+  mapListConversationToDto,
+} from "./conversations.mapper";
 
 @Injectable()
 export class ConversationsService {
@@ -12,6 +21,7 @@ export class ConversationsService {
     private readonly conversationsRepository: ConversationsRepository,
     private readonly messagesRepository: MessagesRepository,
     private readonly usersRepository: UsersRepository,
+    private readonly conversationsGateway: ConversationsGateway,
   ) {}
 
   async getUserConversationsList(userId: number, companyId: number) {
@@ -79,6 +89,24 @@ export class ConversationsService {
     return mapListConversationToDto(conversation);
   }
 
+  async sendMessage(conversationId: number, userId: number, dto: SendMessageDto) {
+    await this.ensureConversationParticipant(conversationId, userId);
+
+    const message = await this.messagesRepository.createMessage(
+      conversationId,
+      userId,
+      dto.content,
+    );
+
+    const rawPayload = await this.messagesRepository.getMessagePayloadData(message.id);
+    const payload = mapCreatedMessageToPayload(rawPayload);
+
+    this.conversationsGateway.emitMessageCreated(conversationId, payload);
+
+    return payload;
+  }
+
+  // HELPERS
   private async ensureNoDuplicateConversation(firstUserId: number, secondUserId: number) {
     const exists = await this.conversationsRepository.checkIfExistsByConversationKey(
       firstUserId,
@@ -102,7 +130,7 @@ export class ConversationsService {
     const allInCompany = await this.usersRepository.areUsersInCompany(userIds, companyId);
 
     if (!allInCompany) {
-      throw new UnauthorizedException("SOme of users do not belong to the company");
+      throw new UnauthorizedException("Some of users do not belong to the company");
     }
   }
 

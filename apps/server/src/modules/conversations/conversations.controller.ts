@@ -20,6 +20,8 @@ import {
   CreateDirectConversationDto,
   CreateGroupConversationDto,
   ListConversationDto,
+  MessageResponseDto,
+  SendMessageDto,
 } from "./conversations.dto";
 import { ConversationsService } from "./conversations.service";
 
@@ -79,5 +81,15 @@ export class ConversationsController {
       limit,
       offset,
     );
+  }
+
+  @Post(":conversationId/message")
+  @HttpCode(HttpStatus.OK)
+  async sendMEssage(
+    @Param("conversationId", ParseIntPipe) conversationId: number,
+    @UserId() userId: number,
+    @Body() sendMessageDto: SendMessageDto,
+  ): Promise<MessageResponseDto> {
+    return await this.conversationsService.sendMessage(conversationId, userId, sendMessageDto);
   }
 }

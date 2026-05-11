@@ -44,3 +44,21 @@ export type CreateGroupConversationBody = {
   title: string;
   targetUserIds: number[];
 };
+
+export type SendMessageBody = {
+  content: string;
+};
+
+export type MessagePayload = {
+  id: number;
+  content: string;
+  conversationId: number;
+  createdAt: string;
+  sender: {
+    id: number;
+    name: string;
+    surname: string;
+  };
+};
+
+export type MessageResponse = MessagePayload;

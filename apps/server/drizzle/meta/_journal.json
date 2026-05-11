@@ -127,6 +127,13 @@
       "when": 1778514056197,
       "tag": "0017_parched_domino",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1778517463896,
+      "tag": "0018_condemned_psylocke",
+      "breakpoints": true
     }
   ]
 }

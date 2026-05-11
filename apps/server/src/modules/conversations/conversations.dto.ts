@@ -6,6 +6,8 @@ import {
   CreateDirectConversationBody,
   CreateGroupConversationBody,
   ListConversation,
+  MessageResponse,
+  SendMessageBody,
 } from "@syncr/packages";
 import { Type } from "class-transformer";
 import {
@@ -14,9 +16,11 @@ import {
   IsDateString,
   IsEnum,
   IsInt,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+  MaxLength,
   ValidateNested,
 } from "class-validator";
 
@@ -99,4 +103,25 @@ export class CreateGroupConversationDto implements CreateGroupConversationBody {
   @IsArray()
   @IsNumber({}, { each: true })
   targetUserIds: number[];
+}
+
+export class SendMessageDto implements SendMessageBody {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(4000)
+  content: string;
+}
+
+export class MessageSenderResponseDto {
+  id: number;
+  name: string;
+  surname: string;
+}
+
+export class MessageResponseDto implements MessageResponse {
+  id: number;
+  content: string;
+  conversationId: number;
+  createdAt: string;
+  sender: MessageSenderResponseDto;
 }

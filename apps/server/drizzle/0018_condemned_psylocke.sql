@@ -1,0 +1,1 @@
+ALTER TABLE "messages" RENAME COLUMN "updated_at" TO "edited_at";

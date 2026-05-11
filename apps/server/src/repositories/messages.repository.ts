@@ -32,4 +32,38 @@ export class MessagesRepository {
 
     return conversationMessages;
   }
+
+  async createMessage(conversationId: number, senderId: number, content: string) {
+    const [message] = await db
+      .insert(messages)
+      .values({
+        conversationId,
+        senderId,
+        content,
+      })
+      .returning();
+
+    return message;
+  }
+
+  async getMessagePayloadData(messageId: number) {
+    const [payload] = await db
+      .select({
+        id: messages.id,
+        content: messages.content,
+        createdAt: messages.createdAt,
+        conversationId: messages.conversationId,
+
+        sender: {
+          id: users.id,
+          name: users.name,
+          surname: users.surname,
+        },
+      })
+      .from(messages)
+      .innerJoin(users, eq(messages.senderId, users.id))
+      .where(eq(messages.id, messageId));
+
+    return payload;
+  }
 }

@@ -365,7 +365,10 @@ export const messages = pgTable("messages", {
   senderId: integer().references(() => users.id, { onDelete: "set null" }),
   content: text().notNull(),
   createdAt: timestamps.createdAt,
-  editedAt: timestamps.updatedAt,
+  editedAt: timestamp({
+    withTimezone: true,
+    mode: "date",
+  }),
   deletedAt: timestamp({
     withTimezone: true,
     mode: "date",

@@ -1,4 +1,4 @@
-import { ConversationType } from "@syncr/packages";
+import { ConversationType, MessagePayload } from "@syncr/packages";
 import { conversations, messages } from "src/db/schema";
 import { getFullName } from "src/utils/getFullName";
 
@@ -17,7 +17,7 @@ type ConversationMessageQueryData = {
   senderId: number | null;
   content: string;
   createdAt: Date;
-  editedAt: Date;
+  editedAt: Date | null;
   user: { id: number; name: string; surname: string } | null;
 };
 
@@ -64,5 +64,29 @@ export const mapConversationMessageToDto = (
     : null,
   content: message.content,
   createdAt: message.createdAt.toISOString(),
-  editedAt: message.editedAt.toISOString(),
+  editedAt: message.editedAt?.toISOString() ?? null,
 });
+
+export const mapCreatedMessageToPayload = (message: {
+  id: number;
+  content: string;
+  conversationId: number;
+  createdAt: Date;
+  sender: {
+    id: number;
+    name: string;
+    surname: string;
+  };
+}): MessagePayload => {
+  return {
+    id: message.id,
+    content: message.content,
+    conversationId: message.conversationId,
+    createdAt: message.createdAt.toISOString(),
+    sender: {
+      id: message.sender.id,
+      name: message.sender.name,
+      surname: message.sender.surname,
+    },
+  };
+};
