@@ -1,7 +1,7 @@
 import { InvitationStatus } from "@syncr/packages";
 import { invitations, roles, users } from "src/db/schema";
 
-import { TeamInvitationDto, TeamResponseDto, TeamUserDto } from "./team.dto";
+import { TeamInvitationDto, TeamMemberDto, TeamResponseDto, TeamUserDto } from "./team.dto";
 
 type DbTeamUserQueryData = {
   user: typeof users.$inferSelect;
@@ -56,5 +56,14 @@ export const mapToTeamDataResponseDto = (
     totalMembers: usersData.length,
     activeProjects: tasksData.activeProjects,
     tasksCompleted: tasksData.tasksCompleted,
+  };
+};
+
+export const mapToTeamMembersDto = (data: typeof users.$inferSelect): TeamMemberDto => {
+  return {
+    id: data.id,
+    email: data.email,
+    name: data.email,
+    surname: data.surname,
   };
 };

@@ -3,7 +3,7 @@ import { InvitationsService } from "src/modules/invitations/invitations.service"
 import { TasksRepository } from "src/repositories/tasks.repository";
 import { UsersRepository } from "src/repositories/users.repository";
 
-import { mapToTeamDataResponseDto } from "./team.mapper";
+import { mapToTeamDataResponseDto, mapToTeamMembersDto } from "./team.mapper";
 
 @Injectable()
 export class TeamService {
@@ -21,6 +21,14 @@ export class TeamService {
     const invitationsData = await this.invitationsService.getCompanyActiveInvitations(companyId);
 
     return mapToTeamDataResponseDto(usersData, tasksData, invitationsData);
+  }
+
+  async getTeamMembers(companyId: number, userId: number) {
+    await this.userBelongsToTheCompany(userId, companyId);
+
+    const teamMembers = await this.usersRepository.getCompanyUsers(companyId);
+
+    return teamMembers.map(mapToTeamMembersDto);
   }
 
   private async userBelongsToTheCompany(userId: number, companyId: number) {

@@ -1,6 +1,7 @@
 import {
   InvitationStatus,
   type TeamInvitation,
+  TeamMember,
   type TeamResponse,
   type TeamUser,
   UserStatus,
@@ -76,4 +77,11 @@ export class TeamResponseDto implements TeamResponse {
   @ValidateNested({ each: true })
   @Type(() => TeamInvitationDto)
   invitations: TeamInvitationDto[];
+}
+
+export class TeamMemberDto implements TeamMember {
+  id: number;
+  email: string;
+  name: string;
+  surname: string;
 }

@@ -19,4 +19,12 @@ export class TeamController {
   async getTeamData(@CompanyId() companyId: number, @UserId() userId: number) {
     return await this.teamService.getCompanyTeamData(companyId, userId);
   }
+
+  @Get("members")
+  @RequirePermission(PermissionKey.TeamView)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @HttpCode(HttpStatus.OK)
+  async getTeamMembers(@CompanyId() companyId: number, @UserId() userId: number) {
+    return await this.teamService.getTeamMembers(companyId, userId);
+  }
 }

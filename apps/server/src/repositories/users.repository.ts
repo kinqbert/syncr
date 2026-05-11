@@ -13,6 +13,16 @@ export class UsersRepository {
     return user;
   }
 
+  async getCompanyUsers(companyId: number) {
+    const result = await db
+      .select()
+      .from(userCompanyRoles)
+      .where(eq(userCompanyRoles.companyId, companyId))
+      .innerJoin(users, eq(users.id, userCompanyRoles.userId));
+
+    return result.map((user) => user.users);
+  }
+
   async getCompanyTeamUserData(companyId: number) {
     const companyUsers = await db
       .select({

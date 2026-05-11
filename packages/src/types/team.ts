@@ -19,3 +19,10 @@ export type TeamResponse = {
   members: TeamUser[];
   invitations: TeamInvitation[];
 };
+
+export type TeamMember = {
+  id: number;
+  email: string;
+  name: string;
+  surname: string;
+};
