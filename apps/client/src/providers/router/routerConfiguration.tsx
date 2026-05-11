@@ -1,9 +1,12 @@
 import { createBrowserRouter } from "react-router";
 
 import { AppLayout } from "@/components/AppLayout";
+import { ConversationsLayout } from "@/components/ConversationsLayout";
 import { ProjectLayout } from "@/components/ProjectLayout";
 import {
   AboutPage,
+  ConversationEmptyPage,
+  ConversationPage,
   DashboardPage,
   LoginPage,
   MyCalendarPage,
@@ -39,6 +42,17 @@ const router = createBrowserRouter([
       {
         path: "notifications",
         element: <NotificationsPage />,
+      },
+      {
+        path: "conversations",
+        element: <ConversationsLayout />,
+        children: [
+          { index: true, element: <ConversationEmptyPage /> },
+          {
+            path: ":conversationId",
+            element: <ConversationPage />,
+          },
+        ],
       },
       {
         path: "team",

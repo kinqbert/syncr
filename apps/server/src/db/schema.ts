@@ -1,4 +1,5 @@
 import {
+  ConversationType,
   InvitationStatus,
   NotificationEntityType,
   NotificationMetadata,
@@ -9,6 +10,9 @@ import {
   TaskStatus,
   UserStatus,
 } from "@syncr/packages";
+import { primaryKey } from "drizzle-orm/pg-core";
+import { uniqueIndex } from "drizzle-orm/pg-core";
+import { AnyPgColumn } from "drizzle-orm/pg-core";
 import { jsonb } from "drizzle-orm/pg-core";
 import {
   boolean,
@@ -21,6 +25,28 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
+
+// HELPERS
+
+function enumToPgEnum<T extends Record<string, string>>(obj: T) {
+  return Object.values(obj) as [T[keyof T], ...T[keyof T][]];
+}
+
+export const timestamps = {
+  createdAt: timestamp({
+    withTimezone: true,
+    mode: "date",
+  })
+    .notNull()
+    .defaultNow(),
+
+  updatedAt: timestamp({
+    withTimezone: true,
+    mode: "date",
+  })
+    .notNull()
+    .defaultNow(),
+};
 
 // CORE TABLES
 export const userStatusEnum = pgEnum("user_status", enumToPgEnum(UserStatus));
@@ -55,7 +81,7 @@ export const userSessions = pgTable("user_sessions", {
 
 export const calendarProviderEnum = pgEnum("calendar_provider", ["google"]);
 
-export const calendarConnections = pgTable(
+export const nessages = pgTable(
   "calendar_connections",
   {
     id: serial().primaryKey(),
@@ -68,8 +94,7 @@ export const calendarConnections = pgTable(
     accessToken: text().notNull(),
     refreshToken: text().notNull(),
     expiresAt: timestamp().notNull(),
-    createdAt: timestamp().notNull().defaultNow(),
-    updatedAt: timestamp().notNull().defaultNow(),
+    ...timestamps,
   },
   (table) => [unique().on(table.userId, table.provider)],
 );
@@ -194,7 +219,7 @@ export const taskComments = pgTable("task_comments", {
     .references(() => tasks.id, { onDelete: "cascade" }),
   userId: integer().references(() => users.id, { onDelete: "set null" }),
   content: text().notNull(),
-  createdAt: timestamp().notNull().defaultNow(),
+  createdAt: timestamps.createdAt,
 });
 
 export const taskActivities = pgTable("task_activities", {
@@ -206,7 +231,7 @@ export const taskActivities = pgTable("task_activities", {
   action: taskActivityActionEnum().notNull(),
   previousValue: text(),
   newValue: text(),
-  createdAt: timestamp().notNull().defaultNow(),
+  createdAt: timestamps.createdAt,
 });
 
 export const taskLabels = pgTable(
@@ -262,7 +287,7 @@ export const notifications = pgTable("notifications", {
   entityId: integer().notNull(),
   metadata: jsonb().$type<NotificationMetadata>(),
   isRead: boolean().notNull().default(false),
-  createdAt: timestamp().notNull().defaultNow(),
+  createdAt: timestamps.createdAt,
 });
 
 export const taskWatchers = pgTable("task_watchers", {
@@ -280,7 +305,7 @@ export const calendarTaskEvents = pgTable(
     id: serial().primaryKey(),
     connectionId: integer()
       .notNull()
-      .references(() => calendarConnections.id, { onDelete: "cascade" }),
+      .references(() => messages.id, { onDelete: "cascade" }),
     taskId: integer()
       .notNull()
       .references(() => tasks.id, { onDelete: "cascade" }),
@@ -290,8 +315,59 @@ export const calendarTaskEvents = pgTable(
   (table) => [unique().on(table.connectionId, table.taskId)],
 );
 
-// HELPERS
+// CHATS
 
-function enumToPgEnum<T extends Record<string, string>>(obj: T) {
-  return Object.values(obj) as [T[keyof T], ...T[keyof T][]];
-}
+export const conversationTypeEnum = pgEnum("conversation_type", enumToPgEnum(ConversationType));
+
+export const conversations = pgTable(
+  "conversations",
+  {
+    id: serial().primaryKey(),
+    companyId: integer()
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    type: conversationTypeEnum().notNull(),
+    directConversationKey: text(),
+    title: text(),
+    lastMessageId: integer().references((): AnyPgColumn => messages.id, { onDelete: "set null" }),
+    createdById: integer()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("direct_conversation_key_idx").on(table.directConversationKey)],
+);
+
+export const conversationParticipants = pgTable(
+  "conversations_participants",
+  {
+    conversationId: integer()
+      .notNull()
+      .references(() => conversations.id, { onDelete: "cascade" }),
+    userId: integer()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    joinedAt: timestamps.createdAt,
+    lastReadMessageId: integer().references(() => messages.id, { onDelete: "set null" }),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.conversationId, table.userId],
+    }),
+  ],
+);
+
+export const messages = pgTable("messages", {
+  id: serial().primaryKey(),
+  conversationId: integer()
+    .notNull()
+    .references(() => conversations.id, { onDelete: "cascade" }),
+  senderId: integer().references(() => users.id, { onDelete: "set null" }),
+  content: text().notNull(),
+  createdAt: timestamps.createdAt,
+  editedAt: timestamps.updatedAt,
+  deletedAt: timestamp({
+    withTimezone: true,
+    mode: "date",
+  }),
+});

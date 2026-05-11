@@ -3,24 +3,19 @@ import { CalendarProvider } from "@syncr/packages";
 import { and, eq } from "drizzle-orm";
 
 import db from "../db/drizzle";
-import { calendarConnections, calendarTaskEvents } from "../db/schema";
+import { nessages, calendarTaskEvents } from "../db/schema";
 
 @Injectable()
 export class CalendarConnectionsRepository {
   async getConnectionsByUserId(userId: number) {
-    return await db
-      .select()
-      .from(calendarConnections)
-      .where(eq(calendarConnections.userId, userId));
+    return await db.select().from(nessages).where(eq(nessages.userId, userId));
   }
 
   async getConnection(userId: number, provider: CalendarProvider) {
     const [connection] = await db
       .select()
-      .from(calendarConnections)
-      .where(
-        and(eq(calendarConnections.userId, userId), eq(calendarConnections.provider, provider)),
-      )
+      .from(nessages)
+      .where(and(eq(nessages.userId, userId), eq(nessages.provider, provider)))
       .limit(1);
 
     return connection;
@@ -30,12 +25,12 @@ export class CalendarConnectionsRepository {
     return await this.getConnectionsByUserId(userId);
   }
 
-  async upsertConnection(data: typeof calendarConnections.$inferInsert) {
+  async upsertConnection(data: typeof nessages.$inferInsert) {
     const [connection] = await db
-      .insert(calendarConnections)
+      .insert(nessages)
       .values(data)
       .onConflictDoUpdate({
-        target: [calendarConnections.userId, calendarConnections.provider],
+        target: [nessages.userId, nessages.provider],
         set: {
           providerAccountEmail: data.providerAccountEmail,
           calendarId: data.calendarId,
@@ -52,13 +47,13 @@ export class CalendarConnectionsRepository {
 
   async updateConnectionTokens(
     connectionId: number,
-    data: Pick<typeof calendarConnections.$inferInsert, "accessToken" | "expiresAt"> &
-      Partial<Pick<typeof calendarConnections.$inferInsert, "refreshToken">>,
+    data: Pick<typeof nessages.$inferInsert, "accessToken" | "expiresAt"> &
+      Partial<Pick<typeof nessages.$inferInsert, "refreshToken">>,
   ) {
     const [connection] = await db
-      .update(calendarConnections)
+      .update(nessages)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(calendarConnections.id, connectionId))
+      .where(eq(nessages.id, connectionId))
       .returning();
 
     return connection;
@@ -66,10 +61,8 @@ export class CalendarConnectionsRepository {
 
   async deleteConnection(userId: number, provider: CalendarProvider) {
     await db
-      .delete(calendarConnections)
-      .where(
-        and(eq(calendarConnections.userId, userId), eq(calendarConnections.provider, provider)),
-      );
+      .delete(nessages)
+      .where(and(eq(nessages.userId, userId), eq(nessages.provider, provider)));
   }
 
   async getTaskEventLink(connectionId: number, taskId: number) {
@@ -122,10 +115,10 @@ export class CalendarConnectionsRepository {
     return await db
       .select({
         link: calendarTaskEvents,
-        connection: calendarConnections,
+        connection: nessages,
       })
       .from(calendarTaskEvents)
-      .innerJoin(calendarConnections, eq(calendarTaskEvents.connectionId, calendarConnections.id))
+      .innerJoin(nessages, eq(calendarTaskEvents.connectionId, nessages.id))
       .where(eq(calendarTaskEvents.taskId, taskId));
   }
 }

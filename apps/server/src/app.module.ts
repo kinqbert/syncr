@@ -9,6 +9,7 @@ import { NotificationsModule } from "./modules/notifications/notifications.modul
 import { ProjectsModule } from "./modules/projects/projects.module";
 import { TasksModule } from "./modules/tasks/tasks.module";
 import { TeamModule } from "./modules/team/team.module";
+import { ConversationsModule } from './modules/conversations/conversations.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TeamModule } from "./modules/team/team.module";
     TasksModule,
     NotificationsModule,
     TeamModule,
+    ConversationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

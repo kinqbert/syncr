@@ -6,14 +6,7 @@ import {
   UserStatus,
 } from "@syncr/packages";
 import { Type } from "class-transformer";
-import {
-  IsArray,
-  IsEmail,
-  IsEnum,
-  IsInt,
-  IsString,
-  ValidateNested,
-} from "class-validator";
+import { IsArray, IsEmail, IsEnum, IsInt, IsString, ValidateNested } from "class-validator";
 
 export class TeamUserDto implements TeamUser {
   @IsInt()

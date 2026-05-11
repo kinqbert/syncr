@@ -1,0 +1,2 @@
+ALTER TABLE "conversations" ADD COLUMN "direct_conversation_key" text;--> statement-breakpoint
+CREATE UNIQUE INDEX "direct_conversation_key_idx" ON "conversations" USING btree ("direct_conversation_key");

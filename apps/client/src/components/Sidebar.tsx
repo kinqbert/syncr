@@ -15,6 +15,7 @@ import {
   CalendarDays,
   Folders,
   LayoutDashboard,
+  MessageCircle,
   Settings,
   Users,
 } from "lucide-mui";
@@ -45,12 +46,18 @@ const SIDEBAR_ITEMS: {
   },
   {
     id: 4,
+    label: "Conversations",
+    to: "conversations",
+    icon: <MessageCircle />,
+  },
+  {
+    id: 5,
     label: "Notifications",
     to: "notifications",
     icon: <Bell />,
   },
   {
-    id: 5,
+    id: 6,
     label: "Settings",
     to: "settings",
     icon: <Settings />,

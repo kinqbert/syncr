@@ -1,4 +1,4 @@
-import { CalendarProvider, type CalendarConnection } from "@syncr/packages";
+import { type CalendarConnection, CalendarProvider } from "@syncr/packages";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import api from "@/lib/axios";

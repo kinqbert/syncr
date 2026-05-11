@@ -69,6 +69,23 @@ export class UsersRepository {
     return Boolean(userCompanyRole);
   }
 
+  async areUsersInCompany(userIds: number[], companyId: number) {
+    const companyUsers = await db
+      .select({
+        userId: userCompanyRoles.userId,
+      })
+      .from(userCompanyRoles)
+      .where(
+        and(
+          inArray(userCompanyRoles.userId, userIds),
+
+          eq(userCompanyRoles.companyId, companyId),
+        ),
+      );
+
+    return companyUsers.length === userIds.length;
+  }
+
   async getCompanyUsersByEmails(companyId: number, emails: string[]) {
     if (emails.length === 0) {
       return [];

@@ -1,6 +1,7 @@
 export * from "./auth";
 export * from "./calendar";
 export * from "./companies";
+export * from "./conversations";
 export * from "./projects";
 export * from "./invitations";
 export * from "./notifications";

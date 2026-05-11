@@ -6,4 +6,4 @@
 - ~~Calendar page~~
 - ~~Calendar integration~~
 - Chat feature for team communication
-- Invitations to the company
+- ~~Invitations to the company~~
