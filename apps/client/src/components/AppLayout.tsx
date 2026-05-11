@@ -3,13 +3,13 @@ import { Outlet } from "react-router";
 import { Toaster } from "sonner";
 
 import { useGetMyCompanies } from "@/api/companies";
-import { NotificationsListener } from "@/context/NotificationSocketContext/NotificationsListener";
-import { NotificationsSocketProvider } from "@/context/NotificationSocketContext/NotificationSocketProvider";
+import { SocketProvider } from "@/context/SocketContext/SocketProvider";
 import { AuthenticatedLayout } from "@/providers/auth";
 import { useCompanyStore } from "@/store/useCompanyStore";
 
 import { CompanyRequiredPlaceholder } from "./CompanyRequiredPlaceholder";
 import { Header, HEADER_HEIGHT } from "./Header";
+import { NotificationsListener } from "./NotificationsListener";
 import { Sidebar } from "./Sidebar";
 
 const CompanyContent = () => {
@@ -71,7 +71,7 @@ const CompanyContent = () => {
 export const AppLayout = () => {
   return (
     <AuthenticatedLayout>
-      <NotificationsSocketProvider>
+      <SocketProvider>
         <>
           <Toaster />
           <NotificationsListener />
@@ -81,7 +81,7 @@ export const AppLayout = () => {
           <Sidebar />
           <CompanyContent />
         </Box>
-      </NotificationsSocketProvider>
+      </SocketProvider>
     </AuthenticatedLayout>
   );
 };

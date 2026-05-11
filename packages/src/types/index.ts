@@ -6,6 +6,7 @@ export * from "./projects";
 export * from "./invitations";
 export * from "./notifications";
 export * from "./role";
+export * from "./sockets";
 export * from "./tasks";
 export * from "./team";
 export * from "./user";

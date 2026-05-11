@@ -62,3 +62,10 @@ export type MessagePayload = {
 };
 
 export type MessageResponse = MessagePayload;
+
+export type StartTypingPayload = {
+  conversationId: number;
+  userId: number;
+};
+
+export type StopTypingPayload = StartTypingPayload;

@@ -1,4 +1,7 @@
-import type { ConversationHistoryPage, ListConversation } from "@syncr/packages";
+import type {
+  ConversationHistoryPage,
+  ListConversation,
+} from "@syncr/packages";
 import {
   type InfiniteData,
   useInfiniteQuery,

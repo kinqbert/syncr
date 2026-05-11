@@ -1,15 +1,13 @@
+import type { ServerToClientEvents } from "@syncr/packages";
 import { useContext, useEffect } from "react";
 
-import { NotificationSocketContext } from "@/context/NotificationSocketContext/NotificationSocketContext";
-import type { ServerToClientEvents } from "@/lib/socket";
+import { SocketContext } from "@/context/SocketContext/SocketContext";
 
-export const useNotificationsSocket = () => {
-  const socket = useContext(NotificationSocketContext);
+export const useSocket = () => {
+  const socket = useContext(SocketContext);
 
   if (!socket) {
-    throw new Error(
-      "useNotificationsSocket must be used within NotificationsSocketProvider",
-    );
+    throw new Error("useSocket must be used within SocketProvider");
   }
 
   return socket;
@@ -19,7 +17,7 @@ export const useNotificationEvent = (
   handler: ServerToClientEvents["notification"],
   enabled = true,
 ) => {
-  const socket = useNotificationsSocket();
+  const socket = useSocket();
 
   useEffect(() => {
     if (!enabled) {
