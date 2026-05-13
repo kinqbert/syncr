@@ -40,15 +40,15 @@ const SIDEBAR_ITEMS: {
   { id: 2, label: "Calendar", to: "calendar", icon: <CalendarDays /> },
   {
     id: 3,
-    label: "Team",
-    to: "team",
-    icon: <Users />,
-  },
-  {
-    id: 4,
     label: "Conversations",
     to: "conversations",
     icon: <MessageCircle />,
+  },
+  {
+    id: 4,
+    label: "Team",
+    to: "team",
+    icon: <Users />,
   },
   {
     id: 5,

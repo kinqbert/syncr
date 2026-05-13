@@ -1,14 +1,12 @@
 import { ConversationType, MessagePayload } from "@syncr/packages";
-import { conversations, messages } from "src/db/schema";
+import { conversations } from "src/db/schema";
 import { getFullName } from "src/utils/getFullName";
 
 import { ConversationMessageDto, ListConversationDto } from "./conversations.dto";
 
 export type ListConversationQueryData = {
   conversation: typeof conversations.$inferSelect;
-  lastMessage: typeof messages.$inferSelect | null;
   otherUser: { id: number; name: string; surname: string } | null;
-  lastMessageSender: { id: number; name: string; surname: string } | null;
 };
 
 type ConversationMessageQueryData = {
@@ -24,7 +22,7 @@ type ConversationMessageQueryData = {
 export const mapListConversationToDto = (
   conversationData: ListConversationQueryData,
 ): ListConversationDto => {
-  const { conversation, lastMessage, otherUser, lastMessageSender } = conversationData;
+  const { conversation, otherUser } = conversationData;
 
   const title =
     !conversation.title && conversation.type === ConversationType.Direct && otherUser
@@ -35,18 +33,6 @@ export const mapListConversationToDto = (
     id: conversation.id,
     type: conversation.type,
     title,
-
-    ...(lastMessage
-      ? {
-          lastMessage: {
-            authorName:
-              lastMessageSender?.name && lastMessageSender?.surname
-                ? getFullName(lastMessageSender?.name, lastMessageSender?.surname)
-                : "",
-            content: lastMessage.content,
-          },
-        }
-      : {}),
   };
 };
 

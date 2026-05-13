@@ -77,12 +77,14 @@ export class ConversationsService {
     companyId: number,
     dto: CreateGroupConversationDto,
   ) {
-    await this.ensureUsersInCompany(dto.targetUserIds, companyId);
+    const participantIds = Array.from(new Set([userId, ...dto.targetUserIds]));
+
+    await this.ensureUsersInCompany(participantIds, companyId);
 
     const conversation = await this.conversationsRepository.createGroupConversation(
       userId,
       companyId,
-      dto.targetUserIds,
+      participantIds,
       dto.title,
     );
 

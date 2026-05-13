@@ -24,14 +24,6 @@ import {
   ValidateNested,
 } from "class-validator";
 
-class ListConversationMessageDto {
-  @IsString()
-  authorName: string;
-
-  @IsString()
-  content: string;
-}
-
 export class ListConversationDto implements ListConversation {
   @IsNumber()
   id: number;
@@ -41,11 +33,6 @@ export class ListConversationDto implements ListConversation {
 
   @IsString()
   title: string;
-
-  @ValidateNested()
-  @IsOptional()
-  @Type(() => ListConversationMessageDto)
-  lastMessage?: { authorName: string; content: string };
 }
 
 class ConversationMessageAuthorDto implements ConversationMessageAuthor {

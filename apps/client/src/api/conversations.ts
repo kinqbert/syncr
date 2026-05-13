@@ -1,14 +1,20 @@
 import type {
+  CreateDirectConversationBody,
+  CreateGroupConversationBody,
   ConversationHistoryPage,
   ListConversation,
+  MessageResponse,
+  SendMessageBody,
 } from "@syncr/packages";
 import {
   type InfiniteData,
   useInfiniteQuery,
+  useMutation,
   useQuery,
 } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
+import { queryClient } from "@/lib/react-query";
 
 export const conversationsKeys = {
   all: ["conversations"] as const,
@@ -42,6 +48,33 @@ const getConversationHistory = async ({
   return response.data;
 };
 
+const createDirectConversation = async (body: CreateDirectConversationBody) => {
+  const response = await api.post<ListConversation>("conversations/direct", body);
+
+  return response.data;
+};
+
+const createGroupConversation = async (body: CreateGroupConversationBody) => {
+  const response = await api.post<ListConversation>("conversations/group", body);
+
+  return response.data;
+};
+
+const sendConversationMessage = async ({
+  conversationId,
+  body,
+}: {
+  conversationId: number;
+  body: SendMessageBody;
+}) => {
+  const response = await api.post<MessageResponse>(
+    `conversations/${conversationId}/message`,
+    body,
+  );
+
+  return response.data;
+};
+
 export const useGetConversationsList = () => {
   return useQuery({
     queryFn: getConversationsList,
@@ -70,5 +103,41 @@ export const useGetConversationHistory = (
     queryFn: ({ pageParam }) =>
       getConversationHistory({ conversationId, limit, offset: pageParam }),
     queryKey: conversationsKeys.history(conversationId),
+  });
+};
+
+export const useCreateDirectConversation = () => {
+  return useMutation({
+    mutationFn: createDirectConversation,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: conversationsKeys.conversationsList,
+      });
+    },
+  });
+};
+
+export const useCreateGroupConversation = () => {
+  return useMutation({
+    mutationFn: createGroupConversation,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: conversationsKeys.conversationsList,
+      });
+    },
+  });
+};
+
+export const useSendConversationMessage = () => {
+  return useMutation({
+    mutationFn: sendConversationMessage,
+    onSuccess: (_message, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: conversationsKeys.history(variables.conversationId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: conversationsKeys.conversationsList,
+      });
+    },
   });
 };

@@ -6,11 +6,10 @@ import { ListConversationQueryData } from "src/modules/conversations/conversatio
 import { buildDirectConversationKey } from "src/utils/buildDirectConversationKey";
 
 import db from "../db/drizzle";
-import { conversationParticipants, conversations, messages, users } from "../db/schema";
+import { conversationParticipants, conversations, users } from "../db/schema";
 
 const otherParticipants = alias(conversationParticipants, "other_participants");
 const otherUsers = alias(users, "other_users");
-const messageSenders = alias(users, "message_senders");
 
 @Injectable()
 export class ConversationsRepository {
@@ -21,16 +20,10 @@ export class ConversationsRepository {
     const userConversations = await db
       .select({
         conversation: conversations,
-        lastMessage: messages,
         otherUser: {
           id: otherUsers.id,
           name: otherUsers.name,
           surname: otherUsers.surname,
-        },
-        lastMessageSender: {
-          id: messageSenders.id,
-          name: messageSenders.name,
-          surname: messageSenders.surname,
         },
       })
 
@@ -43,8 +36,6 @@ export class ConversationsRepository {
           eq(conversations.companyId, companyId),
         ),
       )
-      .leftJoin(messages, eq(conversations.lastMessageId, messages.id))
-      .leftJoin(messageSenders, eq(messages.senderId, messageSenders.id))
 
       // SECOND PARTICIPANT ROW
       .leftJoin(
@@ -128,9 +119,7 @@ export class ConversationsRepository {
 
       return {
         conversation,
-        lastMessage: null,
         otherUser: targetUser,
-        lastMessageSender: null,
       };
     });
 
@@ -150,7 +139,6 @@ export class ConversationsRepository {
           companyId,
           type: ConversationType.Group,
           title,
-          lastMessageId: null,
           createdById: userId,
         })
         .returning();
@@ -165,9 +153,7 @@ export class ConversationsRepository {
 
       return {
         conversation,
-        lastMessage: null,
         otherUser: null,
-        lastMessageSender: null,
       };
     });
 

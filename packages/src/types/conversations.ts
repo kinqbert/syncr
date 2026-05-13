@@ -10,10 +10,6 @@ export type ListConversation = {
   id: number;
   type: ConversationType;
   title: string;
-  lastMessage?: {
-    authorName: string;
-    content: string;
-  };
 };
 
 export type ConversationMessageAuthor = {
