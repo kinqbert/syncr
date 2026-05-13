@@ -150,7 +150,7 @@ export const MessageComposer = ({
             sx={{
               bgcolor: "primary.main",
               color: "primary.contrastText",
-              borderRadius: 2,
+              borderRadius: 1,
               flexShrink: 0,
               height: 40,
               width: 40,

@@ -1,14 +1,8 @@
-import {
-  IconButton,
-  Stack,
-  Tooltip,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
+import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { PanelLeftOpen } from "lucide-mui";
 
 import { CONVERSATIONS_SIDEBAR_HEADER_HEIGHT } from "@/components/conversations";
-import { theme } from "@/lib/theme";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useConversationsSidebarStore } from "@/store/useConversationsSidebarStore";
 
 type ConversationHeaderProps = {
@@ -16,7 +10,7 @@ type ConversationHeaderProps = {
 };
 
 export const ConversationHeader = ({ title }: ConversationHeaderProps) => {
-  const isCompact = useMediaQuery(theme.breakpoints.down("lg"));
+  const isMobile = useIsMobile();
   const openSidebar = useConversationsSidebarStore(
     (state) => state.openSidebar,
   );
@@ -35,7 +29,7 @@ export const ConversationHeader = ({ title }: ConversationHeaderProps) => {
         borderColor: "divider",
       }}
     >
-      {isCompact ? (
+      {isMobile ? (
         <Tooltip title="Open chats">
           <IconButton
             aria-label="Open chats"

@@ -1,5 +1,6 @@
 import {
   Badge,
+  Chip,
   ListItem,
   ListItemButton,
   Stack,
@@ -7,6 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { ListConversation } from "@syncr/packages";
+import { ConversationType } from "@syncr/packages";
 import { NavLink } from "react-router";
 
 import { ConversationAvatar } from "./ConversationAvatar";
@@ -17,11 +19,18 @@ type ConversationListItemProps = {
   open: boolean;
 };
 
+const SIZE = 48;
+
 export const ConversationListItem = ({
   conversation,
   onClick,
   open,
 }: ConversationListItemProps) => {
+  const typeLabel =
+    conversation.type === ConversationType.Direct
+      ? "Direct chat"
+      : "Group chat";
+
   return (
     <Tooltip
       title={open ? "" : conversation.title || "Untitled chat"}
@@ -32,6 +41,11 @@ export const ConversationListItem = ({
         onClick={onClick}
         to={`/conversations/${conversation.id}`}
         sx={{
+          minHeight: SIZE,
+          maxHeight: SIZE,
+
+          minWidth: SIZE,
+
           mb: 0.5,
           overflowX: "hidden",
           p: 0,
@@ -49,9 +63,9 @@ export const ConversationListItem = ({
         <ListItemButton
           sx={{
             borderRadius: 1.5,
-            gap: open ? 1 : 0,
+            gap: open ? 1.15 : 0,
             justifyContent: "initial",
-            minHeight: 44,
+            minHeight: 48,
             px: 1,
             py: 0.5,
             transition:
@@ -70,14 +84,12 @@ export const ConversationListItem = ({
             <ConversationAvatar
               title={conversation.title}
               type={conversation.type}
-              size={30}
+              size={32}
             />
           </Badge>
           <Stack
-            alignItems="center"
-            direction="row"
-            gap={1}
-            justifyContent="space-between"
+            gap={0.25}
+            justifyContent="center"
             minWidth={0}
             sx={{
               flex: open ? "1 1 auto" : "0 1 auto",
@@ -89,16 +101,38 @@ export const ConversationListItem = ({
             }}
             width="100%"
           >
-            <Typography fontSize={14} fontWeight={800} noWrap>
+            <Typography fontSize={14} fontWeight={800} lineHeight="18px" noWrap>
               {conversation.title || "Untitled chat"}
             </Typography>
-            <Typography
-              color="text.secondary"
-              sx={{ textTransform: "capitalize" }}
-              variant="caption"
-            >
-              {conversation.type}
-            </Typography>
+            <Stack alignItems="center" direction="row" gap={0.75} minWidth={0}>
+              <Typography
+                color="text.secondary"
+                fontSize={12}
+                lineHeight="16px"
+                noWrap
+              >
+                {typeLabel}
+              </Typography>
+              {conversation.unreadCount > 0 ? (
+                <Chip
+                  color="primary"
+                  label={
+                    conversation.unreadCount > 99
+                      ? "99+ unread"
+                      : `${conversation.unreadCount} unread`
+                  }
+                  size="small"
+                  sx={{
+                    height: 18,
+                    "& .MuiChip-label": {
+                      fontSize: 11,
+                      fontWeight: 800,
+                      px: 0.75,
+                    },
+                  }}
+                />
+              ) : null}
+            </Stack>
           </Stack>
         </ListItemButton>
       </ListItem>

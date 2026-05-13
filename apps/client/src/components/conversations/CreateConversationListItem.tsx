@@ -47,8 +47,8 @@ export const CreateConversationListItem = ({
               bgcolor: "primary.main",
               color: "primary.contrastText",
               flex: "0 0 auto",
-              height: 30,
-              width: 30,
+              height: 32,
+              width: 32,
             }}
           >
             <Plus fontSize="small" />
