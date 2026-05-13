@@ -21,10 +21,7 @@ export class InvitationsRepository {
       .from(invitations)
       .innerJoin(roles, eq(roles.id, invitations.roleId))
       .where(
-        and(
-          eq(invitations.companyId, companyId),
-          eq(invitations.status, InvitationStatus.Active),
-        ),
+        and(eq(invitations.companyId, companyId), eq(invitations.status, InvitationStatus.Active)),
       );
   }
 
@@ -55,15 +52,15 @@ export class InvitationsRepository {
       .from(invitations)
       .innerJoin(roles, eq(roles.id, invitations.roleId))
       .innerJoin(companies, eq(companies.id, invitations.companyId))
-      .where(
-        and(
-          eq(invitations.userId, userId),
-          eq(invitations.status, InvitationStatus.Active),
-        ),
-      );
+      .where(and(eq(invitations.userId, userId), eq(invitations.status, InvitationStatus.Active)));
   }
 
-  async createInvitations(companyId: number, roleId: number, recipients: InvitationRecipient[]) {
+  async createInvitations(
+    companyId: number,
+    roleId: number,
+    inviterId: number,
+    recipients: InvitationRecipient[],
+  ) {
     if (recipients.length === 0) {
       return [];
     }
@@ -73,7 +70,7 @@ export class InvitationsRepository {
       .values(
         recipients.map((recipient) => ({
           companyId,
-          userId: recipient.userId,
+          userId: inviterId,
           inviteeEmail: recipient.email,
           roleId,
           status: InvitationStatus.Active,

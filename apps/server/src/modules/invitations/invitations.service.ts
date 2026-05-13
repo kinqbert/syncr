@@ -87,11 +87,6 @@ export class InvitationsService {
     }
 
     const usersByEmail = new Map(users.map((user) => [user.email, user]));
-    const missingUserEmails = emails.filter((email) => !usersByEmail.has(email));
-
-    if (missingUserEmails.length > 0) {
-      throw new NotFoundException(`No registered users found for: ${missingUserEmails.join(", ")}`);
-    }
 
     const existingMemberEmails = new Set(companyUsers.map(({ user }) => user.email));
     const activeInvitationEmails = new Set(
@@ -115,6 +110,7 @@ export class InvitationsService {
     const invitations = await this.invitationsRepository.createInvitations(
       companyId,
       role.id,
+      inviterId,
       recipients,
     );
 

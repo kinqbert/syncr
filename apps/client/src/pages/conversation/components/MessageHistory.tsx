@@ -62,11 +62,14 @@ export const MessageHistory = ({
     setIsAtBottom(nextIsAtBottom);
   }, []);
 
-  const scroll = () => {
-    bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+  const scroll = ({ smooth = false }: { smooth?: boolean } = {}) => {
+    bottomRef.current?.scrollIntoView({
+      block: "end",
+      behavior: smooth ? "smooth" : "auto",
+    });
   };
 
-  const scrollToBottom = useCallback(() => {
+  const handleScrollToBottom = useCallback(() => {
     setIsAtBottom(true);
     isAtBottomRef.current = true;
     scroll();
@@ -79,7 +82,7 @@ export const MessageHistory = ({
 
   useEffect(() => {
     if (isAtBottomRef.current) {
-      scroll();
+      scroll({ smooth: true });
     }
   }, [messages.length]);
 
@@ -167,7 +170,7 @@ export const MessageHistory = ({
 
       <IconButton
         aria-label="Scroll to latest message"
-        onClick={scrollToBottom}
+        onClick={handleScrollToBottom}
         sx={{
           bgcolor: "background.paper",
           border: "1px solid",

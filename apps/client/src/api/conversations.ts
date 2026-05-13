@@ -85,8 +85,9 @@ const markConversationRead = async (conversationId: number) => {
   await api.patch(`conversations/${conversationId}/read`);
 };
 
-export const useGetConversationsList = () => {
+export const useGetConversationsList = (enabled = true) => {
   return useQuery({
+    enabled,
     queryFn: getConversationsList,
     queryKey: conversationsKeys.conversationsList,
   });

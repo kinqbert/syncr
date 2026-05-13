@@ -1,6 +1,14 @@
-import { Box } from "@mui/material";
-import { type NotificationPayload, NotificationType } from "@syncr/packages";
+import { Box, Stack, Typography } from "@mui/material";
+import {
+  ConversationType,
+  type ListConversation,
+  type MessagePayload,
+  type NotificationPayload,
+  NotificationType,
+} from "@syncr/packages";
 import { Link } from "react-router";
+
+import { ConversationAvatar } from "./conversations/ConversationAvatar";
 
 type NotificationProps = {
   notification: NotificationPayload;
@@ -9,6 +17,12 @@ type NotificationProps = {
 type NotificationLinkProps = {
   children: React.ReactNode;
   to?: string;
+};
+
+type ConversationMessageNotificationProps = {
+  conversation?: ListConversation;
+  message: MessagePayload;
+  onClick?: () => void;
 };
 
 const linkStyle = { color: "blue", textDecoration: "underline" };
@@ -43,7 +57,9 @@ const TaskLink = ({ notification }: NotificationProps) => {
   const taskName = notification.metadata?.taskName ?? "Task";
 
   return (
-    <NotificationLink to={getTaskUrl(notification)}>{taskName}</NotificationLink>
+    <NotificationLink to={getTaskUrl(notification)}>
+      {taskName}
+    </NotificationLink>
   );
 };
 
@@ -124,6 +140,64 @@ const CompanyInvitationNotification = ({ notification }: NotificationProps) => {
     <Box>
       You have been invited to join {companyName} as {roleName}.
     </Box>
+  );
+};
+
+export const ConversationMessageNotification = ({
+  conversation,
+  message,
+  onClick,
+}: ConversationMessageNotificationProps) => {
+  const senderName = `${message.sender.name} ${message.sender.surname}`;
+  const isGroupConversation = conversation?.type === ConversationType.Group;
+  const conversationTitle = conversation?.title || "Group";
+  const title = isGroupConversation
+    ? `${senderName} in ${conversationTitle}`
+    : senderName;
+
+  return (
+    <Stack
+      component={Link}
+      onClick={onClick}
+      to={`/conversations/${message.conversationId}`}
+      alignItems="center"
+      direction="row"
+      gap={1.25}
+      sx={{
+        color: "text.primary",
+        maxWidth: 430,
+        minWidth: 320,
+        textDecoration: "none",
+      }}
+    >
+      <ConversationAvatar
+        size={30}
+        title={isGroupConversation ? conversationTitle : senderName}
+        type={conversation?.type ?? ConversationType.Direct}
+      />
+
+      <Stack flex={1} gap={0.25} minWidth={0} pt={0.125}>
+        <Typography fontSize={14} fontWeight={800} noWrap>
+          {title}
+        </Typography>
+
+        <Typography
+          color="text.primary"
+          fontSize={12}
+          lineHeight={1.35}
+          variant="body2"
+          sx={{
+            display: "-webkit-box",
+            overflow: "hidden",
+            overflowWrap: "anywhere",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 2,
+          }}
+        >
+          {message.content}
+        </Typography>
+      </Stack>
+    </Stack>
   );
 };
 
