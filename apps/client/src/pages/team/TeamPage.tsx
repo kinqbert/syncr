@@ -33,6 +33,7 @@ import { useState } from "react";
 import { useInviteTeamMembers } from "@/api/invitations";
 import { useGetTeam } from "@/api/team";
 import { UserAvatar } from "@/components/UserAvatar";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { getUserFullName } from "@/utils/getUserFullName";
 
@@ -68,6 +69,7 @@ const parseEmails = (value: string) => {
 };
 
 export const TeamPage = () => {
+  const isMobile = useIsMobile();
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [emails, setEmails] = useState("");
   const [roleKey, setRoleKey] = useState<RoleKey>(RoleKey.Developer);
@@ -108,15 +110,27 @@ export const TeamPage = () => {
   };
 
   return (
-    <Stack component="main" width="100%" minHeight="100%" p={3} gap={3}>
+    <Stack
+      component="main"
+      width="100%"
+      minHeight="100%"
+      minWidth={0}
+      p={{ xs: 2, sm: 3 }}
+      gap={{ xs: 2.5, sm: 3 }}
+    >
       <Stack
-        direction={{ xs: "column", sm: "row" }}
+        direction={{ xs: "column", lg: "row" }}
         gap={2}
         justifyContent="space-between"
-        alignItems="center"
+        alignItems={{ xs: "stretch", lg: "center" }}
       >
-        <Stack gap={0.5}>
-          <Typography variant="h4">Team Management</Typography>
+        <Stack gap={0.5} minWidth={0}>
+          <Typography
+            variant="h4"
+            sx={{ fontSize: { xs: 28, sm: 34 }, lineHeight: 1.2 }}
+          >
+            Team Management
+          </Typography>
           <Typography color="text.secondary">
             Manage team members and their workload
           </Typography>
@@ -124,6 +138,7 @@ export const TeamPage = () => {
         <Button
           onClick={() => setIsInviteDialogOpen(true)}
           startIcon={<Mail />}
+          sx={{ alignSelf: { xs: "stretch", sm: "flex-start", lg: "center" } }}
           variant="contained"
         >
           Invite Member
@@ -133,7 +148,7 @@ export const TeamPage = () => {
       <Box
         sx={{
           display: "grid",
-          gap: 2.5,
+          gap: { xs: 2, sm: 2.5 },
           gridTemplateColumns: {
             xs: "1fr",
             sm: "repeat(2, minmax(0, 1fr))",
@@ -155,6 +170,7 @@ export const TeamPage = () => {
         variant="outlined"
         sx={{
           borderRadius: 2,
+          display: { xs: "none", lg: "block" },
           overflowX: "auto",
         }}
       >
@@ -306,18 +322,189 @@ export const TeamPage = () => {
         </Table>
       </TableContainer>
 
-      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+      <Paper
+        variant="outlined"
+        sx={{
+          borderRadius: 2,
+          display: { xs: "block", lg: "none" },
+          overflow: "hidden",
+        }}
+      >
         <Stack
           alignItems="center"
           direction="row"
           justifyContent="space-between"
-          px={2.5}
+          px={{ xs: 2, sm: 2.5 }}
+          py={2}
+        >
+          <Typography variant="h6">Team Members</Typography>
+          <Chip label={members.length} size="small" />
+        </Stack>
+        {isLoading ? (
+          <Stack alignItems="center" py={4}>
+            <CircularProgress />
+          </Stack>
+        ) : null}
+
+        {!isLoading && members.length === 0 ? (
+          <Stack alignItems="center" py={4}>
+            <Typography color="text.secondary">
+              No team members found.
+            </Typography>
+          </Stack>
+        ) : null}
+
+        {!isLoading ? (
+          <Stack>
+            {members.map((member) => {
+              const workload = normalizeWorkload(member.workload);
+              const workloadColor = getWorkloadColor(workload);
+
+              return (
+                <Stack
+                  key={member.id}
+                  gap={2}
+                  minWidth={0}
+                  sx={{
+                    borderTop: 1,
+                    borderColor: "divider",
+                    p: { xs: 2, sm: 2.5 },
+                  }}
+                >
+                  <Stack
+                    alignItems="flex-start"
+                    direction="row"
+                    gap={1.5}
+                    justifyContent="space-between"
+                  >
+                    <Stack
+                      alignItems="center"
+                      direction="row"
+                      gap={1.5}
+                      minWidth={0}
+                    >
+                      <UserAvatar
+                        name={member.name}
+                        size={40}
+                        surname={member.surname}
+                      />
+                      <Stack minWidth={0}>
+                        <Typography fontWeight={800} noWrap>
+                          {getUserFullName(member.name, member.surname)}
+                        </Typography>
+                        <Typography
+                          color="text.secondary"
+                          noWrap
+                          variant="body2"
+                        >
+                          {member.email}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                    <Tooltip title="Member actions">
+                      <IconButton
+                        aria-label="Member actions"
+                        size="small"
+                        sx={{ mt: -0.5 }}
+                      >
+                        <MoreVertical />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+
+                  <Stack direction="row" gap={1} flexWrap="wrap">
+                    <Chip
+                      label={member.roleName}
+                      size="small"
+                      sx={{ borderRadius: 999, fontWeight: 600 }}
+                    />
+                    <Chip
+                      color={member.status === "active" ? "success" : "default"}
+                      label={member.status}
+                      size="small"
+                      sx={{
+                        borderRadius: 999,
+                        fontWeight: 600,
+                        textTransform: "capitalize",
+                      }}
+                    />
+                  </Stack>
+
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gap: 1.5,
+                      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                    }}
+                  >
+                    <Stack gap={0.25}>
+                      <Typography color="text.secondary" variant="caption">
+                        Assigned
+                      </Typography>
+                      <Typography fontWeight={800}>
+                        {member.assignedTasks}
+                      </Typography>
+                    </Stack>
+                    <Stack gap={0.25}>
+                      <Typography color="text.secondary" variant="caption">
+                        Completed
+                      </Typography>
+                      <Stack alignItems="center" direction="row" gap={0.75}>
+                        <CircleCheck color="success" sx={{ fontSize: 17 }} />
+                        <Typography fontWeight={800}>
+                          {member.completedTasks}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                  </Box>
+
+                  <Stack gap={0.75}>
+                    <Stack
+                      alignItems="center"
+                      direction="row"
+                      justifyContent="space-between"
+                    >
+                      <Typography color="text.secondary" variant="caption">
+                        Workload
+                      </Typography>
+                      <Typography color="text.secondary" variant="body2">
+                        {formatPercent(workload)}
+                      </Typography>
+                    </Stack>
+                    <LinearProgress
+                      color={workloadColor}
+                      value={workload * 100}
+                      variant="determinate"
+                      sx={{
+                        bgcolor: "action.disabledBackground",
+                        borderRadius: 999,
+                        height: 7,
+                      }}
+                    />
+                  </Stack>
+                </Stack>
+              );
+            })}
+          </Stack>
+        ) : null}
+      </Paper>
+
+      <TableContainer
+        component={Paper}
+        variant="outlined"
+        sx={{ borderRadius: 2, overflow: "hidden" }}
+      >
+        <Stack
+          alignItems="center"
+          direction="row"
+          justifyContent="space-between"
+          px={{ xs: 2, sm: 2.5 }}
           py={2}
         >
           <Typography variant="h6">Pending Invitations</Typography>
           <Chip label={invitations.length} size="small" />
         </Stack>
-        <Table sx={{ minWidth: 720 }}>
+        <Table sx={{ display: { xs: "none", lg: "table" }, minWidth: 720 }}>
           <TableHead>
             <TableRow
               sx={{
@@ -370,9 +557,57 @@ export const TeamPage = () => {
             )}
           </TableBody>
         </Table>
+        <Stack
+          gap={1.5}
+          p={{ xs: 2, sm: 2.5 }}
+          sx={{ display: { xs: "flex", lg: "none" } }}
+        >
+          {invitations.length === 0 ? (
+            <Stack alignItems="center" py={2}>
+              <Typography color="text.secondary">
+                No pending invitations.
+              </Typography>
+            </Stack>
+          ) : (
+            invitations.map((invitation) => (
+              <Paper
+                key={invitation.id}
+                variant="outlined"
+                sx={{ borderRadius: 1.5, p: 2 }}
+              >
+                <Stack
+                  alignItems="flex-start"
+                  direction="row"
+                  gap={1.5}
+                  justifyContent="space-between"
+                >
+                  <Stack minWidth={0}>
+                    <Typography fontWeight={800} noWrap>
+                      {invitation.email}
+                    </Typography>
+                    <Typography color="text.secondary" variant="body2">
+                      {invitation.roleName}
+                    </Typography>
+                  </Stack>
+                  <Chip
+                    label={invitation.status}
+                    size="small"
+                    sx={{
+                      borderRadius: 999,
+                      flexShrink: 0,
+                      fontWeight: 500,
+                      textTransform: "capitalize",
+                    }}
+                  />
+                </Stack>
+              </Paper>
+            ))
+          )}
+        </Stack>
       </TableContainer>
 
       <Dialog
+        fullScreen={isMobile}
         fullWidth
         maxWidth="xs"
         onClose={handleInviteDialogClose}
@@ -408,7 +643,15 @@ export const TeamPage = () => {
             </FormControl>
           </Stack>
         </DialogContent>
-        <DialogActions>
+        <DialogActions
+          sx={{
+            flexDirection: { xs: "column-reverse", sm: "row" },
+            "& > .MuiButton-root": {
+              ml: { xs: "0 !important", sm: undefined },
+              width: { xs: "100%", sm: "auto" },
+            },
+          }}
+        >
           <Button onClick={handleInviteDialogClose}>Cancel</Button>
           <Button
             disabled={inviteTeamMembers.isPending}

@@ -11,8 +11,8 @@ export const StatCard = ({
     variant="outlined"
     sx={{
       borderRadius: 2,
-      minHeight: 96,
-      p: 2.5,
+      minHeight: { xs: 88, sm: 96 },
+      p: { xs: 2, sm: 2.5 },
     }}
   >
     <Typography color="text.secondary" variant="body2">
