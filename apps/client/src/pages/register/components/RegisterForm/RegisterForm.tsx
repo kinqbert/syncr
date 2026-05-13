@@ -100,9 +100,20 @@ export const RegisterForm = () => {
   const isLastStep = step === registerStepSchemas.length - 1;
   const isErrorSnackbarOpen = Boolean(errorMessage);
 
+  const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isLastStep) {
+      void onSubmit();
+      return;
+    }
+
+    onNextStep();
+  };
+
   return (
     <FormProvider {...methods}>
-      <form>
+      <form onSubmit={onFormSubmit}>
         <Stack gap={2.5}>
           <Stack gap={1}>
             <Typography color="text.secondary" fontWeight={500}>
@@ -132,15 +143,14 @@ export const RegisterForm = () => {
 
           {isLastStep ? (
             <Button
-              type="button"
+              type="submit"
               variant="contained"
               loading={isPending}
-              onClick={onSubmit}
             >
               Finish
             </Button>
           ) : (
-            <Button type="button" variant="contained" onClick={onNextStep}>
+            <Button type="submit" variant="contained">
               Next
             </Button>
           )}

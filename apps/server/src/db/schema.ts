@@ -257,9 +257,7 @@ export const invitations = pgTable("invitations", {
   companyId: integer()
     .notNull()
     .references(() => companies.id, { onDelete: "cascade" }),
-  userId: integer()
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  userId: integer().references(() => users.id, { onDelete: "cascade" }),
   inviteeEmail: text().notNull(),
   roleId: integer()
     .notNull()

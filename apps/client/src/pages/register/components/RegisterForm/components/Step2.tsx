@@ -22,6 +22,7 @@ export const Step2 = () => {
   return (
     <Stack gap={2}>
       <TextField
+        autoFocus
         sx={{ flex: 1 }}
         label="Password"
         placeholder="Enter password"

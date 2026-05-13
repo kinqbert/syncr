@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { InvitationStatus } from "@syncr/packages";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, or } from "drizzle-orm";
 
 import db from "../db/drizzle";
-import { companies, invitations, roles, userCompanyRoles } from "../db/schema";
+import { companies, invitations, roles, userCompanyRoles, users } from "../db/schema";
 
 type InvitationRecipient = {
-  userId: number;
+  userId: number | null;
   email: string;
 };
 
@@ -52,13 +52,18 @@ export class InvitationsRepository {
       .from(invitations)
       .innerJoin(roles, eq(roles.id, invitations.roleId))
       .innerJoin(companies, eq(companies.id, invitations.companyId))
-      .where(and(eq(invitations.userId, userId), eq(invitations.status, InvitationStatus.Active)));
+      .innerJoin(users, eq(users.id, userId))
+      .where(
+        and(
+          or(eq(invitations.userId, userId), eq(invitations.inviteeEmail, users.email)),
+          eq(invitations.status, InvitationStatus.Active),
+        ),
+      );
   }
 
   async createInvitations(
     companyId: number,
     roleId: number,
-    inviterId: number,
     recipients: InvitationRecipient[],
   ) {
     if (recipients.length === 0) {
@@ -70,7 +75,7 @@ export class InvitationsRepository {
       .values(
         recipients.map((recipient) => ({
           companyId,
-          userId: inviterId,
+          userId: recipient.userId,
           inviteeEmail: recipient.email,
           roleId,
           status: InvitationStatus.Active,
@@ -89,7 +94,13 @@ export class InvitationsRepository {
       .from(invitations)
       .innerJoin(roles, eq(roles.id, invitations.roleId))
       .innerJoin(companies, eq(companies.id, invitations.companyId))
-      .where(and(eq(invitations.id, invitationId), eq(invitations.userId, userId)))
+      .innerJoin(users, eq(users.id, userId))
+      .where(
+        and(
+          eq(invitations.id, invitationId),
+          or(eq(invitations.userId, userId), eq(invitations.inviteeEmail, users.email)),
+        ),
+      )
       .limit(1);
 
     return invitation;
@@ -100,30 +111,36 @@ export class InvitationsRepository {
       const [invitation] = await tx
         .select()
         .from(invitations)
-        .where(and(eq(invitations.id, invitationId), eq(invitations.userId, userId)))
+        .innerJoin(users, eq(users.id, userId))
+        .where(
+          and(
+            eq(invitations.id, invitationId),
+            or(eq(invitations.userId, userId), eq(invitations.inviteeEmail, users.email)),
+          ),
+        )
         .limit(1);
 
       if (!invitation) {
         return undefined;
       }
 
-      if (invitation.status !== InvitationStatus.Active) {
-        return invitation;
+      if (invitation.invitations.status !== InvitationStatus.Active) {
+        return invitation.invitations;
       }
 
       await tx
         .insert(userCompanyRoles)
         .values({
           userId,
-          companyId: invitation.companyId,
-          roleId: invitation.roleId,
+          companyId: invitation.invitations.companyId,
+          roleId: invitation.invitations.roleId,
         })
         .onConflictDoNothing();
 
       const [updatedInvitation] = await tx
         .update(invitations)
-        .set({ status: InvitationStatus.Accepted })
-        .where(and(eq(invitations.id, invitationId), eq(invitations.userId, userId)))
+        .set({ status: InvitationStatus.Accepted, userId })
+        .where(eq(invitations.id, invitationId))
         .returning();
 
       return updatedInvitation;
@@ -131,18 +148,34 @@ export class InvitationsRepository {
   }
 
   async declineInvitation(invitationId: number, userId: number) {
-    const [invitation] = await db
-      .update(invitations)
-      .set({ status: InvitationStatus.Declined })
-      .where(
-        and(
-          eq(invitations.id, invitationId),
-          eq(invitations.userId, userId),
-          eq(invitations.status, InvitationStatus.Active),
-        ),
-      )
-      .returning();
+    return db.transaction(async (tx) => {
+      const [invitation] = await tx
+        .select()
+        .from(invitations)
+        .innerJoin(users, eq(users.id, userId))
+        .where(
+          and(
+            eq(invitations.id, invitationId),
+            or(eq(invitations.userId, userId), eq(invitations.inviteeEmail, users.email)),
+          ),
+        )
+        .limit(1);
 
-    return invitation;
+      if (!invitation) {
+        return undefined;
+      }
+
+      if (invitation.invitations.status !== InvitationStatus.Active) {
+        return invitation.invitations;
+      }
+
+      const [updatedInvitation] = await tx
+        .update(invitations)
+        .set({ status: InvitationStatus.Declined, userId })
+        .where(eq(invitations.id, invitationId))
+        .returning();
+
+      return updatedInvitation;
+    });
   }
 }

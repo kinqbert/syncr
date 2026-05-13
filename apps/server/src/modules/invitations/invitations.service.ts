@@ -104,27 +104,30 @@ export class InvitationsService {
 
     const recipients = emails.map((email) => ({
       email,
-      userId: usersByEmail.get(email)?.id as number,
+      userId: usersByEmail.get(email)?.id ?? null,
     }));
 
     const invitations = await this.invitationsRepository.createInvitations(
       companyId,
       role.id,
-      inviterId,
       recipients,
     );
 
     await Promise.all(
-      invitations.map((invitation) =>
-        this.notifyCompanyInvitation(
+      invitations.map((invitation) => {
+        if (!invitation.userId) {
+          return;
+        }
+
+        return this.notifyCompanyInvitation(
           invitation.userId,
           inviterId,
           invitation.id,
           company.id,
           company.name,
           role.name,
-        ),
-      ),
+        );
+      }),
     );
   }
 

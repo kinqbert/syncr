@@ -12,6 +12,7 @@ export const Step1 = () => {
   return (
     <Stack gap={2}>
       <TextField
+        autoFocus
         label="Email"
         placeholder="you@example.com"
         {...register("email")}
