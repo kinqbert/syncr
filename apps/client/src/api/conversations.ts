@@ -1,7 +1,7 @@
 import type {
+  ConversationHistoryPage,
   CreateDirectConversationBody,
   CreateGroupConversationBody,
-  ConversationHistoryPage,
   ListConversation,
   MessageResponse,
   SendMessageBody,

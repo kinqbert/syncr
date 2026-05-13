@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
 
 import { AppLayout } from "@/components/AppLayout";
-import { ConversationsLayout } from "@/components/ConversationsLayout";
+import { ConversationsLayout } from "@/components/conversations";
 import { ProjectLayout } from "@/components/ProjectLayout";
 import {
   AboutPage,

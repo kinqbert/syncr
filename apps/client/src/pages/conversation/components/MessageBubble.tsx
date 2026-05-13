@@ -26,7 +26,6 @@ export const MessageBubble = ({
         border: isOwn ? 0 : "1px solid",
         borderColor: "divider",
         borderRadius: getBubbleRadius(isOwn, isFirstInBlock),
-        boxShadow: isOwn ? "none" : "0 1px 2px rgba(17, 24, 39, 0.04)",
         color: isOwn ? "primary.contrastText" : "text.primary",
         px: 1.5,
         py: 1,

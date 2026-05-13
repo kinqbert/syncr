@@ -46,6 +46,7 @@ export const ConversationPage = () => {
     >
       <ConversationHeader title={conversation?.title} />
       <MessageHistory
+        key={parsedConversationId}
         conversationId={parsedConversationId}
         currentUserId={currentUser?.id}
         enabled={hasValidConversationId}

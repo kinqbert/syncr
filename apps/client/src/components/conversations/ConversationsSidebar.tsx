@@ -1,0 +1,105 @@
+import { CircularProgress, Stack } from "@mui/material";
+import type { ListConversation } from "@syncr/packages";
+import { useState } from "react";
+
+import { theme } from "@/lib/theme";
+import { useConversationsSidebarStore } from "@/store/useConversationsSidebarStore";
+
+import { ConversationListItem } from "./ConversationListItem";
+import { ConversationsEmptyState } from "./ConversationsEmptyState";
+import { ConversationsSidebarHeader } from "./ConversationsSidebarHeader";
+import { CreateConversationListItem } from "./CreateConversationListItem";
+import { NewConversationDialog } from "./NewConversationDialog";
+
+type ConversationsSidebarProps = {
+  conversations: ListConversation[];
+  loading?: boolean;
+};
+
+export const ConversationsSidebar = ({
+  conversations,
+  loading = false,
+}: ConversationsSidebarProps) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const open = useConversationsSidebarStore((state) => state.isOpen);
+  const openSidebar = useConversationsSidebarStore(
+    (state) => state.openSidebar,
+  );
+  const closeSidebar = useConversationsSidebarStore(
+    (state) => state.closeSidebar,
+  );
+
+  if (loading) {
+    return (
+      <Stack
+        width="100%"
+        height="100%"
+        alignItems="center"
+        justifyContent="center"
+        sx={{ borderRight: 1, borderColor: "divider" }}
+      >
+        <CircularProgress />
+      </Stack>
+    );
+  }
+
+  return (
+    <>
+      <Stack
+        height="100%"
+        width="100%"
+        sx={{
+          bgcolor: "background.paper",
+          borderRight: 1,
+          borderColor: "divider",
+          overflow: "hidden",
+          transition: theme.transitions.create("width", {
+            duration: theme.transitions.duration.enteringScreen,
+            easing: theme.transitions.easing.sharp,
+          }),
+        }}
+      >
+        <ConversationsSidebarHeader
+          open={open}
+          onClose={closeSidebar}
+          onOpen={openSidebar}
+        />
+
+        <Stack
+          flex={1}
+          minHeight={0}
+          p={1}
+          sx={{
+            overflowY: "auto",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
+          }}
+        >
+          <CreateConversationListItem
+            open={open}
+            onClick={() => setDialogOpen(true)}
+          />
+
+          {conversations.length === 0 ? (
+            <ConversationsEmptyState />
+          ) : (
+            conversations.map((conversation) => (
+              <ConversationListItem
+                key={conversation.id}
+                conversation={conversation}
+                open={open}
+              />
+            ))
+          )}
+        </Stack>
+      </Stack>
+
+      <NewConversationDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+      />
+    </>
+  );
+};

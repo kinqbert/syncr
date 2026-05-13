@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 
-import { CONVERSATIONS_SIDEBAR_HEADER_HEIGHT } from "@/components/ConversationsSidebar";
+import { CONVERSATIONS_SIDEBAR_HEADER_HEIGHT } from "@/components/conversations";
 
 type ConversationHeaderProps = {
   title?: string;
