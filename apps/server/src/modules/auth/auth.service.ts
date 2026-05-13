@@ -39,12 +39,20 @@ export class AuthService {
 
     const hashedPassword = await this.hashPassword(password);
 
-    await this.userRepository.createUser({
+    const newUser = await this.userRepository.createUser({
       email,
       password: hashedPassword,
       name,
       surname,
     });
+
+    const userId = newUser.id;
+
+    const tokenPayload = { userId };
+    const { accessToken, refreshToken } = this.generateTokens(tokenPayload);
+    const sessionId = await this.createSessionForUser(userId, refreshToken);
+
+    return { accessToken, refreshToken, sessionId };
   }
 
   async login(loginDto: LoginDto) {

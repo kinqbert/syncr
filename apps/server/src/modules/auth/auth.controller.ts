@@ -18,8 +18,12 @@ export class AuthController {
 
   @Post("register")
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() registerDto: RegisterDto) {
-    return await this.authService.register(registerDto);
+  async register(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) res: Response) {
+    const { accessToken, refreshToken, sessionId } = await this.authService.register(registerDto);
+
+    this.setCookie(res, COOKIE_PARAM.accessToken, accessToken, true);
+    this.setCookie(res, COOKIE_PARAM.refreshToken, refreshToken);
+    this.setCookie(res, COOKIE_PARAM.sessionId, sessionId);
   }
 
   @Post("login")
