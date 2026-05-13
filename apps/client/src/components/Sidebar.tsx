@@ -77,6 +77,12 @@ export const Sidebar = () => {
 
   const isMobile = useIsMobile();
 
+  const handleListItemClick = () => {
+    if (isMobile) {
+      closeSidebar();
+    }
+  };
+
   return (
     <Box position="relative">
       <Drawer
@@ -135,6 +141,7 @@ export const Sidebar = () => {
               <ListItem
                 disablePadding
                 component={NavLink}
+                onClick={handleListItemClick}
                 to={item.to}
                 sx={{
                   mb: 0.75,
