@@ -1,4 +1,5 @@
 import {
+  Badge,
   ListItem,
   ListItemButton,
   Stack,
@@ -57,11 +58,18 @@ export const ConversationListItem = ({
             },
           }}
         >
-          <ConversationAvatar
-            title={conversation.title}
-            type={conversation.type}
-            size={30}
-          />
+          <Badge
+            color="primary"
+            badgeContent={conversation.unreadCount}
+            invisible={conversation.unreadCount === 0}
+            overlap="circular"
+          >
+            <ConversationAvatar
+              title={conversation.title}
+              type={conversation.type}
+              size={30}
+            />
+          </Badge>
           <Stack
             alignItems="center"
             direction="row"

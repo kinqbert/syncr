@@ -75,10 +75,6 @@ export const useConversationRealtime = ({
           };
         },
       );
-
-      void queryClient.invalidateQueries({
-        queryKey: conversationsKeys.conversationsList,
-      });
     };
 
     socket.on("message.created", handleMessageCreated);

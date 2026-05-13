@@ -7,11 +7,17 @@ import {
   WebSocketServer,
 } from "@nestjs/websockets";
 import { MessagePayload } from "@syncr/packages";
+import { parse as parseCookie } from "cookie";
 import { Server, Socket } from "socket.io";
+
+import { COOKIE_PARAM } from "../../common/constants/cookie-param";
+import { verifyAccessToken } from "../../common/utils/jwt";
+import { CONFIG } from "../../config/configuration";
+import { AuthRepository } from "../../repositories/auth.repository";
 
 @WebSocketGateway({
   cors: {
-    origin: "http://localhost:5173",
+    origin: CONFIG.CLIENT_URL,
     credentials: true,
   },
 })
@@ -19,7 +25,39 @@ export class ConversationsGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
 
-  handleConnection() {}
+  constructor(private readonly authRepository: AuthRepository) {}
+
+  async handleConnection(client: Socket) {
+    try {
+      const cookies = parseCookie(client.handshake.headers.cookie ?? "");
+
+      const accessToken = cookies[COOKIE_PARAM.accessToken];
+      const sessionId = cookies[COOKIE_PARAM.sessionId];
+
+      if (!accessToken || !sessionId) {
+        client.disconnect();
+        return;
+      }
+
+      const payload = verifyAccessToken(accessToken);
+      const userSession = await this.authRepository.findSessionById(sessionId);
+
+      if (
+        !userSession ||
+        userSession.userId !== payload.userId ||
+        new Date(userSession.expiresAt) < new Date()
+      ) {
+        client.disconnect();
+        return;
+      }
+
+      client.data.userId = payload.userId;
+
+      await client.join(this.getUserRoom(payload.userId));
+    } catch {
+      client.disconnect();
+    }
+  }
 
   @SubscribeMessage("conversation.join")
   async handleConversationJoin(
@@ -71,5 +109,15 @@ export class ConversationsGateway implements OnGatewayConnection {
     },
   ) {
     this.server.to(`conversation:${conversationId}`).emit("typing.stopped", payload);
+  }
+
+  emitConversationMessageCreated(participantUserIds: number[], message: MessagePayload) {
+    for (const userId of participantUserIds) {
+      this.server.to(this.getUserRoom(userId)).emit("message.created", message);
+    }
+  }
+
+  private getUserRoom(userId: number) {
+    return `user:${userId}`;
   }
 }

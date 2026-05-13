@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -91,5 +92,14 @@ export class ConversationsController {
     @Body() sendMessageDto: SendMessageDto,
   ): Promise<MessageResponseDto> {
     return await this.conversationsService.sendMessage(conversationId, userId, sendMessageDto);
+  }
+
+  @Patch(":conversationId/read")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async markConversationRead(
+    @Param("conversationId", ParseIntPipe) conversationId: number,
+    @UserId() userId: number,
+  ) {
+    await this.conversationsService.markConversationRead(conversationId, userId);
   }
 }

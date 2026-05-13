@@ -10,6 +10,7 @@ export type ListConversation = {
   id: number;
   type: ConversationType;
   title: string;
+  unreadCount: number;
 };
 
 export type ConversationMessageAuthor = {

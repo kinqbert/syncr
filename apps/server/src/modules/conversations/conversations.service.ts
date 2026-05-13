@@ -102,10 +102,17 @@ export class ConversationsService {
 
     const rawPayload = await this.messagesRepository.getMessagePayloadData(message.id);
     const payload = mapCreatedMessageToPayload(rawPayload);
+    const participantUserIds =
+      await this.conversationsRepository.getConversationParticipantIds(conversationId);
 
-    this.conversationsGateway.emitMessageCreated(conversationId, payload);
+    this.conversationsGateway.emitConversationMessageCreated(participantUserIds, payload);
 
     return payload;
+  }
+
+  async markConversationRead(conversationId: number, userId: number) {
+    await this.ensureConversationParticipant(conversationId, userId);
+    await this.conversationsRepository.markConversationRead(conversationId, userId);
   }
 
   // HELPERS

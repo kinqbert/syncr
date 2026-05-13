@@ -1,7 +1,14 @@
 import { Stack } from "@mui/material";
+import type { ListConversation } from "@syncr/packages";
+import { useEffect } from "react";
 import { useParams } from "react-router";
 
-import { useGetConversationsList } from "@/api/conversations";
+import {
+  conversationsKeys,
+  useGetConversationsList,
+  useMarkConversationRead,
+} from "@/api/conversations";
+import { queryClient } from "@/lib/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
 
 import {
@@ -22,6 +29,8 @@ export const ConversationPage = () => {
   const currentUser = useAuthStore((state) => state.user);
 
   const { data: conversations = [] } = useGetConversationsList();
+  const { mutate: markConversationRead } = useMarkConversationRead();
+
   const conversation = conversations.find(
     (item) => item.id === parsedConversationId,
   );
@@ -30,6 +39,31 @@ export const ConversationPage = () => {
     conversationId: parsedConversationId,
     enabled: hasValidConversationId,
   });
+
+  useEffect(() => {
+    if (!hasValidConversationId) {
+      return;
+    }
+
+    if (conversation?.unreadCount && conversation?.unreadCount > 0) {
+      queryClient.setQueryData<ListConversation[]>(
+        conversationsKeys.conversationsList,
+        (conversations) =>
+          conversations?.map((item) =>
+            item.id === parsedConversationId
+              ? { ...item, unreadCount: 0 }
+              : item,
+          ),
+      );
+
+      markConversationRead(parsedConversationId);
+    }
+  }, [
+    conversation?.unreadCount,
+    hasValidConversationId,
+    markConversationRead,
+    parsedConversationId,
+  ]);
 
   if (!hasValidConversationId) {
     return <InvalidConversationState />;

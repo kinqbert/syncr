@@ -1,15 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { ConversationType } from "@syncr/packages";
-import { and, eq, ne } from "drizzle-orm";
+import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { ListConversationQueryData } from "src/modules/conversations/conversations.mapper";
 import { buildDirectConversationKey } from "src/utils/buildDirectConversationKey";
 
 import db from "../db/drizzle";
-import { conversationParticipants, conversations, users } from "../db/schema";
+import { conversationParticipants, conversations, messages, users } from "../db/schema";
 
 const otherParticipants = alias(conversationParticipants, "other_participants");
 const otherUsers = alias(users, "other_users");
+const lastMessages = alias(messages, "last_messages");
 
 @Injectable()
 export class ConversationsRepository {
@@ -25,6 +26,19 @@ export class ConversationsRepository {
           name: otherUsers.name,
           surname: otherUsers.surname,
         },
+        unreadCount: sql<number>`(
+            select count(*)::int
+            from messages
+            where messages.conversation_id = ${conversations.id}
+              and messages.deleted_at is null
+              and messages.sender_id <> ${userId}
+              and messages.created_at >= ${conversationParticipants.joinedAt}
+              and (
+                ${conversationParticipants.lastReadMessageId} is null
+                or messages.id > ${conversationParticipants.lastReadMessageId}
+              )
+          )
+        `.mapWith(Number),
       })
 
       .from(conversationParticipants)
@@ -49,8 +63,14 @@ export class ConversationsRepository {
 
       // OTHER USER
       .leftJoin(otherUsers, eq(otherParticipants.userId, otherUsers.id))
-      .where(eq(conversationParticipants.userId, userId));
 
+      // ORDER BY LATEST ACTIVITY
+      .leftJoin(lastMessages, eq(conversations.lastMessageId, lastMessages.id))
+      .where(eq(conversationParticipants.userId, userId))
+      .orderBy(
+        desc(sql`coalesce(${lastMessages.createdAt}, ${conversations.createdAt})`),
+        desc(conversations.id),
+      );
     return userConversations;
   }
 
@@ -61,6 +81,34 @@ export class ConversationsRepository {
       .where(eq(conversations.id, conversationId));
 
     return conversation;
+  }
+
+  async markConversationRead(conversationId: number, userId: number) {
+    const [latestMessage] = await db
+      .select({ id: messages.id })
+      .from(messages)
+      .where(and(eq(messages.conversationId, conversationId), isNull(messages.deletedAt)))
+      .orderBy(desc(messages.id))
+      .limit(1);
+
+    await db
+      .update(conversationParticipants)
+      .set({ lastReadMessageId: latestMessage?.id ?? null })
+      .where(
+        and(
+          eq(conversationParticipants.conversationId, conversationId),
+          eq(conversationParticipants.userId, userId),
+        ),
+      );
+  }
+
+  async getConversationParticipantIds(conversationId: number) {
+    const rows = await db
+      .select({ userId: conversationParticipants.userId })
+      .from(conversationParticipants)
+      .where(eq(conversationParticipants.conversationId, conversationId));
+
+    return rows.map((row) => row.userId);
   }
 
   // async getConversationByConversationKey(firstUserId: number, secondUserId: number) {
@@ -120,6 +168,7 @@ export class ConversationsRepository {
       return {
         conversation,
         otherUser: targetUser,
+        unreadCount: 0,
       };
     });
 
@@ -154,6 +203,7 @@ export class ConversationsRepository {
       return {
         conversation,
         otherUser: null,
+        unreadCount: 0,
       };
     });
 

@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { and, desc, eq, isNull } from "drizzle-orm";
 
 import db from "../db/drizzle";
-import { messages, users } from "../db/schema";
+import { conversations, messages, users } from "../db/schema";
 
 const conversationMessageColumns = {
   id: messages.id,
@@ -34,16 +34,26 @@ export class MessagesRepository {
   }
 
   async createMessage(conversationId: number, senderId: number, content: string) {
-    const [message] = await db
-      .insert(messages)
-      .values({
-        conversationId,
-        senderId,
-        content,
-      })
-      .returning();
+    return await db.transaction(async (tx) => {
+      const [message] = await tx
+        .insert(messages)
+        .values({
+          conversationId,
+          senderId,
+          content,
+        })
+        .returning();
 
-    return message;
+      await tx
+        .update(conversations)
+        .set({
+          lastMessageId: message.id,
+          updatedAt: message.createdAt,
+        })
+        .where(eq(conversations.id, conversationId));
+
+      return message;
+    });
   }
 
   async getMessagePayloadData(messageId: number) {

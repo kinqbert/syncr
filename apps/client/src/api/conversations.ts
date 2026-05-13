@@ -49,13 +49,19 @@ const getConversationHistory = async ({
 };
 
 const createDirectConversation = async (body: CreateDirectConversationBody) => {
-  const response = await api.post<ListConversation>("conversations/direct", body);
+  const response = await api.post<ListConversation>(
+    "conversations/direct",
+    body,
+  );
 
   return response.data;
 };
 
 const createGroupConversation = async (body: CreateGroupConversationBody) => {
-  const response = await api.post<ListConversation>("conversations/group", body);
+  const response = await api.post<ListConversation>(
+    "conversations/group",
+    body,
+  );
 
   return response.data;
 };
@@ -73,6 +79,10 @@ const sendConversationMessage = async ({
   );
 
   return response.data;
+};
+
+const markConversationRead = async (conversationId: number) => {
+  await api.patch(`conversations/${conversationId}/read`);
 };
 
 export const useGetConversationsList = () => {
@@ -135,6 +145,17 @@ export const useSendConversationMessage = () => {
       void queryClient.invalidateQueries({
         queryKey: conversationsKeys.history(variables.conversationId),
       });
+      void queryClient.invalidateQueries({
+        queryKey: conversationsKeys.conversationsList,
+      });
+    },
+  });
+};
+
+export const useMarkConversationRead = () => {
+  return useMutation({
+    mutationFn: markConversationRead,
+    onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: conversationsKeys.conversationsList,
       });

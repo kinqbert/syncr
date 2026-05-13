@@ -7,12 +7,14 @@ type ConversationsSidebarHeaderProps = {
   onClose: () => void;
   onOpen: () => void;
   open: boolean;
+  unreadCount: number;
 };
 
 export const ConversationsSidebarHeader = ({
   onClose,
   onOpen,
   open,
+  unreadCount,
 }: ConversationsSidebarHeaderProps) => {
   return (
     <Stack
@@ -29,9 +31,26 @@ export const ConversationsSidebarHeader = ({
     >
       {open ? (
         <>
-          <Typography fontWeight={800} noWrap variant="h6">
-            Chats
-          </Typography>
+          <Stack direction="row" alignItems="center" gap={1} minWidth={0}>
+            <Typography fontWeight={800} noWrap variant="h6">
+              Chats
+            </Typography>
+            {unreadCount > 0 && (
+              <Typography
+                bgcolor="primary.main"
+                borderRadius={999}
+                color="primary.contrastText"
+                fontSize={12}
+                fontWeight={800}
+                minWidth={22}
+                px={0.75}
+                textAlign="center"
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </Typography>
+            )}
+          </Stack>
+
           <Tooltip title="Collapse chats">
             <IconButton
               aria-label="Collapse chats"

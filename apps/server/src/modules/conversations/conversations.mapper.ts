@@ -7,6 +7,7 @@ import { ConversationMessageDto, ListConversationDto } from "./conversations.dto
 export type ListConversationQueryData = {
   conversation: typeof conversations.$inferSelect;
   otherUser: { id: number; name: string; surname: string } | null;
+  unreadCount: number;
 };
 
 type ConversationMessageQueryData = {
@@ -33,6 +34,7 @@ export const mapListConversationToDto = (
     id: conversation.id,
     type: conversation.type,
     title,
+    unreadCount: conversationData.unreadCount,
   };
 };
 

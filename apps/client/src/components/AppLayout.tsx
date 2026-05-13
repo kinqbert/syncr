@@ -8,6 +8,7 @@ import { AuthenticatedLayout } from "@/providers/auth";
 import { useCompanyStore } from "@/store/useCompanyStore";
 
 import { CompanyRequiredPlaceholder } from "./CompanyRequiredPlaceholder";
+import { ConversationEventsListener } from "./ConversationEventsListener";
 import { Header, HEADER_HEIGHT } from "./Header";
 import { NotificationsListener } from "./NotificationsListener";
 import { Sidebar } from "./Sidebar";
@@ -75,6 +76,7 @@ export const AppLayout = () => {
         <>
           <Toaster />
           <NotificationsListener />
+          <ConversationEventsListener />
         </>
         <Header />
         <Box display="flex" sx={{ overflow: "hidden" }}>

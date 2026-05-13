@@ -29,6 +29,11 @@ export const ConversationsSidebar = ({
     (state) => state.closeSidebar,
   );
 
+  const unreadCount = conversations.reduce(
+    (sum, conversation) => sum + conversation.unreadCount,
+    0,
+  );
+
   if (loading) {
     return (
       <Stack
@@ -61,6 +66,7 @@ export const ConversationsSidebar = ({
       >
         <ConversationsSidebarHeader
           open={open}
+          unreadCount={unreadCount}
           onClose={closeSidebar}
           onOpen={openSidebar}
         />

@@ -33,6 +33,9 @@ export class ListConversationDto implements ListConversation {
 
   @IsString()
   title: string;
+
+  @IsNumber()
+  unreadCount: number;
 }
 
 class ConversationMessageAuthorDto implements ConversationMessageAuthor {
