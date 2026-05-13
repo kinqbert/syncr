@@ -1,5 +1,9 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import type { DashboardChartPoint, DashboardData } from "@syncr/packages";
+import type {
+  DashboardBirthday,
+  DashboardChartPoint,
+  DashboardData,
+} from "@syncr/packages";
 import { DashboardRepository } from "src/repositories/dashboard.repository";
 import { UsersRepository } from "src/repositories/users.repository";
 
@@ -13,10 +17,11 @@ export class DashboardService {
   async getDashboard(companyId: number, userId: number): Promise<DashboardData> {
     await this.userBelongsToCompany(userId, companyId);
 
-    const [summary, completedByDay, recentActivity] =
+    const [summary, completedByDay, upcomingBirthdays, recentActivity] =
       await Promise.all([
         this.dashboardRepository.getSummary(companyId),
         this.dashboardRepository.getTasksCompletedThisWeek(companyId),
+        this.dashboardRepository.getUpcomingBirthdays(companyId),
         this.dashboardRepository.getRecentActivity(companyId),
       ]);
 
@@ -24,14 +29,11 @@ export class DashboardService {
       summary: {
         activeProjects: summary.activeProjects,
         tasksCompleted: summary.tasksCompleted,
-        tasksCompletedChangePercent: this.getChangePercent(
-          summary.tasksCompletedThisWeek,
-          summary.tasksCompletedPreviousWeek,
-        ),
         tasksDueToday: summary.tasksDueToday,
         teamMembers: summary.teamMembers,
       },
       tasksCompletedThisWeek: this.mapCompletedWeek(completedByDay),
+      upcomingBirthdays: this.mapUpcomingBirthdays(upcomingBirthdays),
       recentActivity: recentActivity.map((activity) => ({
         id: activity.id,
         action: activity.action,
@@ -49,14 +51,6 @@ export class DashboardService {
         createdAt: activity.createdAt.toISOString(),
       })),
     };
-  }
-
-  private getChangePercent(current: number, previous: number) {
-    if (previous === 0) {
-      return current === 0 ? 0 : null;
-    }
-
-    return Math.round(((current - previous) / previous) * 100);
   }
 
   private mapCompletedWeek(
@@ -83,6 +77,56 @@ export class DashboardService {
         };
       },
     );
+  }
+
+  private mapUpcomingBirthdays(
+    birthdays: {
+      userId: number;
+      name: string;
+      surname: string;
+      birthday: string | null;
+    }[],
+  ): DashboardBirthday[] {
+    return birthdays
+      .flatMap((birthday) =>
+        birthday.birthday
+          ? [
+              {
+                userId: birthday.userId,
+                name: birthday.name,
+                surname: birthday.surname,
+                birthday: birthday.birthday,
+                daysRemaining: this.getDaysUntilBirthday(birthday.birthday),
+              },
+            ]
+          : [],
+      )
+      .sort((first, second) => {
+        if (first.daysRemaining !== second.daysRemaining) {
+          return first.daysRemaining - second.daysRemaining;
+        }
+
+        return `${first.name} ${first.surname}`.localeCompare(
+          `${second.name} ${second.surname}`,
+        );
+      });
+  }
+
+  private getDaysUntilBirthday(birthday: string) {
+    const [, month, day] = birthday.split("-").map(Number);
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+
+    let nextBirthday = new Date(today.getFullYear(), month - 1, day);
+
+    if (nextBirthday.getTime() < today.getTime()) {
+      nextBirthday = new Date(today.getFullYear() + 1, month - 1, day);
+    }
+
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    return Math.round((nextBirthday.getTime() - today.getTime()) / dayMs);
   }
 
   private async userBelongsToCompany(userId: number, companyId: number) {

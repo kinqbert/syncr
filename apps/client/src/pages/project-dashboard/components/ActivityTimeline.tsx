@@ -6,11 +6,11 @@ import {
   Typography,
 } from "@mui/material";
 import type { ProjectActivity } from "@syncr/packages";
-import { TaskActivityAction } from "@syncr/packages";
 import { ListChecks } from "lucide-mui";
 
 import { useGetProjectActivities } from "@/api/projects";
 import { UserAvatar } from "@/components/UserAvatar";
+import { TASK_ACTIVITY_LABEL } from "@/constants/taskActivityLabels";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
 import { getUserFullName } from "@/utils/getUserFullName";
 
@@ -20,26 +20,6 @@ type ActivityTimelineProps = {
 
 const ACTIVITY_PAGE_SIZE = 5;
 
-const ACTIVITY_LABEL: Record<TaskActivityAction, string> = {
-  [TaskActivityAction.TaskCreated]: "created",
-  [TaskActivityAction.TaskUpdated]: "updated",
-  [TaskActivityAction.TaskNameUpdated]: "renamed",
-  [TaskActivityAction.TaskDescriptionUpdated]: "updated the description for",
-  [TaskActivityAction.TaskAssigneeUpdated]: "changed the assignee for",
-  [TaskActivityAction.TaskStatusUpdated]: "changed the status for",
-  [TaskActivityAction.TaskPriorityUpdated]: "changed the priority for",
-  [TaskActivityAction.TaskDeadlineUpdated]: "changed the deadline for",
-  [TaskActivityAction.TaskEstimateUpdated]: "changed the estimate for",
-  [TaskActivityAction.TaskLabelsUpdated]: "updated labels for",
-  [TaskActivityAction.TaskCommentAdded]: "commented on",
-  [TaskActivityAction.AcceptanceCriterionCreated]:
-    "added acceptance criteria to",
-  [TaskActivityAction.AcceptanceCriterionUpdated]:
-    "updated acceptance criteria on",
-  [TaskActivityAction.AcceptanceCriterionDeleted]:
-    "removed acceptance criteria from",
-};
-
 const getActivityActorName = (activity: ProjectActivity) => {
   return activity.actor
     ? getUserFullName(activity.actor.name, activity.actor.surname)
@@ -47,7 +27,7 @@ const getActivityActorName = (activity: ProjectActivity) => {
 };
 
 const getActivityText = (activity: ProjectActivity) => {
-  return `${getActivityActorName(activity)} ${ACTIVITY_LABEL[activity.action]} "${activity.task.name}"`;
+  return `${getActivityActorName(activity)} ${TASK_ACTIVITY_LABEL[activity.action]} "${activity.task.name}"`;
 };
 
 export const ActivityTimeline = ({ projectId }: ActivityTimelineProps) => {

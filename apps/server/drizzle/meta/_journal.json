@@ -148,6 +148,13 @@
       "when": 1778691528126,
       "tag": "0020_silent_human_torch",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1778693223592,
+      "tag": "0021_bouncy_starfox",
+      "breakpoints": true
     }
   ]
 }

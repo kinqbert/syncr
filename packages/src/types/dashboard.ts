@@ -3,7 +3,6 @@ import type { TaskActivityAction } from "./tasks";
 export type DashboardSummary = {
   activeProjects: number;
   tasksCompleted: number;
-  tasksCompletedChangePercent: number | null;
   tasksDueToday: number;
   teamMembers: number;
 };
@@ -28,8 +27,17 @@ export type DashboardActivity = {
   createdAt: string;
 };
 
+export type DashboardBirthday = {
+  userId: number;
+  name: string;
+  surname: string;
+  birthday: string;
+  daysRemaining: number;
+};
+
 export type DashboardData = {
   summary: DashboardSummary;
   tasksCompletedThisWeek: DashboardChartPoint[];
+  upcomingBirthdays: DashboardBirthday[];
   recentActivity: DashboardActivity[];
 };

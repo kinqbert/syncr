@@ -63,6 +63,7 @@ export const useUpdateProfile = () => {
     mutationFn: updateProfile,
     onSuccess: (user) => {
       queryClient.setQueryData(authKeys.me, user);
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       void queryClient.invalidateQueries({ queryKey: ["team"] });
       void queryClient.invalidateQueries({ queryKey: ["team-members"] });
     },

@@ -71,7 +71,7 @@ export class UsersRepository {
 
   async updateUserProfile(
     userId: number,
-    data: Pick<typeof users.$inferInsert, "name" | "surname" | "weeklyLoadMinutes">,
+    data: Pick<typeof users.$inferInsert, "name" | "surname" | "birthday" | "weeklyLoadMinutes">,
   ) {
     const [user] = await db.update(users).set(data).where(eq(users.id, userId)).returning();
 

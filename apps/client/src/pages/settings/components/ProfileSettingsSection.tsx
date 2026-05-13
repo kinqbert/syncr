@@ -19,6 +19,7 @@ import { SettingsSectionHeader } from "./SettingsSectionHeader";
 type ProfileFormState = {
   name: string;
   surname: string;
+  birthday: string;
   weeklyLoadHours: number;
 };
 
@@ -40,6 +41,7 @@ export const ProfileSettingsSection = () => {
     defaultValues: {
       name: "",
       surname: "",
+      birthday: "",
       weeklyLoadHours: 40,
     },
   });
@@ -52,6 +54,7 @@ export const ProfileSettingsSection = () => {
     reset({
       name: user.name,
       surname: user.surname,
+      birthday: user.birthday ?? "",
       weeklyLoadHours: minutesToHours(user.weeklyLoadMinutes),
     });
   }, [reset, user]);
@@ -64,6 +67,7 @@ export const ProfileSettingsSection = () => {
       await updateProfile.mutateAsync({
         name: formState.name.trim(),
         surname: formState.surname.trim(),
+        birthday: formState.birthday || null,
         weeklyLoadMinutes: hoursToMinutes(Number(formState.weeklyLoadHours)),
       });
       setMessage("Profile updated.");
@@ -124,6 +128,14 @@ export const ProfileSettingsSection = () => {
             error={Boolean(errors.surname)}
             helperText={errors.surname?.message}
             label="Surname"
+          />
+          <TextField
+            {...register("birthday")}
+            disabled={updateProfile.isPending}
+            helperText="Shown on the dashboard birthday list."
+            InputLabelProps={{ shrink: true }}
+            label="Birthday"
+            type="date"
           />
           <TextField
             {...register("weeklyLoadHours", {

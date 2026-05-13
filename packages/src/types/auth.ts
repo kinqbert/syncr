@@ -14,12 +14,13 @@ export type LoginBody = {
 
 export type MeResponse = Pick<
   User,
-  "id" | "email" | "name" | "surname" | "weeklyLoadMinutes"
+  "id" | "email" | "name" | "surname" | "birthday" | "weeklyLoadMinutes"
 >;
 
 export type UpdateProfileBody = {
   name: string;
   surname: string;
+  birthday: string | null;
   weeklyLoadMinutes: number;
 };
 

@@ -17,8 +17,6 @@ export class DashboardRepository {
     const [
       activeProjects,
       tasksCompleted,
-      tasksCompletedThisWeek,
-      tasksCompletedPreviousWeek,
       tasksDueToday,
       teamMembers,
     ] = await Promise.all([
@@ -51,32 +49,6 @@ export class DashboardRepository {
         .where(
           and(
             eq(projects.companyId, companyId),
-            gte(tasks.completedAt, sql`date_trunc('week', current_date)`),
-            lt(tasks.completedAt, sql`date_trunc('week', current_date) + interval '7 days'`),
-          ),
-        ),
-      db
-        .select({
-          value: sql<number>`count(${tasks.id})::int`.mapWith(Number),
-        })
-        .from(tasks)
-        .innerJoin(projects, eq(tasks.projectId, projects.id))
-        .where(
-          and(
-            eq(projects.companyId, companyId),
-            gte(tasks.completedAt, sql`date_trunc('week', current_date) - interval '7 days'`),
-            lt(tasks.completedAt, sql`date_trunc('week', current_date)`),
-          ),
-        ),
-      db
-        .select({
-          value: sql<number>`count(${tasks.id})::int`.mapWith(Number),
-        })
-        .from(tasks)
-        .innerJoin(projects, eq(tasks.projectId, projects.id))
-        .where(
-          and(
-            eq(projects.companyId, companyId),
             ne(tasks.status, TaskStatus.Done),
             sql`${tasks.endDate}::date = current_date`,
           ),
@@ -92,8 +64,6 @@ export class DashboardRepository {
     return {
       activeProjects: activeProjects[0]?.value ?? 0,
       tasksCompleted: tasksCompleted[0]?.value ?? 0,
-      tasksCompletedThisWeek: tasksCompletedThisWeek[0]?.value ?? 0,
-      tasksCompletedPreviousWeek: tasksCompletedPreviousWeek[0]?.value ?? 0,
       tasksDueToday: tasksDueToday[0]?.value ?? 0,
       teamMembers: teamMembers[0]?.value ?? 0,
     };
@@ -119,6 +89,24 @@ export class DashboardRepository {
       )
       .groupBy(day)
       .orderBy(asc(day));
+  }
+
+  async getUpcomingBirthdays(companyId: number) {
+    return await db
+      .select({
+        userId: users.id,
+        name: users.name,
+        surname: users.surname,
+        birthday: users.birthday,
+      })
+      .from(userCompanyRoles)
+      .innerJoin(users, eq(users.id, userCompanyRoles.userId))
+      .where(
+        and(
+          eq(userCompanyRoles.companyId, companyId),
+          isNotNull(users.birthday),
+        ),
+      );
   }
 
   async getRecentActivity(companyId: number, limit = 5) {

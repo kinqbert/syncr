@@ -93,7 +93,7 @@ export class AuthService {
   }
 
   async updateProfile(userId: number, updateProfileDto: UpdateProfileDto) {
-    const { name, surname, weeklyLoadMinutes } = updateProfileDto;
+    const { name, surname, birthday, weeklyLoadMinutes } = updateProfileDto;
     const trimmedName = name.trim();
     const trimmedSurname = surname.trim();
 
@@ -104,6 +104,7 @@ export class AuthService {
     const user = await this.userRepository.updateUserProfile(userId, {
       name: trimmedName,
       surname: trimmedSurname,
+      birthday: this.getValidBirthday(birthday),
       weeklyLoadMinutes,
     });
 
@@ -112,6 +113,26 @@ export class AuthService {
     }
 
     return mapMeResponseDto(user);
+  }
+
+  private getValidBirthday(birthday: string | null) {
+    if (!birthday) {
+      return null;
+    }
+
+    const date = new Date(`${birthday}T00:00:00.000Z`);
+
+    if (Number.isNaN(date.getTime())) {
+      throw new BadRequestException("Birthday must be a valid date");
+    }
+
+    const normalizedBirthday = date.toISOString().slice(0, 10);
+
+    if (normalizedBirthday !== birthday) {
+      throw new BadRequestException("Birthday must be a valid date");
+    }
+
+    return birthday;
   }
 
   async updatePassword(userId: number, updatePasswordDto: UpdatePasswordDto) {

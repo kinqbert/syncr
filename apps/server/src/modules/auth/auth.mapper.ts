@@ -7,6 +7,7 @@ export const mapMeResponseDto = (user: typeof users.$inferSelect): MeResponseDto
     email: user.email,
     name: user.name,
     surname: user.surname,
+    birthday: user.birthday,
     weeklyLoadMinutes: user.weeklyLoadMinutes,
   };
 };

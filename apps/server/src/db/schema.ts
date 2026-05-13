@@ -16,6 +16,7 @@ import { AnyPgColumn } from "drizzle-orm/pg-core";
 import { jsonb } from "drizzle-orm/pg-core";
 import {
   boolean,
+  date,
   integer,
   pgEnum,
   pgTable,
@@ -58,6 +59,7 @@ export const users = pgTable("users", {
   surname: text().notNull(),
   password: text().notNull(),
   status: userStatusEnum().notNull().default(UserStatus.Active),
+  birthday: date({ mode: "string" }),
   weeklyLoadMinutes: integer()
     .notNull()
     .default(40 * 60),

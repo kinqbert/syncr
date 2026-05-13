@@ -5,7 +5,18 @@ import {
   type UpdatePasswordBody,
   type UpdateProfileBody,
 } from "@syncr/packages";
-import { IsEmail, IsInt, IsNumber, IsString, Matches, Max, Min, MinLength } from "class-validator";
+import {
+  IsDateString,
+  IsEmail,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Matches,
+  Max,
+  Min,
+  MinLength,
+} from "class-validator";
 
 export class RegisterDto implements RegisterBody {
   @IsEmail({}, { message: "Email has to be valid." })
@@ -47,6 +58,10 @@ export class MeResponseDto implements MeResponse {
   @IsString()
   surname: string;
 
+  @IsOptional()
+  @IsDateString()
+  birthday: string | null;
+
   @IsNumber()
   weeklyLoadMinutes: number;
 }
@@ -57,6 +72,10 @@ export class UpdateProfileDto implements UpdateProfileBody {
 
   @IsString()
   surname: string;
+
+  @IsOptional()
+  @IsDateString()
+  birthday: string | null;
 
   @IsInt()
   @Min(60)
