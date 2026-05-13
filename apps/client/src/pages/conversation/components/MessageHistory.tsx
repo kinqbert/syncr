@@ -97,7 +97,7 @@ export const MessageHistory = ({
       <Stack
         ref={scrollContainerRef}
         width="100%"
-        maxWidth={1000}
+        maxWidth={680}
         height="100%"
         minHeight={0}
         alignSelf="center"

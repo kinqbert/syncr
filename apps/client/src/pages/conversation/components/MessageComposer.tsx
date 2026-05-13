@@ -37,24 +37,41 @@ export const MessageComposer = ({ conversationId }: MessageComposerProps) => {
     <Box
       component="form"
       px={{ xs: 1.5, sm: 2, md: 3 }}
-      py={{ xs: 1.25, sm: 2 }}
+      py={{ xs: 1.25, sm: 1.75 }}
       sx={{
-        bgcolor: "background.paper",
-        borderTop: 1,
-        borderColor: "divider",
+        bgcolor: "background.default",
+        display: "flex",
+        justifyContent: "center",
       }}
       onSubmit={(event) => {
         event.preventDefault();
         void handleSendMessage();
       }}
     >
-      <Stack alignItems="flex-end" direction="row" gap={1.25}>
+      <Stack
+        alignItems="center"
+        direction="row"
+        gap={1}
+        sx={{
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 999,
+          boxSizing: "border-box",
+          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
+          maxWidth: 680,
+          p: 0.75,
+          pl: { xs: 1.5, sm: 2 },
+          width: "100%",
+        }}
+      >
         <TextField
           fullWidth
           multiline
           maxRows={5}
           minRows={1}
           placeholder="Write a message"
+          variant="standard"
           value={messageText}
           onChange={(event) => setMessageText(event.target.value)}
           onKeyDown={(event) => {
@@ -62,6 +79,17 @@ export const MessageComposer = ({ conversationId }: MessageComposerProps) => {
               event.preventDefault();
               void handleSendMessage();
             }
+          }}
+          slotProps={{
+            input: {
+              disableUnderline: true,
+              sx: {
+                alignItems: "center",
+                fontSize: 14,
+                lineHeight: "20px",
+                py: 0.75,
+              },
+            },
           }}
         />
         <IconButton
@@ -72,8 +100,8 @@ export const MessageComposer = ({ conversationId }: MessageComposerProps) => {
             bgcolor: "primary.main",
             color: "primary.contrastText",
             flexShrink: 0,
-            height: 42,
-            width: 42,
+            height: 40,
+            width: 40,
             "&:hover": {
               bgcolor: "primary.dark",
             },
