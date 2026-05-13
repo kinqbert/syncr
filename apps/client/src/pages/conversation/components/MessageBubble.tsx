@@ -1,6 +1,16 @@
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  Stack,
+  Typography,
+} from "@mui/material";
 import type { ConversationMessageReply } from "@syncr/packages";
 import { Reply } from "lucide-mui";
+import { useRef, useState } from "react";
+
+import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 
 type MessageBubbleProps = {
   content: string;
@@ -29,18 +39,74 @@ export const MessageBubble = ({
   onReplyClick,
   replyTo,
 }: MessageBubbleProps) => {
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const longPressTimerRef = useRef<number | null>(null);
+  const touchMovedRef = useRef(false);
+  const isTouchDevice = useIsTouchDevice();
+
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current == null) {
+      return;
+    }
+
+    window.clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = null;
+  };
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLElement>) => {
+    if (!isTouchDevice) {
+      return;
+    }
+
+    touchMovedRef.current = false;
+    clearLongPressTimer();
+
+    const target = event.currentTarget;
+
+    longPressTimerRef.current = window.setTimeout(() => {
+      if (touchMovedRef.current) {
+        return;
+      }
+
+      setMenuAnchor(target);
+      longPressTimerRef.current = null;
+    }, 520);
+  };
+
+  const handleTouchMove = () => {
+    touchMovedRef.current = true;
+    clearLongPressTimer();
+  };
+
+  const handleTouchEnd = () => {
+    clearLongPressTimer();
+  };
+
+  const handleReplyFromMenu = () => {
+    setMenuAnchor(null);
+    onReply();
+  };
+
   return (
     <Stack
       alignItems={isOwn ? "flex-end" : "flex-start"}
       direction={isOwn ? "row-reverse" : "row"}
       gap={0.5}
-      sx={{
-        "&:hover .message-reply-button": {
-          opacity: 1,
-        },
-      }}
+      sx={
+        isTouchDevice
+          ? undefined
+          : {
+              "&:hover .message-reply-button": {
+                opacity: 1,
+              },
+            }
+      }
     >
       <Box
+        onTouchCancel={handleTouchEnd}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove}
+        onTouchStart={handleTouchStart}
         sx={{
           bgcolor: isOwn ? "primary.main" : "background.paper",
           border: highlighted ? "2px solid" : isOwn ? 0 : "1px solid",
@@ -101,14 +167,35 @@ export const MessageBubble = ({
         sx={{
           alignSelf: "center",
           color: "text.secondary",
+          display: isTouchDevice ? "none" : "inline-flex",
           height: 28,
-          opacity: { xs: 1, sm: 0 },
+          opacity: 0,
           transition: "opacity 120ms ease",
           width: 28,
         }}
       >
         <Reply fontSize="small" />
       </IconButton>
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={() => setMenuAnchor(null)}
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 2,
+              boxShadow: "0 14px 40px rgba(15, 23, 42, 0.18)",
+            },
+          },
+        }}
+      >
+        <MenuItem onClick={handleReplyFromMenu}>
+          <Reply fontSize="small" />
+          <Typography fontSize={14} fontWeight={700} ml={1}>
+            Reply
+          </Typography>
+        </MenuItem>
+      </Menu>
     </Stack>
   );
 };

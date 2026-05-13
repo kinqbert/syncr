@@ -25,8 +25,20 @@ export const MessageComposer = ({
   replyTo,
 }: MessageComposerProps) => {
   const [messageText, setMessageText] = useState("");
+  const [exitingReply, setExitingReply] =
+    useState<ConversationMessage | null>(null);
   const sendMessage = useSendConversationMessage();
   const hasContent = Boolean(messageText.trim());
+  const displayedReply = replyTo ?? exitingReply;
+  const isReplyVisible = Boolean(replyTo);
+
+  const handleCancelReply = () => {
+    if (replyTo) {
+      setExitingReply(replyTo);
+    }
+
+    onCancelReply();
+  };
 
   const handleSendMessage = async () => {
     const content = messageText.trim();
@@ -41,7 +53,7 @@ export const MessageComposer = ({
         conversationId,
       });
       setMessageText("");
-      onCancelReply();
+      handleCancelReply();
     } catch (error) {
       toast.error(getErrorMessage(error));
     }
@@ -61,46 +73,81 @@ export const MessageComposer = ({
       }}
     >
       <Stack
-        gap={1}
         sx={{
           maxWidth: 680,
           mx: "auto",
+          position: "relative",
           width: "100%",
         }}
       >
-        {replyTo ? (
-          <Stack
-            alignItems="center"
-            direction="row"
-            gap={1}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateRows: isReplyVisible ? "1fr" : "0fr",
+            overflow: "hidden",
+            transition: "grid-template-rows 220ms ease",
+          }}
+          onTransitionEnd={(event) => {
+            if (
+              event.propertyName === "grid-template-rows" &&
+              !replyTo &&
+              exitingReply
+            ) {
+              setExitingReply(null);
+            }
+          }}
+        >
+          <Box
             sx={{
-              bgcolor: "#EEF2FF",
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 2,
-              boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
-              px: { xs: 1.25, sm: 1.5 },
-              py: 1,
+              minHeight: 0,
+              opacity: isReplyVisible ? 1 : 0,
+              pb: isReplyVisible ? 1 : 0,
+              transform: isReplyVisible ? "translateY(0)" : "translateY(18px)",
+              transition:
+                "opacity 180ms ease, transform 220ms ease, padding-bottom 220ms ease",
+              zIndex: 0,
             }}
           >
-            <Stack minWidth={0} flex={1}>
-              <Typography color="primary.main" fontSize={12} fontWeight={800}>
-                Replying to {getReplyAuthorName(replyTo)}
-              </Typography>
-              <Typography color="text.secondary" fontSize={12} noWrap>
-                {replyTo.content}
-              </Typography>
-            </Stack>
-            <IconButton
-              aria-label="Cancel reply"
-              onClick={onCancelReply}
-              size="small"
-              sx={{ height: 28, width: 28 }}
-            >
-              <X fontSize="small" />
-            </IconButton>
-          </Stack>
-        ) : null}
+            {displayedReply ? (
+              <Stack
+                alignItems="center"
+                direction="row"
+                gap={1}
+                sx={{
+                  bgcolor: "#EEF2FF",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
+                  px: { xs: 1.5, sm: 2 },
+                  pr: { xs: 1.5, sm: 1.5 },
+                  py: 1,
+                }}
+              >
+                <Stack minWidth={0} flex={1}>
+                  <Typography
+                    color="primary.main"
+                    fontSize={12}
+                    fontWeight={800}
+                  >
+                    Replying to {getReplyAuthorName(displayedReply)}
+                  </Typography>
+                  <Typography color="text.secondary" fontSize={12} noWrap>
+                    {displayedReply.content}
+                  </Typography>
+                </Stack>
+                <IconButton
+                  aria-label="Cancel reply"
+                  onClick={handleCancelReply}
+                  size="small"
+                  sx={{ height: 28, width: 28 }}
+                >
+                  <X fontSize="small" />
+                </IconButton>
+              </Stack>
+            ) : null}
+          </Box>
+        </Box>
         <Stack
           alignItems="center"
           direction="row"
@@ -109,11 +156,13 @@ export const MessageComposer = ({
             bgcolor: "background.paper",
             border: "1px solid",
             borderColor: "divider",
-            borderRadius: 2,
+            borderRadius: 8,
             boxSizing: "border-box",
             boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
             p: 0.75,
             pl: { xs: 1.5, sm: 2 },
+            position: "relative",
+            zIndex: 1,
           }}
         >
           <TextField
@@ -148,9 +197,10 @@ export const MessageComposer = ({
             disabled={!hasContent || sendMessage.isPending}
             type="submit"
             sx={{
+              alignSelf: "end",
               bgcolor: "primary.main",
               color: "primary.contrastText",
-              borderRadius: 1,
+              borderRadius: 6,
               flexShrink: 0,
               height: 40,
               width: 40,

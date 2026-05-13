@@ -30,10 +30,14 @@ export const MessageHistory = ({
   onReply,
 }: MessageHistoryProps) => {
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [highlightedMessageId, setHighlightedMessageId] = useState<number | null>(null);
-  const [pendingScrollMessageId, setPendingScrollMessageId] = useState<number | null>(null);
+  const [highlightedMessage, setHighlightedMessage] = useState<{
+    conversationId: number;
+    messageId: number;
+  } | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const highlightClearTimerRef = useRef<number | null>(null);
   const messageRefs = useRef(new Map<number, HTMLDivElement>());
+  const pendingScrollMessageIdRef = useRef<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const isAtBottomRef = useRef(true);
   const {
@@ -53,6 +57,10 @@ export const MessageHistory = ({
     () => buildMessageBlocks(messages, currentUserId),
     [currentUserId, messages],
   );
+  const highlightedMessageId =
+    highlightedMessage?.conversationId === conversationId
+      ? highlightedMessage.messageId
+      : null;
 
   const updateIsAtBottom = useCallback(() => {
     const element = scrollContainerRef.current;
@@ -68,18 +76,18 @@ export const MessageHistory = ({
     setIsAtBottom(nextIsAtBottom);
   }, []);
 
-  const scroll = ({ smooth = false }: { smooth?: boolean } = {}) => {
+  const scroll = useCallback(({ smooth = false }: { smooth?: boolean } = {}) => {
     bottomRef.current?.scrollIntoView({
       block: "end",
       behavior: smooth ? "smooth" : "auto",
     });
-  };
+  }, []);
 
   const handleScrollToBottom = useCallback(() => {
     setIsAtBottom(true);
     isAtBottomRef.current = true;
     scroll();
-  }, []);
+  }, [scroll]);
 
   const registerMessageRef = useCallback(
     (messageId: number, element: HTMLDivElement | null) => {
@@ -92,6 +100,17 @@ export const MessageHistory = ({
     [],
   );
 
+  const scheduleHighlightClear = useCallback(() => {
+    if (highlightClearTimerRef.current != null) {
+      window.clearTimeout(highlightClearTimerRef.current);
+    }
+
+    highlightClearTimerRef.current = window.setTimeout(() => {
+      setHighlightedMessage(null);
+      highlightClearTimerRef.current = null;
+    }, 1800);
+  }, []);
+
   const scrollToMessage = useCallback((messageId: number) => {
     const element = messageRefs.current.get(messageId);
 
@@ -100,43 +119,71 @@ export const MessageHistory = ({
     }
 
     element.scrollIntoView({ behavior: "smooth", block: "center" });
-    setHighlightedMessageId(messageId);
-    window.setTimeout(() => setHighlightedMessageId(null), 1800);
 
     return true;
   }, []);
 
   const handleReplyClick = useCallback(
     (messageId: number) => {
+      if (highlightClearTimerRef.current != null) {
+        window.clearTimeout(highlightClearTimerRef.current);
+        highlightClearTimerRef.current = null;
+      }
+
+      setHighlightedMessage({ conversationId, messageId });
+
       if (scrollToMessage(messageId)) {
+        pendingScrollMessageIdRef.current = null;
+        scheduleHighlightClear();
         return;
       }
 
-      setPendingScrollMessageId(messageId);
+      pendingScrollMessageIdRef.current = messageId;
+
+      if (hasNextPage && !isFetchingNextPage) {
+        void fetchNextPage();
+      }
     },
-    [scrollToMessage],
+    [
+      conversationId,
+      fetchNextPage,
+      hasNextPage,
+      isFetchingNextPage,
+      scheduleHighlightClear,
+      scrollToMessage,
+    ],
   );
 
   useEffect(() => {
     scroll();
     isAtBottomRef.current = true;
-    setPendingScrollMessageId(null);
-    setHighlightedMessageId(null);
-  }, [conversationId]);
+    pendingScrollMessageIdRef.current = null;
+  }, [conversationId, scroll]);
+
+  useEffect(() => {
+    return () => {
+      if (highlightClearTimerRef.current != null) {
+        window.clearTimeout(highlightClearTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isAtBottomRef.current) {
       scroll({ smooth: true });
     }
-  }, [messages.length]);
+  }, [messages.length, scroll]);
 
   useEffect(() => {
+    const pendingScrollMessageId = pendingScrollMessageIdRef.current;
+
     if (pendingScrollMessageId == null) {
       return;
     }
 
     if (scrollToMessage(pendingScrollMessageId)) {
-      setPendingScrollMessageId(null);
+      pendingScrollMessageIdRef.current = null;
+      scheduleHighlightClear();
       return;
     }
 
@@ -146,14 +193,15 @@ export const MessageHistory = ({
     }
 
     if (!hasNextPage && !isFetchingNextPage) {
-      setPendingScrollMessageId(null);
+      pendingScrollMessageIdRef.current = null;
+      scheduleHighlightClear();
     }
   }, [
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     messages.length,
-    pendingScrollMessageId,
+    scheduleHighlightClear,
     scrollToMessage,
   ]);
 
