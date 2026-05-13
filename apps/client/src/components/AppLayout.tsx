@@ -70,6 +70,8 @@ const CompanyContent = () => {
 };
 
 export const AppLayout = () => {
+  const selectedCompanyId = useCompanyStore((state) => state.selectedCompanyId);
+
   return (
     <AuthenticatedLayout>
       <SocketProvider>
@@ -80,7 +82,7 @@ export const AppLayout = () => {
         </>
         <Header />
         <Box display="flex" sx={{ overflow: "hidden" }}>
-          <Sidebar />
+          {selectedCompanyId && <Sidebar />}
           <CompanyContent />
         </Box>
       </SocketProvider>
