@@ -63,7 +63,7 @@ export const mapToTeamMembersDto = (data: typeof users.$inferSelect): TeamMember
   return {
     id: data.id,
     email: data.email,
-    name: data.email,
+    name: data.name,
     surname: data.surname,
   };
 };
