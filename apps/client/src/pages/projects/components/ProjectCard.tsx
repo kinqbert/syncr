@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Card,
   CardContent,
@@ -51,7 +52,7 @@ export const ProjectCard = ({
         boxShadow: "0 8px 24px rgba(15, 23, 42, 0.04)",
         display: "flex",
         flexDirection: "column",
-        minHeight: 248,
+        minHeight: { xs: "auto", sm: 248 },
         overflow: "hidden",
         transition:
           "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
@@ -61,12 +62,14 @@ export const ProjectCard = ({
         },
       }}
     >
-      <CardContent sx={{ display: "flex", flex: 1, p: 2.5 }}>
-        <Stack gap={2.25} minWidth={0} width="100%">
+      <CardContent
+        sx={{ display: "flex", flex: 1, p: { xs: 2, sm: 2.5 } }}
+      >
+        <Stack gap={{ xs: 2, sm: 2.25 }} minWidth={0} width="100%">
           <Stack
             alignItems="flex-start"
             direction="row"
-            gap={1.5}
+            gap={1}
             justifyContent="space-between"
           >
             <Stack minWidth={0}>
@@ -74,9 +77,9 @@ export const ProjectCard = ({
                 noWrap
                 sx={{
                   color: "text.primary",
-                  fontSize: 20,
+                  fontSize: { xs: 18, sm: 20 },
                   fontWeight: 800,
-                  lineHeight: "28px",
+                  lineHeight: { xs: "24px", sm: "28px" },
                 }}
               >
                 {project.name}
@@ -96,6 +99,7 @@ export const ProjectCard = ({
                 bgcolor: "#ECFDF5",
                 borderColor: "#A7F3D0",
                 color: "#047857",
+                flexShrink: 0,
                 fontWeight: 700,
                 textTransform: "capitalize",
               }}
@@ -186,11 +190,22 @@ export const ProjectCard = ({
             </Stack>
           </Stack>
 
-          <Stack alignItems="center" direction="row" gap={1} mt="auto" pt={0.5}>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 1,
+              gridTemplateColumns: {
+                xs: "repeat(2, minmax(0, 1fr))",
+                sm: "repeat(3, minmax(0, 1fr)) 40px",
+              },
+              mt: "auto",
+              pt: 0.5,
+            }}
+          >
             <Button
               component={Link}
               startIcon={<LayoutDashboard />}
-              sx={{ flex: 1, borderRadius: 1 }}
+              sx={{ borderRadius: 1, minWidth: 0 }}
               to={`/projects/${project.id}`}
               variant="contained"
             >
@@ -199,7 +214,7 @@ export const ProjectCard = ({
             <Button
               onClick={() => onOpenTasks(project)}
               startIcon={<SquareCheckBig />}
-              sx={{ flex: 1, borderRadius: 1 }}
+              sx={{ borderRadius: 1, minWidth: 0 }}
               variant="outlined"
             >
               Tasks
@@ -207,7 +222,7 @@ export const ProjectCard = ({
             <Button
               component={Link}
               startIcon={<CalendarDays />}
-              sx={{ flex: 1, borderRadius: 1 }}
+              sx={{ borderRadius: 1, minWidth: 0 }}
               to={`/projects/${project.id}/calendar`}
               variant="outlined"
             >
@@ -221,6 +236,7 @@ export const ProjectCard = ({
                   borderRadius: 1,
                   color: "text.secondary",
                   height: 40,
+                  justifySelf: "end",
                   width: 40,
                   "&:hover": {
                     bgcolor: "action.hover",
@@ -231,7 +247,7 @@ export const ProjectCard = ({
                 <Pencil fontSize="small" />
               </IconButton>
             </Tooltip>
-          </Stack>
+          </Box>
         </Stack>
       </CardContent>
     </Card>

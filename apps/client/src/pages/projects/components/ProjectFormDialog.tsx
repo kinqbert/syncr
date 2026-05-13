@@ -13,6 +13,8 @@ import {
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import type {
   CreateProjectBody,
@@ -69,6 +71,8 @@ export const ProjectFormDialog = ({
   onSave,
   project,
 }: ProjectFormDialogProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const currentUserId = useAuthStore((state) => state.user?.id ?? null);
 
   const {
@@ -118,7 +122,13 @@ export const ProjectFormDialog = ({
   };
 
   return (
-    <Dialog fullWidth maxWidth="xs" onClose={onClose} open={isOpen}>
+    <Dialog
+      fullScreen={isMobile}
+      fullWidth
+      maxWidth="xs"
+      onClose={onClose}
+      open={isOpen}
+    >
       <DialogTitle>{project ? "Update project" : "Create project"}</DialogTitle>
       <DialogContent>
         <Stack
@@ -218,6 +228,7 @@ export const ProjectFormDialog = ({
             <Button
               disabled={!canAssignCurrentUser || isCurrentUserSelected}
               onClick={handleAssignCurrentUser}
+              sx={{ width: { xs: "100%", sm: "auto" } }}
               type="button"
               variant="outlined"
             >
@@ -226,7 +237,15 @@ export const ProjectFormDialog = ({
           </Box>
         </Stack>
       </DialogContent>
-      <DialogActions>
+      <DialogActions
+        sx={{
+          flexDirection: { xs: "column-reverse", sm: "row" },
+          "& > .MuiButton-root": {
+            ml: { xs: "0 !important", sm: undefined },
+            width: { xs: "100%", sm: "auto" },
+          },
+        }}
+      >
         <Button disabled={isSaving} onClick={onClose}>
           Cancel
         </Button>

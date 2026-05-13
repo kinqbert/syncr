@@ -79,16 +79,24 @@ export const ProjectsPage = () => {
   };
 
   return (
-    <Box component="main" sx={{ width: "100%", p: 3 }}>
-      <Stack gap={3}>
+    <Box
+      component="main"
+      sx={{ minWidth: 0, p: { xs: 2, sm: 3 }, width: "100%" }}
+    >
+      <Stack gap={{ xs: 2.5, sm: 3 }} minWidth={0}>
         <Stack
-          alignItems="center"
+          alignItems={{ xs: "stretch", sm: "center" }}
           direction={{ xs: "column", sm: "row" }}
           gap={2}
           justifyContent="space-between"
         >
-          <Stack gap={0.5}>
-            <Typography variant="h4">Projects</Typography>
+          <Stack gap={0.5} minWidth={0}>
+            <Typography
+              variant="h4"
+              sx={{ fontSize: { xs: 28, sm: 34 }, lineHeight: 1.2 }}
+            >
+              Projects
+            </Typography>
             <Typography color="text.secondary">
               {projects.length} active workspace project
               {projects.length === 1 ? "" : "s"}
@@ -97,6 +105,7 @@ export const ProjectsPage = () => {
           <Button
             onClick={handleOpenCreateDialog}
             startIcon={<FolderPlus />}
+            sx={{ alignSelf: { xs: "stretch", sm: "center" } }}
             variant="contained"
           >
             Create project
