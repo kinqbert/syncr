@@ -2,6 +2,7 @@ import { Alert, Button, Divider, Stack, TextField } from "@mui/material";
 import { KeyRound } from "lucide-mui";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { useUpdatePassword } from "@/api";
 import { getErrorMessage } from "@/utils/getErrorMessage";
@@ -16,7 +17,6 @@ type PasswordFormState = {
 
 export const PasswordSettingsSection = () => {
   const updatePassword = useUpdatePassword();
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -34,7 +34,6 @@ export const PasswordSettingsSection = () => {
 
   const handleSavePassword = async (formState: PasswordFormState) => {
     setError(null);
-    setMessage(null);
 
     try {
       await updatePassword.mutateAsync({
@@ -42,7 +41,7 @@ export const PasswordSettingsSection = () => {
         newPassword: formState.newPassword,
       });
       reset();
-      setMessage("Password updated.");
+      toast.success("Password updated.");
     } catch (error) {
       setError(getErrorMessage(error, "Could not update password."));
     }
@@ -67,7 +66,6 @@ export const PasswordSettingsSection = () => {
 
       <Stack gap={2} px={{ xs: 2, sm: 2.25 }} py={2}>
         {error && <Alert severity="error">{error}</Alert>}
-        {message && <Alert severity="success">{message}</Alert>}
 
         <TextField
           {...register("currentPassword", {

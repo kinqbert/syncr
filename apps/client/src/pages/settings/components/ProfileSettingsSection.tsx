@@ -10,6 +10,7 @@ import {
 import { Save, UserRound } from "lucide-mui";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { useMe, useUpdateProfile } from "@/api";
 import { getErrorMessage } from "@/utils/getErrorMessage";
@@ -29,7 +30,6 @@ const hoursToMinutes = (hours: number) => Math.round(hours * 60);
 export const ProfileSettingsSection = () => {
   const { data: user } = useMe();
   const updateProfile = useUpdateProfile();
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -61,7 +61,6 @@ export const ProfileSettingsSection = () => {
 
   const handleSaveProfile = async (formState: ProfileFormState) => {
     setError(null);
-    setMessage(null);
 
     try {
       await updateProfile.mutateAsync({
@@ -70,7 +69,7 @@ export const ProfileSettingsSection = () => {
         birthday: formState.birthday || null,
         weeklyLoadMinutes: hoursToMinutes(Number(formState.weeklyLoadHours)),
       });
-      setMessage("Profile updated.");
+      toast.success("Profile updated.");
     } catch (error) {
       setError(getErrorMessage(error, "Could not update profile."));
     }
@@ -95,7 +94,6 @@ export const ProfileSettingsSection = () => {
 
       <Stack gap={2} px={{ xs: 2, sm: 2.25 }} py={2}>
         {error && <Alert severity="error">{error}</Alert>}
-        {message && <Alert severity="success">{message}</Alert>}
 
         <Box
           sx={{
