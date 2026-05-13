@@ -223,10 +223,73 @@
   .syncr-calendar .fc .fc-toolbar {
     align-items: stretch;
     flex-direction: column;
+    gap: 10px;
+    padding: 12px;
   }
 
   .syncr-calendar .fc .fc-toolbar-chunk {
     display: flex;
     justify-content: center;
+  }
+
+  .syncr-calendar .fc .fc-toolbar-chunk:first-child,
+  .syncr-calendar .fc .fc-toolbar-chunk:last-child {
+    justify-content: stretch;
+  }
+
+  .syncr-calendar .fc .fc-toolbar-chunk:first-child .fc-button-group,
+  .syncr-calendar .fc .fc-toolbar-chunk:last-child .fc-button-group {
+    flex: 1;
+  }
+
+  .syncr-calendar .fc .fc-toolbar-chunk:first-child .fc-button,
+  .syncr-calendar .fc .fc-toolbar-chunk:last-child .fc-button {
+    flex: 1;
+  }
+
+  .syncr-calendar .fc .fc-toolbar-title {
+    font-size: 18px;
+    line-height: 24px;
+    text-align: center;
+  }
+
+  .syncr-calendar .fc .fc-button {
+    font-size: 13px;
+    min-height: 32px;
+    padding: 5px 8px;
+  }
+
+  .syncr-calendar .fc .fc-col-header-cell {
+    padding: 8px 0;
+  }
+
+  .syncr-calendar .fc .fc-daygrid-day-number {
+    padding: 6px;
+  }
+
+  .syncr-calendar .fc .fc-daygrid-event {
+    margin-left: 4px;
+    margin-right: 4px;
+  }
+
+  .syncr-calendar-event {
+    gap: 5px;
+    padding: 4px 6px;
+  }
+
+  .syncr-calendar-event-meta {
+    display: none;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1199px) {
+  .syncr-calendar .fc .fc-toolbar {
+    flex-wrap: wrap;
+    padding: 14px;
+  }
+
+  .syncr-calendar .fc .fc-toolbar-title {
+    font-size: 19px;
+    line-height: 26px;
   }
 }

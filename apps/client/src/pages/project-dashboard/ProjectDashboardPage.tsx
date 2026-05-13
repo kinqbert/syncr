@@ -19,19 +19,23 @@ export const ProjectDashboardPage = () => {
     <Box
       component="main"
       sx={{
-        p: 3,
+        minWidth: 0,
+        p: { xs: 2, sm: 3 },
         width: "100%",
       }}
     >
-      <Stack gap={3}>
+      <Stack gap={{ xs: 2.5, sm: 3 }} minWidth={0}>
         <Stack
-          alignItems="center"
-          direction={{ xs: "column", sm: "row" }}
+          alignItems={{ xs: "stretch", lg: "center" }}
+          direction={{ xs: "column", lg: "row" }}
           gap={2}
           justifyContent="space-between"
         >
           <Stack minWidth={0} gap={0.5}>
-            <Typography variant="h4">
+            <Typography
+              variant="h4"
+              sx={{ fontSize: { xs: 28, sm: 34 }, lineHeight: 1.2 }}
+            >
               {project?.name ?? "Project dashboard"}
             </Typography>
             <Typography color="text.secondary">

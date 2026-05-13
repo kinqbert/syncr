@@ -1,4 +1,5 @@
 import {
+  Box,
   capitalize,
   CircularProgress,
   LinearProgress,
@@ -54,7 +55,12 @@ export const ProjectDashboardHeader = ({
     return (
       <Paper
         elevation={0}
-        sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 3 }}
+        sx={{
+          border: 1,
+          borderColor: "divider",
+          borderRadius: 2,
+          p: { xs: 2, sm: 3 },
+        }}
       >
         <Stack alignItems="center" py={3}>
           <CircularProgress size={28} />
@@ -108,34 +114,48 @@ export const ProjectDashboardHeader = ({
         border: 1,
         borderColor: "divider",
         borderRadius: 2,
-        p: 3,
+        p: { xs: 2, sm: 3 },
       }}
     >
-      <Stack gap={3}>
+      <Stack gap={{ xs: 2.5, sm: 3 }} minWidth={0}>
         <Stack
           direction={{ xs: "column", md: "row" }}
-          gap={3}
+          gap={{ xs: 2.5, md: 3 }}
           justifyContent="space-between"
         >
-          <Stack direction={{ xs: "column", sm: "row" }} gap={4}>
+          <Box
+            sx={{
+              display: "grid",
+              gap: { xs: 2, sm: 2.5, md: 4 },
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, minmax(0, 1fr))",
+                lg: "repeat(4, minmax(0, 1fr))",
+              },
+              minWidth: 0,
+              width: "100%",
+            }}
+          >
             {STATS.map((stat) => {
               const Icon = stat.icon;
 
               return (
-                <Stack key={stat.id} gap={0.75}>
+                <Stack key={stat.id} gap={0.75} minWidth={0}>
                   <Typography color="text.secondary" fontSize={13}>
                     {stat.label}
                   </Typography>
-                  <Stack alignItems="center" direction="row" gap={0.75}>
+                  <Stack alignItems="center" direction="row" gap={0.75} minWidth={0}>
                     {Icon && (
                       <Icon sx={{ color: "text.secondary", fontSize: 17 }} />
                     )}
-                    <Typography fontWeight={700}>{stat.value}</Typography>
+                    <Typography noWrap fontWeight={700} minWidth={0}>
+                      {stat.value}
+                    </Typography>
                   </Stack>
                 </Stack>
               );
             })}
-          </Stack>
+          </Box>
 
           <Stack gap={1} minWidth={{ xs: "100%", md: 300 }}>
             <Typography color="text.secondary" fontSize={13}>

@@ -63,9 +63,14 @@ export const ActivityTimeline = ({ projectId }: ActivityTimelineProps) => {
   return (
     <Paper
       elevation={0}
-      sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 2.5 }}
+      sx={{
+        border: 1,
+        borderColor: "divider",
+        borderRadius: 2,
+        p: { xs: 2, sm: 2.5 },
+      }}
     >
-      <Stack gap={2.25}>
+      <Stack gap={2.25} minWidth={0}>
         <Stack alignItems="center" direction="row" gap={1}>
           <ListChecks sx={{ color: "primary.main", fontSize: 19 }} />
           <Typography fontSize={17} fontWeight={800}>
@@ -86,7 +91,13 @@ export const ActivityTimeline = ({ projectId }: ActivityTimelineProps) => {
         ) : null}
 
         {activities.map((item) => (
-          <Stack key={item.id} alignItems="center" direction="row" gap={1.5}>
+          <Stack
+            key={item.id}
+            alignItems="center"
+            direction="row"
+            gap={1.5}
+            minWidth={0}
+          >
             <UserAvatar
               name={item.actor?.name}
               size={32}

@@ -42,15 +42,21 @@ export const ProjectViewNav = ({ projectId }: ProjectViewNavProps) => {
         maxWidth: "100%",
         overflowX: "auto",
         p: 0.5,
+        width: { xs: "100%", lg: "auto" },
       }}
     >
       <Tabs
         onChange={(_, value: string) => navigate(value)}
         TabIndicatorProps={{ sx: { display: "none" } }}
         sx={{
+          width: { xs: "100%", lg: "auto" },
           minHeight: 0,
           "& .MuiTabs-flexContainer": {
             gap: 0.5,
+            width: { xs: "100%", lg: "auto" },
+          },
+          "& .MuiTabs-scroller": {
+            overflowX: "auto !important",
           },
         }}
         value={activePath}
@@ -70,9 +76,10 @@ export const ProjectViewNav = ({ projectId }: ProjectViewNavProps) => {
               gap: 0.75,
               lineHeight: "20px",
               minHeight: 34,
-              minWidth: "auto",
-              px: 1.5,
+              minWidth: 0,
+              px: { xs: 1, sm: 1.5 },
               py: 0.75,
+              flex: { xs: "1 1 0", lg: "0 0 auto" },
               textTransform: "none",
               whiteSpace: "nowrap",
               "& .MuiSvgIcon-root": {

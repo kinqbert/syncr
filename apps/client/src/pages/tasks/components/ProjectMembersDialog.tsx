@@ -24,6 +24,7 @@ import { Trash2, UserPlus } from "lucide-mui";
 import { useMemo, useState } from "react";
 
 import { UserAvatar } from "@/components/UserAvatar";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 type ProjectMembersDialogProps = {
@@ -55,6 +56,7 @@ export const ProjectMembersDialog = ({
   onClose,
   onRemoveMember,
 }: ProjectMembersDialogProps) => {
+  const isMobile = useIsMobile();
   const [selectedCandidates, setSelectedCandidates] = useState<
     ProjectMemberCandidate[]
   >([]);
@@ -97,7 +99,13 @@ export const ProjectMembersDialog = ({
   };
 
   return (
-    <Dialog fullWidth maxWidth="sm" onClose={onClose} open={isOpen}>
+    <Dialog
+      fullScreen={isMobile}
+      fullWidth
+      maxWidth="sm"
+      onClose={onClose}
+      open={isOpen}
+    >
       <DialogTitle>Project members</DialogTitle>
       <DialogContent>
         <Stack gap={2} pt={1}>

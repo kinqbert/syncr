@@ -43,10 +43,10 @@ export const TaskDistributionCard = ({ tasks }: TaskDistributionCardProps) => {
         borderRadius: 2,
         height: "100%",
         minWidth: 0,
-        p: 2.5,
+        p: { xs: 2, sm: 2.5 },
       }}
     >
-      <Stack gap={3} height="100%">
+      <Stack gap={{ xs: 2, sm: 3 }} height="100%" minWidth={0}>
         <Typography fontSize={17} fontWeight={800}>
           Task Distribution
         </Typography>
@@ -56,7 +56,7 @@ export const TaskDistributionCard = ({ tasks }: TaskDistributionCardProps) => {
           gap={2}
           sx={{
             flex: 1,
-            minHeight: 230,
+            minHeight: { xs: 190, sm: 230 },
             minWidth: 0,
             overflowX: "auto",
             pb: 1,
@@ -71,7 +71,7 @@ export const TaskDistributionCard = ({ tasks }: TaskDistributionCardProps) => {
                 key={status}
                 alignItems="center"
                 gap={1}
-                sx={{ flex: "1 0 86px", minWidth: 0 }}
+                sx={{ flex: { xs: "1 0 68px", sm: "1 0 86px" }, minWidth: 0 }}
               >
                 <Box
                   sx={{
@@ -82,7 +82,7 @@ export const TaskDistributionCard = ({ tasks }: TaskDistributionCardProps) => {
                     width: "100%",
                   }}
                 />
-                <Typography color="text.secondary" fontSize={12}>
+                <Typography color="text.secondary" fontSize={12} noWrap>
                   {TASK_STATUS_LABEL[status]}
                 </Typography>
                 <Typography fontSize={13} fontWeight={800}>

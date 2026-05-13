@@ -108,7 +108,7 @@ export const TaskCreateForm = ({
           boxShadow: "0 16px 32px rgba(15, 23, 42, 0.14)",
           mt: 1,
           mx: 1,
-          p: 1.5,
+          p: { xs: 1.25, sm: 1.5 },
         }}
       >
         <Stack gap={1.5}>
@@ -224,10 +224,15 @@ export const TaskCreateForm = ({
             slotProps={{ inputLabel: { shrink: true } }}
             type="date"
           />
-          <Stack direction="row" gap={1} justifyContent="flex-end">
+          <Stack
+            direction={{ xs: "column-reverse", sm: "row" }}
+            gap={1}
+            justifyContent="flex-end"
+          >
             <Button
               disabled={isCreating}
               onClick={handleClose}
+              sx={{ width: { xs: "100%", sm: "auto" } }}
               size="small"
               type="button"
             >
@@ -235,6 +240,7 @@ export const TaskCreateForm = ({
             </Button>
             <Button
               disabled={isCreating}
+              sx={{ width: { xs: "100%", sm: "auto" } }}
               size="small"
               type="submit"
               variant="contained"

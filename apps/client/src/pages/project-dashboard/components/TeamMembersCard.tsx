@@ -67,10 +67,10 @@ export const TeamMembersCard = ({
           borderRadius: 2,
           height: "100%",
           minWidth: 0,
-          p: 2.5,
+          p: { xs: 2, sm: 2.5 },
         }}
       >
-        <Stack gap={2}>
+        <Stack gap={2} minWidth={0}>
           <Stack
             alignItems="center"
             direction="row"
@@ -131,7 +131,7 @@ export const TeamMembersCard = ({
                       : "Member"}
                   </Typography>
                 </Stack>
-                <Typography color="text.secondary" fontSize={13}>
+                <Typography color="text.secondary" flexShrink={0} fontSize={13}>
                   {getAssignedTaskCount(tasks, member.id)} tasks
                 </Typography>
               </Stack>

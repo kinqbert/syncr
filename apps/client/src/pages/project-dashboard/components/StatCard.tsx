@@ -17,11 +17,12 @@ export const StatCard = ({ helper, icon, label, value }: StatCardProps) => {
         borderColor: "divider",
         borderRadius: 2,
         height: "100%",
-        p: 2.5,
+        minWidth: 0,
+        p: { xs: 2, sm: 2.5 },
       }}
     >
-      <Stack direction="row" justifyContent="space-between">
-        <Stack gap={1}>
+      <Stack direction="row" gap={1.5} justifyContent="space-between">
+        <Stack gap={1} minWidth={0}>
           <Typography color="text.secondary" fontSize={13} fontWeight={600}>
             {label}
           </Typography>
@@ -32,7 +33,7 @@ export const StatCard = ({ helper, icon, label, value }: StatCardProps) => {
             {helper}
           </Typography>
         </Stack>
-        <Box sx={{ color: "text.disabled" }}>{icon}</Box>
+        <Box sx={{ color: "text.disabled", flexShrink: 0 }}>{icon}</Box>
       </Stack>
     </Paper>
   );

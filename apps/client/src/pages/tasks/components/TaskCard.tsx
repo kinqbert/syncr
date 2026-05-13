@@ -88,13 +88,14 @@ export const TaskCard = ({
       <Card
         variant="outlined"
         sx={{
-          minWidth: TASK_CARD_WIDTH,
-          maxWidth: TASK_CARD_WIDTH,
           borderColor: "divider",
           borderRadius: 1.5,
           boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
-          p: 2,
+          maxWidth: "100%",
+          minWidth: 0,
+          p: { xs: 1.5, sm: 2 },
           transition: "border-color 160ms ease, box-shadow 160ms ease",
+          width: "100%",
         }}
       >
         <Stack gap={2}>
@@ -104,10 +105,17 @@ export const TaskCard = ({
             justifyContent="space-between"
             gap={1}
           >
-            <Stack direction="row" alignItems="start" gap={1.25}>
+            <Stack direction="row" alignItems="start" gap={1.25} minWidth={0}>
               <IconButton
                 disableRipple
-                sx={{ width: "34px", p: 0, mt: 0.25, cursor: "inherit" }}
+                sx={{
+                  flexShrink: 0,
+                  mt: 0.25,
+                  p: 0,
+                  touchAction: "none",
+                  width: "34px",
+                  cursor: "inherit",
+                }}
                 {...dragHandleProps}
               >
                 <GripVertical />
@@ -161,8 +169,8 @@ export const TaskCard = ({
           </Stack>
 
           <Stack
-            direction="row"
-            alignItems="center"
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "stretch", sm: "center" }}
             justifyContent="space-between"
             gap={1.5}
           >
@@ -177,7 +185,13 @@ export const TaskCard = ({
                 {assigneeName}
               </Typography>
             </Stack>
-            <Stack direction="row" alignItems="center" gap={1.5} flexShrink={0}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              gap={1.5}
+              flexShrink={0}
+              justifyContent={{ xs: "space-between", sm: "flex-start" }}
+            >
               <Chip
                 label={formatPriority(task.priority)}
                 size="small"
@@ -193,14 +207,14 @@ export const TaskCard = ({
                 <Calendar
                   sx={{ color: "text.secondary", fontSize: 18 }}
                 />
-                <Typography color="text.secondary">
+                <Typography color="text.secondary" noWrap>
                   {formatDateShort(task.endDate)}
                 </Typography>
               </Stack>
             </Stack>
           </Stack>
         </Stack>
-      </Card>{" "}
+      </Card>
     </>
   );
 };

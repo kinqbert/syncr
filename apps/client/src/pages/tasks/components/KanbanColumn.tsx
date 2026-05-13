@@ -51,10 +51,16 @@ export const KanbanColumn = ({
     <Box
       ref={setNodeRef}
       sx={{
-        minWidth: TASK_CARD_WIDTH + PADDING * 2,
-        maxWidth: TASK_CARD_WIDTH + PADDING * 2,
-        width: "100%",
         borderRadius: 2,
+        flex: "0 0 auto",
+        maxWidth: {
+          xs: `calc(min(82vw, ${TASK_CARD_WIDTH}px) + ${PADDING * 2}px)`,
+          sm: TASK_CARD_WIDTH + PADDING * 2,
+        },
+        minWidth: {
+          xs: `calc(min(82vw, ${TASK_CARD_WIDTH}px) + ${PADDING * 2}px)`,
+          sm: TASK_CARD_WIDTH + PADDING * 2,
+        },
         position: "relative",
         transition: "background-color 160ms ease",
       }}
@@ -65,7 +71,7 @@ export const KanbanColumn = ({
         justifyContent="space-between"
         px={`${PADDING}px`}
       >
-        <Typography variant="subtitle1" fontWeight={600}>
+        <Typography noWrap variant="subtitle1" fontWeight={600}>
           {column.label}
         </Typography>
         <Tooltip title={isFormOpen ? "Close form" : "Create task"}>
@@ -100,12 +106,12 @@ export const KanbanColumn = ({
       )}
 
       <Box
-        minHeight="600px"
         sx={{
           p: `${PADDING}px`,
           backgroundColor: isDragOver ? "kanban.bgActive" : "kanban.bg",
           borderRadius: 2,
           boxSizing: "border-box",
+          minHeight: { xs: 480, sm: 560, lg: 600 },
           transition: "border-color 160ms ease",
         }}
       >

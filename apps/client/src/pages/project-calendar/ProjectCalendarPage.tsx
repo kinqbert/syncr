@@ -19,16 +19,24 @@ export const ProjectCalendarPage = () => {
   const isLoading = isProjectLoading || areTasksLoading;
 
   return (
-    <Stack height="100%" minWidth={0} p={3} width="100%">
+    <Stack
+      height="100%"
+      minWidth={0}
+      p={{ xs: 2, sm: 3 }}
+      width="100%"
+    >
       <Stack
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        direction={{ xs: "column", sm: "row" }}
+        alignItems={{ xs: "stretch", lg: "center" }}
+        direction={{ xs: "column", lg: "row" }}
         gap={2}
         justifyContent="space-between"
-        mb={2}
+        mb={{ xs: 2, sm: 3 }}
       >
         <Stack minWidth={0} gap={0.5}>
-          <Typography variant="h4">
+          <Typography
+            variant="h4"
+            sx={{ fontSize: { xs: 28, sm: 34 }, lineHeight: 1.2 }}
+          >
             {project ? `${project.name}` : "Project calendar"}
           </Typography>
           <Typography color="text.secondary">

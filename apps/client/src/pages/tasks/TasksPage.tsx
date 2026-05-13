@@ -50,23 +50,42 @@ export const TasksPage = () => {
   };
 
   return (
-    <Stack height="100%" minWidth={0} p={3} width="100%">
+    <Stack
+      height="100%"
+      minWidth={0}
+      p={{ xs: 2, sm: 3 }}
+      width="100%"
+    >
       <Stack
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        direction={{ xs: "column", sm: "row" }}
+        alignItems={{ xs: "stretch", lg: "center" }}
+        direction={{ xs: "column", lg: "row" }}
         justifyContent="space-between"
-        mb={2}
+        mb={{ xs: 2, sm: 3 }}
         gap={2}
       >
         <Stack minWidth={0} gap={0.5}>
-          <Typography variant="h4">{project?.name}</Typography>
+          <Typography
+            variant="h4"
+            sx={{ fontSize: { xs: 28, sm: 34 }, lineHeight: 1.2 }}
+          >
+            {project?.name}
+          </Typography>
           <Typography color="text.secondary">
             Drag and drop tasks to update their status
           </Typography>
         </Stack>
         <ProjectViewNav projectId={numericProjectId} />
       </Stack>
-      <Box minHeight={0} minWidth={0} sx={{ flex: 1, overflowX: "scroll" }}>
+      <Box
+        minHeight={0}
+        minWidth={0}
+        sx={{
+          flex: 1,
+          overflowX: "auto",
+          overflowY: "hidden",
+          pb: 1,
+        }}
+      >
         <Kanban projectAssignees={members} />
       </Box>
       <ProjectMembersDialog

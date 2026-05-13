@@ -4,10 +4,18 @@ import type { EventContentArg, EventInput } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
-import { Box, CircularProgress, Paper, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Paper,
+  Stack,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 
+import { theme } from "@/lib/theme";
 import { useSidebarStore } from "@/store/useSidebarStore";
 
 type TaskDeadlineCalendarProps = {
@@ -37,8 +45,15 @@ export const TaskDeadlineCalendar = ({
 }: TaskDeadlineCalendarProps) => {
   const navigate = useNavigate();
   const isSidebarOpen = useSidebarStore((state) => state.isOpen);
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "lg"));
   const calendarRef = useRef<FullCalendar>(null);
   const calendarContainerRef = useRef<HTMLDivElement>(null);
+  const calendarView = isMobile
+    ? "dayGridThreeDay"
+    : isTablet
+      ? "dayGridWeek"
+      : "dayGridMonth";
 
   useEffect(() => {
     if (isLoading) {
@@ -57,6 +72,21 @@ export const TaskDeadlineCalendar = ({
       window.clearTimeout(transitionEndId);
     };
   }, [isLoading, isSidebarOpen]);
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    const calendarApi = calendarRef.current?.getApi();
+
+    if (!calendarApi || calendarApi.view.type === calendarView) {
+      return;
+    }
+
+    calendarApi.changeView(calendarView);
+    calendarApi.updateSize();
+  }, [calendarView, isLoading]);
 
   useEffect(() => {
     const calendarContainer = calendarContainerRef.current;
@@ -115,11 +145,22 @@ export const TaskDeadlineCalendar = ({
             headerToolbar={{
               center: "title",
               left: "prev,next today",
-              right: "dayGridMonth,dayGridWeek",
+              right: isMobile
+                ? "dayGridThreeDay,dayGridDay"
+                : isTablet
+                  ? "dayGridWeek,dayGridThreeDay"
+                  : "dayGridMonth,dayGridWeek",
             }}
             height="100%"
-            initialView="dayGridMonth"
+            initialView={calendarView}
             plugins={[dayGridPlugin, interactionPlugin]}
+            views={{
+              dayGridThreeDay: {
+                buttonText: "3 days",
+                duration: { days: 3 },
+                type: "dayGrid",
+              },
+            }}
           />
         </Box>
       )}

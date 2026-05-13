@@ -31,7 +31,7 @@ export const SortableTaskCard = ({ task }: SortableTaskCardProps) => {
         cursor: isDragging ? "grabbing" : "grab",
         transform: CSS.Transform.toString(transform),
         transition: "none",
-        touchAction: "none",
+        touchAction: "auto",
         visibility: isDragging ? "hidden" : "visible",
       }}
     >

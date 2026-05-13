@@ -16,7 +16,7 @@ import { useProject } from "@/hooks";
 import { useKanbanDrag } from "../hooks/useKanbanDrag";
 import { KanbanColumn } from "./KanbanColumn";
 import { SortableTaskCard } from "./SortableTaskCard";
-import { TaskCard } from "./TaskCard";
+import { TaskCard, TASK_CARD_WIDTH } from "./TaskCard";
 
 const columns: KanbanColumn[] = [
   {
@@ -83,7 +83,15 @@ export const Kanban = ({ projectAssignees }: KanbanProps) => {
       onDragStart={handleDragStart}
       sensors={sensors}
     >
-      <Stack direction="row" gap={1}>
+      <Stack
+        alignItems="stretch"
+        direction="row"
+        gap={{ xs: 1.25, sm: 1.5 }}
+        sx={{
+          minWidth: "max-content",
+          pb: 0.5,
+        }}
+      >
         {columns.map((column) => (
           <KanbanColumn
             key={column.status}
@@ -112,6 +120,7 @@ export const Kanban = ({ projectAssignees }: KanbanProps) => {
             sx={{
               cursor: "grabbing",
               transform: "rotate(1deg)",
+              width: { xs: "min(82vw, 360px)", sm: TASK_CARD_WIDTH },
             }}
           >
             <TaskCard task={activeTask} />
