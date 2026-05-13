@@ -22,9 +22,11 @@ import {
 import { NavLink } from "react-router";
 
 import { useGetNotifications } from "@/api/notifications";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useSidebarStore } from "@/store/useSidebarStore";
 
 import { HEADER_HEIGHT } from "./Header";
+import { HeaderLogo } from "./HeaderLogo";
 
 export const SIDEBAR_WIDTH = 240;
 export const SIDEBAR_COLLAPSED_WIDTH = 65;
@@ -66,18 +68,27 @@ const SIDEBAR_ITEMS: {
 
 export const Sidebar = () => {
   const open = useSidebarStore((state) => state.isOpen);
+  const closeSidebar = useSidebarStore((state) => state.closeSidebar);
   const { data: notifications = [] } = useGetNotifications();
 
   const unreadNotificationsCount = notifications.filter(
     (notification) => !notification.isRead,
   ).length;
 
+  const isMobile = useIsMobile();
+
   return (
     <Box position="relative">
       <Drawer
-        variant="permanent"
+        variant={isMobile ? "temporary" : "permanent"}
+        open={isMobile ? open : true}
+        onClose={closeSidebar}
         sx={(theme: Theme) => ({
-          width: open ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
+          width: isMobile
+            ? SIDEBAR_WIDTH
+            : open
+              ? SIDEBAR_WIDTH
+              : SIDEBAR_COLLAPSED_WIDTH,
           flexShrink: 0,
 
           transition: theme.transitions.create("width", {
@@ -85,14 +96,18 @@ export const Sidebar = () => {
             easing: theme.transitions.easing.sharp,
           }),
           "& .MuiDrawer-paper": {
-            width: open ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
+            width: isMobile
+              ? SIDEBAR_WIDTH
+              : open
+                ? SIDEBAR_WIDTH
+                : SIDEBAR_COLLAPSED_WIDTH,
             display: "flex",
             flexDirection: "column",
             overflowX: "hidden",
-            top: HEADER_HEIGHT,
+            top: isMobile ? 0 : HEADER_HEIGHT,
             height: {
-              xs: "calc(100% - 56px)",
-              sm: `calc(100% - ${HEADER_HEIGHT}px)`,
+              xs: "100dvh",
+              sm: `calc(100vh - ${HEADER_HEIGHT}px)`,
             },
             borderRightColor: "divider",
             transition: theme.transitions.create("width", {
@@ -102,6 +117,7 @@ export const Sidebar = () => {
           },
         })}
       >
+        {isMobile && <HeaderLogo hasBottomBorder />}
         <List
           disablePadding
           sx={{
