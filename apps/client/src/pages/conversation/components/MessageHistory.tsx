@@ -102,8 +102,8 @@ export const MessageHistory = ({
         minHeight={0}
         alignSelf="center"
         mx="auto"
-        px={3}
-        py={2}
+        px={{ xs: 1.5, sm: 2, md: 3 }}
+        py={{ xs: 1.5, sm: 2 }}
         onScroll={updateIsAtBottom}
         sx={{
           overflowY: "auto",
@@ -137,7 +137,7 @@ export const MessageHistory = ({
             </Typography>
           </Stack>
         ) : (
-          <Stack gap={2.5}>
+          <Stack gap={{ xs: 2, sm: 2.5 }}>
             {messageBlocks.map((block, index) => {
               const previousBlock = messageBlocks[index - 1];
               const showDate =

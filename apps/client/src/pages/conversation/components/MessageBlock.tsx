@@ -29,7 +29,11 @@ export const MessageBlock = ({ block }: MessageBlockProps) => {
       <Stack
         alignItems={block.isOwn ? "flex-end" : "flex-start"}
         gap={0.5}
-        maxWidth="min(680px, 76%)"
+        maxWidth={{
+          xs: "min(620px, 86%)",
+          sm: "min(680px, 80%)",
+          md: "min(680px, 76%)",
+        }}
         minWidth={0}
       >
         {!block.isOwn ? (

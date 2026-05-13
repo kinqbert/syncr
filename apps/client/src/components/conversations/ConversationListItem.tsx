@@ -13,11 +13,13 @@ import { ConversationAvatar } from "./ConversationAvatar";
 
 type ConversationListItemProps = {
   conversation: ListConversation;
+  onClick?: () => void;
   open: boolean;
 };
 
 export const ConversationListItem = ({
   conversation,
+  onClick,
   open,
 }: ConversationListItemProps) => {
   return (
@@ -27,6 +29,7 @@ export const ConversationListItem = ({
     >
       <ListItem
         component={NavLink}
+        onClick={onClick}
         to={`/conversations/${conversation.id}`}
         sx={{
           mb: 0.5,

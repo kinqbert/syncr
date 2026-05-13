@@ -12,15 +12,20 @@ import { NewConversationDialog } from "./NewConversationDialog";
 
 type ConversationsSidebarProps = {
   conversations: ListConversation[];
+  forceOpen?: boolean;
   loading?: boolean;
+  onConversationSelect?: () => void;
 };
 
 export const ConversationsSidebar = ({
   conversations,
+  forceOpen = false,
   loading = false,
+  onConversationSelect,
 }: ConversationsSidebarProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const open = useConversationsSidebarStore((state) => state.isOpen);
+  const visibleOpen = forceOpen || open;
   const openSidebar = useConversationsSidebarStore(
     (state) => state.openSidebar,
   );
@@ -64,7 +69,7 @@ export const ConversationsSidebar = ({
         }}
       >
         <ConversationsSidebarHeader
-          open={open}
+          open={visibleOpen}
           unreadCount={unreadCount}
           onClose={closeSidebar}
           onOpen={openSidebar}
@@ -83,7 +88,7 @@ export const ConversationsSidebar = ({
           }}
         >
           <CreateConversationListItem
-            open={open}
+            open={visibleOpen}
             onClick={() => setDialogOpen(true)}
           />
 
@@ -91,7 +96,8 @@ export const ConversationsSidebar = ({
             <ConversationListItem
               key={conversation.id}
               conversation={conversation}
-              open={open}
+              onClick={onConversationSelect}
+              open={visibleOpen}
             />
           ))}
         </Stack>

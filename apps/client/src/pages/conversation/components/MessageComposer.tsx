@@ -36,8 +36,8 @@ export const MessageComposer = ({ conversationId }: MessageComposerProps) => {
   return (
     <Box
       component="form"
-      px={3}
-      py={2}
+      px={{ xs: 1.5, sm: 2, md: 3 }}
+      py={{ xs: 1.25, sm: 2 }}
       sx={{
         bgcolor: "background.paper",
         borderTop: 1,
@@ -71,6 +71,7 @@ export const MessageComposer = ({ conversationId }: MessageComposerProps) => {
           sx={{
             bgcolor: "primary.main",
             color: "primary.contrastText",
+            flexShrink: 0,
             height: 42,
             width: 42,
             "&:hover": {

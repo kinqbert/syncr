@@ -27,8 +27,8 @@ export const MessageBubble = ({
         borderColor: "divider",
         borderRadius: getBubbleRadius(isOwn, isFirstInBlock),
         color: isOwn ? "primary.contrastText" : "text.primary",
-        px: 1.5,
-        py: 1,
+        px: { xs: 1.25, sm: 1.5 },
+        py: { xs: 0.875, sm: 1 },
       }}
     >
       <Typography

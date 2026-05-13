@@ -11,6 +11,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import type { TeamMember } from "@syncr/packages";
 import { ConversationType } from "@syncr/packages";
@@ -24,7 +25,9 @@ import {
   useCreateGroupConversation,
 } from "@/api/conversations";
 import { useGetTeamMembers } from "@/api/team";
+import { theme } from "@/lib/theme";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useConversationsSidebarStore } from "@/store/useConversationsSidebarStore";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { ConversationAvatar } from "./ConversationAvatar";
@@ -42,6 +45,11 @@ export const NewConversationDialog = ({
   open,
 }: NewConversationDialogProps) => {
   const navigate = useNavigate();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isCompact = useMediaQuery(theme.breakpoints.down("lg"));
+  const closeSidebar = useConversationsSidebarStore(
+    (state) => state.closeSidebar,
+  );
   const [mode, setMode] = useState<ConversationMode>("direct");
   const [directMember, setDirectMember] = useState<TeamMember | null>(null);
   const [groupMembers, setGroupMembers] = useState<TeamMember[]>([]);
@@ -100,13 +108,22 @@ export const NewConversationDialog = ({
       reset();
       onClose();
       await navigate(`/conversations/${conversation.id}`);
+      if (isCompact) {
+        closeSidebar();
+      }
     } catch (error) {
       toast.error(getErrorMessage(error));
     }
   };
 
   return (
-    <Dialog fullWidth maxWidth="sm" open={open} onClose={handleClose}>
+    <Dialog
+      fullScreen={isMobile}
+      fullWidth
+      maxWidth="sm"
+      open={open}
+      onClose={handleClose}
+    >
       <DialogTitle>New chat</DialogTitle>
       <DialogContent>
         <Stack gap={2.25} pt={0.5}>
