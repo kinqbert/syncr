@@ -17,13 +17,13 @@ export const ConversationsLayout = () => {
   const closeSidebar = useConversationsSidebarStore(
     (state) => state.closeSidebar,
   );
-  const isCompact = useMediaQuery(theme.breakpoints.down("lg"));
+  const isPhone = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: isCompact
+        gridTemplateColumns: isPhone
           ? "minmax(0, 1fr)"
           : `${
               open
@@ -37,7 +37,7 @@ export const ConversationsLayout = () => {
         }),
       }}
     >
-      {isCompact ? (
+      {isPhone ? (
         <Drawer
           open={open}
           onClose={closeSidebar}

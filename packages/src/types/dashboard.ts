@@ -5,6 +5,8 @@ export type DashboardSummary = {
   tasksCompleted: number;
   tasksDueToday: number;
   teamMembers: number;
+  myAssignedTasks: number;
+  unreadNotifications: number;
 };
 
 export type DashboardChartPoint = {

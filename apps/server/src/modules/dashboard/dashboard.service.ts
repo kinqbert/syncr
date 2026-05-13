@@ -19,7 +19,7 @@ export class DashboardService {
 
     const [summary, completedByDay, upcomingBirthdays, recentActivity] =
       await Promise.all([
-        this.dashboardRepository.getSummary(companyId),
+        this.dashboardRepository.getSummary(companyId, userId),
         this.dashboardRepository.getTasksCompletedThisWeek(companyId),
         this.dashboardRepository.getUpcomingBirthdays(companyId),
         this.dashboardRepository.getRecentActivity(companyId),
@@ -31,6 +31,8 @@ export class DashboardService {
         tasksCompleted: summary.tasksCompleted,
         tasksDueToday: summary.tasksDueToday,
         teamMembers: summary.teamMembers,
+        myAssignedTasks: summary.myAssignedTasks,
+        unreadNotifications: summary.unreadNotifications,
       },
       tasksCompletedThisWeek: this.mapCompletedWeek(completedByDay),
       upcomingBirthdays: this.mapUpcomingBirthdays(upcomingBirthdays),

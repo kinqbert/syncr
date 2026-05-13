@@ -4,6 +4,7 @@ import { and, asc, desc, eq, gte, isNotNull, lt, ne, sql } from "drizzle-orm";
 
 import db from "../db/drizzle";
 import {
+  notifications,
   projects,
   taskActivities,
   tasks,
@@ -13,12 +14,14 @@ import {
 
 @Injectable()
 export class DashboardRepository {
-  async getSummary(companyId: number) {
+  async getSummary(companyId: number, userId: number) {
     const [
       activeProjects,
       tasksCompleted,
       tasksDueToday,
       teamMembers,
+      myAssignedTasks,
+      unreadNotifications,
     ] = await Promise.all([
       db
         .select({
@@ -59,6 +62,30 @@ export class DashboardRepository {
         })
         .from(userCompanyRoles)
         .where(eq(userCompanyRoles.companyId, companyId)),
+      db
+        .select({
+          value: sql<number>`count(${tasks.id})::int`.mapWith(Number),
+        })
+        .from(tasks)
+        .innerJoin(projects, eq(tasks.projectId, projects.id))
+        .where(
+          and(
+            eq(projects.companyId, companyId),
+            eq(tasks.assigneeId, userId),
+            ne(tasks.status, TaskStatus.Done),
+          ),
+        ),
+      db
+        .select({
+          value: sql<number>`count(${notifications.id})::int`.mapWith(Number),
+        })
+        .from(notifications)
+        .where(
+          and(
+            eq(notifications.recipientId, userId),
+            eq(notifications.isRead, false),
+          ),
+        ),
     ]);
 
     return {
@@ -66,6 +93,8 @@ export class DashboardRepository {
       tasksCompleted: tasksCompleted[0]?.value ?? 0,
       tasksDueToday: tasksDueToday[0]?.value ?? 0,
       teamMembers: teamMembers[0]?.value ?? 0,
+      myAssignedTasks: myAssignedTasks[0]?.value ?? 0,
+      unreadNotifications: unreadNotifications[0]?.value ?? 0,
     };
   }
 

@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Paper, Stack, Typography } from "@mui/material";
-import { CircleCheck, Clock, Folders, Users } from "lucide-mui";
+import { Bell, CircleCheck, Clock, Folders, ListTodo, Users } from "lucide-mui";
 
 import { useGetDashboard } from "@/api/dashboard";
 
@@ -68,12 +68,13 @@ export const DashboardPage = () => {
 
         <Box
           sx={{
+            alignItems: "stretch",
             display: "grid",
-            gap: { xs: 2, sm: 2.5 },
+            gap: { xs: 2, sm: 2.5, lg: 3 },
             gridTemplateColumns: {
               xs: "1fr",
               sm: "repeat(2, minmax(0, 1fr))",
-              xl: "repeat(4, minmax(0, 1fr))",
+              lg: "repeat(6, minmax(0, 1fr))",
             },
           }}
         >
@@ -102,53 +103,61 @@ export const DashboardPage = () => {
             label="Team Members"
             value={data.summary.teamMembers}
           />
-        </Box>
-
-        <Box
-          sx={{
-            alignItems: "stretch",
-            display: "grid",
-            gap: { xs: 2, sm: 3 },
-            gridTemplateColumns: {
-              xs: "1fr",
-              lg: "minmax(0, 2fr) minmax(320px, 1fr)",
-            },
-          }}
-        >
-          <TasksCompletedChart data={data.tasksCompletedThisWeek} />
-          <Stack
-            gap={{ xs: 2, sm: 3 }}
-            height="100%"
-            minHeight={0}
-            minWidth={0}
+          <SummaryCard
+            color="#e9ebff"
+            icon={<ListTodo />}
+            label="My Assigned Tasks"
+            value={data.summary.myAssignedTasks}
+          />
+          <SummaryCard
+            color="#e9ebff"
+            icon={<Bell />}
+            label="Unread Notifications"
+            value={data.summary.unreadNotifications}
+          />
+          <Box
+            sx={{
+              display: "flex",
+              gridColumn: { xs: "1", sm: "1 / -1", lg: "span 4" },
+              gridRow: { lg: "span 2" },
+              minHeight: 0,
+              minWidth: 0,
+              "& > .MuiPaper-root": {
+                height: "100%",
+                width: "100%",
+              },
+            }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                flex: "1 1 0",
-                minHeight: 0,
-                "& > .MuiPaper-root": {
-                  height: "100%",
-                  width: "100%",
-                },
-              }}
-            >
-              <BirthdaysPanel birthdays={data.upcomingBirthdays} />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flex: "1 1 0",
-                minHeight: 0,
-                "& > .MuiPaper-root": {
-                  height: "100%",
-                  width: "100%",
-                },
-              }}
-            >
-              <RecentActivity activities={data.recentActivity} />
-            </Box>
-          </Stack>
+            <TasksCompletedChart data={data.tasksCompletedThisWeek} />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              gridColumn: { xs: "1", sm: "span 1", lg: "span 2" },
+              minHeight: 0,
+              minWidth: 0,
+              "& > .MuiPaper-root": {
+                height: "100%",
+                width: "100%",
+              },
+            }}
+          >
+            <BirthdaysPanel birthdays={data.upcomingBirthdays} />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              gridColumn: { xs: "1", sm: "span 1", lg: "span 2" },
+              minHeight: 0,
+              minWidth: 0,
+              "& > .MuiPaper-root": {
+                height: "100%",
+                width: "100%",
+              },
+            }}
+          >
+            <RecentActivity activities={data.recentActivity} />
+          </Box>
         </Box>
       </Stack>
     </Box>
