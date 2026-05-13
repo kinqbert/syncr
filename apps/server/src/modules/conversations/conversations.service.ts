@@ -61,7 +61,6 @@ export class ConversationsService {
     dto: CreateDirectConversationDto,
   ) {
     await this.ensureUserInCompany(dto.targetUserId, companyId);
-    await this.ensureNoDuplicateConversation(userId, dto.targetUserId);
 
     const conversation = await this.conversationsRepository.createDirectConversation(
       userId,
@@ -116,17 +115,6 @@ export class ConversationsService {
   }
 
   // HELPERS
-  private async ensureNoDuplicateConversation(firstUserId: number, secondUserId: number) {
-    const exists = await this.conversationsRepository.checkIfExistsByConversationKey(
-      firstUserId,
-      secondUserId,
-    );
-
-    if (exists) {
-      throw new UnauthorizedException("The conversation already exists");
-    }
-  }
-
   private async ensureUserInCompany(userId: number, companyId: number) {
     const isInCompany = await this.usersRepository.isUserInCompany(userId, companyId);
 

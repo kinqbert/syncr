@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConversationType } from "@syncr/packages";
-import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, isNull, ne, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { ListConversationQueryData } from "src/modules/conversations/conversations.mapper";
 import { buildDirectConversationKey } from "src/utils/buildDirectConversationKey";
@@ -66,7 +66,9 @@ export class ConversationsRepository {
 
       // ORDER BY LATEST ACTIVITY
       .leftJoin(lastMessages, eq(conversations.lastMessageId, lastMessages.id))
-      .where(eq(conversationParticipants.userId, userId))
+      .where(
+        and(eq(conversationParticipants.userId, userId), isNotNull(conversations.lastMessageId)),
+      )
       .orderBy(
         desc(sql`coalesce(${lastMessages.createdAt}, ${conversations.createdAt})`),
         desc(conversations.id),
@@ -111,57 +113,53 @@ export class ConversationsRepository {
     return rows.map((row) => row.userId);
   }
 
-  // async getConversationByConversationKey(firstUserId: number, secondUserId: number) {
-  //   const conversationKey = buildDirectConversationKey(firstUserId, secondUserId);
-
-  //   const [conversation] = await db
-  //     .select({ id: conversations.id })
-  //     .from(conversations)
-  //     .where(eq(conversations.directConversationKey, conversationKey));
-
-  //   return conversation;
-  // }
-
-  async checkIfExistsByConversationKey(firstUserId: number, secondUserId: number) {
-    const conversationKey = buildDirectConversationKey(firstUserId, secondUserId);
-
-    const [conversation] = await db
-      .select({ id: conversations.id })
-      .from(conversations)
-      .where(eq(conversations.directConversationKey, conversationKey))
-      .limit(1);
-
-    return Boolean(conversation);
-  }
-
   async createDirectConversation(
     userId: number,
     companyId: number,
     targetUserId: number,
   ): Promise<ListConversationQueryData> {
+    const directConversationKey = buildDirectConversationKey(userId, targetUserId);
+
     const newConversationData = await db.transaction(async (tx) => {
-      const [conversation] = await tx
+      const [createdConversation] = await tx
         .insert(conversations)
         .values({
           companyId,
           type: ConversationType.Direct,
           createdById: userId,
-          directConversationKey: buildDirectConversationKey(userId, targetUserId),
+          directConversationKey,
         })
+        .onConflictDoNothing({ target: conversations.directConversationKey })
         .returning();
 
-      const conversationParticipantsValues: (typeof conversationParticipants.$inferInsert)[] = [
-        {
-          conversationId: conversation.id,
-          userId: userId,
-        },
-        {
-          conversationId: conversation.id,
-          userId: targetUserId,
-        },
-      ];
+      const conversation =
+        createdConversation ??
+        (
+          await tx
+            .select()
+            .from(conversations)
+            .where(eq(conversations.directConversationKey, directConversationKey))
+            .limit(1)
+        )[0];
 
-      await tx.insert(conversationParticipants).values(conversationParticipantsValues);
+      if (!conversation) {
+        throw new Error("Could not create or resolve direct conversation");
+      }
+
+      if (createdConversation) {
+        const conversationParticipantsValues: (typeof conversationParticipants.$inferInsert)[] = [
+          {
+            conversationId: conversation.id,
+            userId: userId,
+          },
+          {
+            conversationId: conversation.id,
+            userId: targetUserId,
+          },
+        ];
+
+        await tx.insert(conversationParticipants).values(conversationParticipantsValues);
+      }
 
       const [targetUser] = await tx.select().from(users).where(eq(users.id, targetUserId));
 
