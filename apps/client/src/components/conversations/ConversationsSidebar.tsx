@@ -6,7 +6,6 @@ import { theme } from "@/lib/theme";
 import { useConversationsSidebarStore } from "@/store/useConversationsSidebarStore";
 
 import { ConversationListItem } from "./ConversationListItem";
-import { ConversationsEmptyState } from "./ConversationsEmptyState";
 import { ConversationsSidebarHeader } from "./ConversationsSidebarHeader";
 import { CreateConversationListItem } from "./CreateConversationListItem";
 import { NewConversationDialog } from "./NewConversationDialog";
@@ -88,17 +87,13 @@ export const ConversationsSidebar = ({
             onClick={() => setDialogOpen(true)}
           />
 
-          {conversations.length === 0 ? (
-            <ConversationsEmptyState />
-          ) : (
-            conversations.map((conversation) => (
-              <ConversationListItem
-                key={conversation.id}
-                conversation={conversation}
-                open={open}
-              />
-            ))
-          )}
+          {conversations.map((conversation) => (
+            <ConversationListItem
+              key={conversation.id}
+              conversation={conversation}
+              open={open}
+            />
+          ))}
         </Stack>
       </Stack>
 
