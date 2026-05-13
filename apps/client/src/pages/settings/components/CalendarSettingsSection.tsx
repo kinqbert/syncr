@@ -30,6 +30,7 @@ export const CalendarSettingsSection = () => {
       borderRadius={2}
       divider={<Divider />}
       maxWidth={760}
+      width="100%"
     >
       <SettingsSectionHeader
         description="Task deadlines are created as all-day events in connected calendars."
@@ -43,14 +44,14 @@ export const CalendarSettingsSection = () => {
 
         return (
           <Stack
-            alignItems="center"
-            direction="row"
+            alignItems={{ xs: "stretch", sm: "center" }}
+            direction={{ xs: "column", sm: "row" }}
             gap={2}
             justifyContent="space-between"
             key={provider}
             minHeight={72}
-            px={2.25}
-            py={1.5}
+            px={{ xs: 2, sm: 2.25 }}
+            py={{ xs: 2, sm: 1.5 }}
           >
             <Stack direction="row" gap={1.5} minWidth={0}>
               <Box
@@ -67,7 +68,7 @@ export const CalendarSettingsSection = () => {
               </Box>
               <Stack minWidth={0}>
                 <Stack alignItems="center" direction="row" gap={1}>
-                  <Typography fontSize={14} fontWeight={700}>
+                  <Typography fontSize={14} fontWeight={700} noWrap>
                     {providerLabels[provider]}
                   </Typography>
                   {isConnected && (
@@ -86,6 +87,7 @@ export const CalendarSettingsSection = () => {
                 disabled={disconnectCalendar.isPending}
                 onClick={() => disconnectCalendar.mutate(provider)}
                 startIcon={<Unplug sx={{ fontSize: 16 }} />}
+                sx={{ width: { xs: "100%", sm: "auto" } }}
                 variant="outlined"
               >
                 Disconnect
@@ -95,6 +97,7 @@ export const CalendarSettingsSection = () => {
                 disabled={isLoading}
                 href={getCalendarConnectUrl(provider)}
                 startIcon={<ExternalLink sx={{ fontSize: 16 }} />}
+                sx={{ width: { xs: "100%", sm: "auto" } }}
                 variant="contained"
               >
                 Connect

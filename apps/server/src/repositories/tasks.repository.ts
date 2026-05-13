@@ -24,6 +24,7 @@ const taskWithAssigneeColumns = {
   priority: tasks.priority,
   position: tasks.position,
   endDate: tasks.endDate,
+  completedAt: tasks.completedAt,
   estimateMinutes: tasks.estimateMinutes,
 };
 

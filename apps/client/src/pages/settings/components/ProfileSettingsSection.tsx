@@ -81,6 +81,7 @@ export const ProfileSettingsSection = () => {
       divider={<Divider />}
       maxWidth={760}
       onSubmit={handleSubmit(handleSaveProfile)}
+      width="100%"
     >
       <SettingsSectionHeader
         description="Update your personal details and weekly capacity."
@@ -88,7 +89,7 @@ export const ProfileSettingsSection = () => {
         title="Profile"
       />
 
-      <Stack gap={2} px={2.25} py={2}>
+      <Stack gap={2} px={{ xs: 2, sm: 2.25 }} py={2}>
         {error && <Alert severity="error">{error}</Alert>}
         {message && <Alert severity="success">{message}</Alert>}
 
@@ -154,7 +155,7 @@ export const ProfileSettingsSection = () => {
           />
         </Box>
 
-        <Stack alignItems="flex-start">
+        <Stack alignItems={{ xs: "stretch", sm: "flex-start" }}>
           <Button
             disabled={updateProfile.isPending}
             startIcon={<Save sx={{ fontSize: 16 }} />}

@@ -77,6 +77,7 @@ export class TasksService {
       description: createTaskDto.description?.trim() ?? "",
       assigneeId: createTaskDto.assigneeId ?? null,
       status,
+      completedAt: status === TaskStatus.Done ? new Date() : null,
       priority: createTaskDto.priority ?? TaskPriority.Medium,
       position,
       endDate: createTaskDto.endDate ? this.getValidDate(createTaskDto.endDate, "End date") : null,
@@ -140,6 +141,10 @@ export class TasksService {
 
     if (updateTaskDto.status !== undefined) {
       updateData.status = updateTaskDto.status;
+      updateData.completedAt =
+        updateTaskDto.status === TaskStatus.Done
+          ? (existingTask.completedAt ?? new Date())
+          : null;
     }
 
     if (updateTaskDto.priority !== undefined) {

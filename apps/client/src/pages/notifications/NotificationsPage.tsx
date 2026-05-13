@@ -162,16 +162,24 @@ export const NotificationsPage = () => {
   );
 
   return (
-    <Box component="main" sx={{ minWidth: 0, p: 3, width: "100%" }}>
+    <Box
+      component="main"
+      sx={{ minWidth: 0, p: { xs: 2, sm: 3 }, width: "100%" }}
+    >
       <Stack
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        direction={{ xs: "column", sm: "row" }}
+        alignItems={{ xs: "stretch", lg: "center" }}
+        direction={{ xs: "column", lg: "row" }}
         gap={2}
         justifyContent="space-between"
-        mb={3}
+        mb={{ xs: 2.5, sm: 3 }}
       >
-        <Stack gap={0.5}>
-          <Typography variant="h4">Notifications</Typography>
+        <Stack gap={0.5} minWidth={0}>
+          <Typography
+            variant="h4"
+            sx={{ fontSize: { xs: 28, sm: 34 }, lineHeight: 1.2 }}
+          >
+            Notifications
+          </Typography>
           <Typography color="text.secondary">
             You have {unreadCount} unread notification
             {unreadCount === 1 ? "" : "s"}
@@ -180,7 +188,7 @@ export const NotificationsPage = () => {
         <Button
           disabled={unreadCount === 0 || markAllNotificationsRead.isPending}
           onClick={() => markAllNotificationsRead.mutate()}
-          sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}
+          sx={{ alignSelf: { xs: "stretch", sm: "flex-start", lg: "center" } }}
         >
           Mark all as read
         </Button>
@@ -196,14 +204,27 @@ export const NotificationsPage = () => {
       >
         <Tabs
           onChange={(_, value: NotificationFilter) => setFilter(value)}
-          sx={{ minHeight: 50, px: 2 }}
+          sx={{
+            minHeight: { xs: 44, sm: 50 },
+            px: { xs: 1, sm: 2 },
+            "& .MuiTabs-flexContainer": {
+              gap: { xs: 0.5, sm: 0 },
+            },
+          }}
           value={filter}
+          variant="scrollable"
         >
           {FILTERS.map((item) => (
             <Tab
               key={item.value}
               label={item.label}
-              sx={{ minHeight: 50, textTransform: "none" }}
+              sx={{
+                fontSize: { xs: 13, sm: 14 },
+                minHeight: { xs: 44, sm: 50 },
+                minWidth: { xs: "auto", sm: 90 },
+                px: { xs: 1.25, sm: 2 },
+                textTransform: "none",
+              }}
               value={item.value}
             />
           ))}
@@ -225,16 +246,16 @@ export const NotificationsPage = () => {
             return (
               <Box key={notification.id}>
                 <Stack
-                  alignItems="center"
+                  alignItems={{ xs: "flex-start", sm: "center" }}
                   direction="row"
-                  gap={2}
+                  gap={{ xs: 1.5, sm: 2 }}
                   sx={{
                     bgcolor: notification.isRead
                       ? "background.paper"
                       : "grey.50",
-                    minHeight: 108,
-                    px: 2.75,
-                    py: 2.5,
+                    minHeight: { xs: "auto", sm: 108 },
+                    px: { xs: 2, sm: 2.75 },
+                    py: { xs: 2, sm: 2.5 },
                   }}
                 >
                   <Box
@@ -245,9 +266,9 @@ export const NotificationsPage = () => {
                       color: iconColors.color,
                       display: "flex",
                       flex: "0 0 auto",
-                      height: 36,
+                      height: { xs: 34, sm: 36 },
                       justifyContent: "center",
-                      width: 36,
+                      width: { xs: 34, sm: 36 },
                     }}
                   >
                     {getNotificationIcon(notification)}
@@ -260,7 +281,12 @@ export const NotificationsPage = () => {
                     <Typography color="text.secondary" mt={0.5}>
                       <Notification notification={notification} />
                     </Typography>
-                    <Stack alignItems="center" direction="row" gap={2} mt={1}>
+                    <Stack
+                      alignItems={{ xs: "flex-start", sm: "center" }}
+                      direction={{ xs: "column", sm: "row" }}
+                      gap={{ xs: 0.75, sm: 2 }}
+                      mt={1}
+                    >
                       <Typography color="text.secondary" variant="caption">
                         {formatRelativeDate(notification.createdAt)}
                       </Typography>
@@ -278,7 +304,11 @@ export const NotificationsPage = () => {
                       )}
                     </Stack>
                     {isActiveInvitationNotification(notification) && (
-                      <Stack direction="row" gap={1} mt={1.5}>
+                      <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        gap={1}
+                        mt={1.5}
+                      >
                         <Button
                           disabled={acceptInvitation.isPending}
                           onClick={() => {
@@ -289,6 +319,7 @@ export const NotificationsPage = () => {
                             }
                           }}
                           size="small"
+                          sx={{ width: { xs: "100%", sm: "auto" } }}
                           variant="contained"
                         >
                           Accept
@@ -304,6 +335,7 @@ export const NotificationsPage = () => {
                             }
                           }}
                           size="small"
+                          sx={{ width: { xs: "100%", sm: "auto" } }}
                           variant="outlined"
                         >
                           Decline

@@ -57,6 +57,7 @@ export const PasswordSettingsSection = () => {
       divider={<Divider />}
       maxWidth={760}
       onSubmit={handleSubmit(handleSavePassword)}
+      width="100%"
     >
       <SettingsSectionHeader
         description="Change the password used to sign in to your account."
@@ -64,7 +65,7 @@ export const PasswordSettingsSection = () => {
         title="Password"
       />
 
-      <Stack gap={2} px={2.25} py={2}>
+      <Stack gap={2} px={{ xs: 2, sm: 2.25 }} py={2}>
         {error && <Alert severity="error">{error}</Alert>}
         {message && <Alert severity="success">{message}</Alert>}
 
@@ -77,7 +78,7 @@ export const PasswordSettingsSection = () => {
           error={Boolean(errors.currentPassword)}
           helperText={errors.currentPassword?.message}
           label="Current password"
-          sx={{ maxWidth: { sm: 420 } }}
+          sx={{ maxWidth: { sm: 420 }, width: "100%" }}
           type="password"
         />
         <TextField
@@ -98,7 +99,7 @@ export const PasswordSettingsSection = () => {
           error={Boolean(errors.newPassword)}
           helperText={errors.newPassword?.message}
           label="New password"
-          sx={{ maxWidth: { sm: 420 } }}
+          sx={{ maxWidth: { sm: 420 }, width: "100%" }}
           type="password"
         />
         <TextField
@@ -112,11 +113,11 @@ export const PasswordSettingsSection = () => {
           error={Boolean(errors.passwordConfirmation)}
           helperText={errors.passwordConfirmation?.message}
           label="Confirm new password"
-          sx={{ maxWidth: { sm: 420 } }}
+          sx={{ maxWidth: { sm: 420 }, width: "100%" }}
           type="password"
         />
 
-        <Stack alignItems="flex-start">
+        <Stack alignItems={{ xs: "stretch", sm: "flex-start" }}>
           <Button
             disabled={updatePassword.isPending}
             startIcon={<KeyRound sx={{ fontSize: 16 }} />}

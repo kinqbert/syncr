@@ -13,20 +13,27 @@ export const SettingsSectionHeader = ({
   title,
 }: SettingsSectionHeaderProps) => {
   return (
-    <Stack direction="row" gap={1.5} px={2.25} py={2}>
+    <Stack
+      direction="row"
+      gap={1.5}
+      minWidth={0}
+      px={{ xs: 2, sm: 2.25 }}
+      py={2}
+    >
       <Box
         alignItems="center"
         border={1}
         borderColor="divider"
         borderRadius={1}
         display="flex"
+        flexShrink={0}
         height={40}
         justifyContent="center"
         width={40}
       >
         {icon}
       </Box>
-      <Stack gap={0.25}>
+      <Stack gap={0.25} minWidth={0}>
         <Typography fontSize={16} fontWeight={700}>
           {title}
         </Typography>
