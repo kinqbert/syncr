@@ -2,6 +2,7 @@ import {
   ConversationHistoryPage,
   ConversationMessage,
   ConversationMessageAuthor,
+  ConversationMessageReply,
   ConversationType,
   CreateDirectConversationBody,
   CreateGroupConversationBody,
@@ -49,6 +50,22 @@ class ConversationMessageAuthorDto implements ConversationMessageAuthor {
   surname: string;
 }
 
+class ConversationMessageReplyDto implements ConversationMessageReply {
+  @IsInt()
+  id: number;
+
+  @ValidateNested()
+  @IsOptional()
+  @Type(() => ConversationMessageAuthorDto)
+  author: ConversationMessageAuthorDto | null;
+
+  @IsString()
+  content: string;
+
+  @IsDateString()
+  createdAt: string;
+}
+
 export class ConversationMessageDto implements ConversationMessage {
   @IsInt()
   id: number;
@@ -60,6 +77,11 @@ export class ConversationMessageDto implements ConversationMessage {
   @IsOptional()
   @Type(() => ConversationMessageAuthorDto)
   author: ConversationMessageAuthorDto | null;
+
+  @ValidateNested()
+  @IsOptional()
+  @Type(() => ConversationMessageReplyDto)
+  replyTo: ConversationMessageReplyDto | null;
 
   @IsString()
   content: string;
@@ -100,6 +122,10 @@ export class SendMessageDto implements SendMessageBody {
   @IsNotEmpty()
   @MaxLength(4000)
   content: string;
+
+  @IsInt()
+  @IsOptional()
+  replyToMessageId?: number | null;
 }
 
 export class MessageSenderResponseDto {
@@ -113,5 +139,6 @@ export class MessageResponseDto implements MessageResponse {
   content: string;
   conversationId: number;
   createdAt: string;
+  replyTo: ConversationMessageReplyDto | null;
   sender: MessageSenderResponseDto;
 }

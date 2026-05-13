@@ -19,10 +19,18 @@ export type ConversationMessageAuthor = {
   surname: string;
 };
 
+export type ConversationMessageReply = {
+  id: number;
+  author: ConversationMessageAuthor | null;
+  content: string;
+  createdAt: string;
+};
+
 export type ConversationMessage = {
   id: number;
   conversationId: number;
   author: ConversationMessageAuthor | null;
+  replyTo: ConversationMessageReply | null;
   content: string;
   createdAt: string;
   editedAt: string | null;
@@ -44,6 +52,7 @@ export type CreateGroupConversationBody = {
 
 export type SendMessageBody = {
   content: string;
+  replyToMessageId?: number | null;
 };
 
 export type MessagePayload = {
@@ -51,6 +60,7 @@ export type MessagePayload = {
   content: string;
   conversationId: number;
   createdAt: string;
+  replyTo: ConversationMessageReply | null;
   sender: {
     id: number;
     name: string;

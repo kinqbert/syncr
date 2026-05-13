@@ -92,11 +92,16 @@ export class ConversationsService {
 
   async sendMessage(conversationId: number, userId: number, dto: SendMessageDto) {
     await this.ensureConversationParticipant(conversationId, userId);
+    const replyToMessageId = await this.getValidReplyToMessageId(
+      conversationId,
+      dto.replyToMessageId,
+    );
 
     const message = await this.messagesRepository.createMessage(
       conversationId,
       userId,
       dto.content,
+      replyToMessageId,
     );
 
     const rawPayload = await this.messagesRepository.getMessagePayloadData(message.id);
@@ -156,5 +161,25 @@ export class ConversationsService {
     }
 
     return value;
+  }
+
+  private async getValidReplyToMessageId(
+    conversationId: number,
+    replyToMessageId?: number | null,
+  ) {
+    if (replyToMessageId == null) {
+      return null;
+    }
+
+    const message = await this.messagesRepository.getConversationMessageReference(
+      replyToMessageId,
+      conversationId,
+    );
+
+    if (!message) {
+      throw new BadRequestException("Reply message does not exist in this conversation");
+    }
+
+    return replyToMessageId;
   }
 }

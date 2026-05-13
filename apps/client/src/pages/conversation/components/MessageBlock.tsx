@@ -1,4 +1,5 @@
 import { Stack, Typography } from "@mui/material";
+import type { ConversationMessage } from "@syncr/packages";
 
 import { UserAvatar } from "@/components/UserAvatar";
 import { formatTime24Hour } from "@/utils/formatDate";
@@ -9,9 +10,19 @@ import { MessageBubble } from "./MessageBubble";
 
 type MessageBlockProps = {
   block: MessageBlockData;
+  highlightedMessageId: number | null;
+  onMessageRef: (messageId: number, element: HTMLDivElement | null) => void;
+  onReply: (message: ConversationMessage) => void;
+  onReplyClick: (messageId: number) => void;
 };
 
-export const MessageBlock = ({ block }: MessageBlockProps) => {
+export const MessageBlock = ({
+  block,
+  highlightedMessageId,
+  onMessageRef,
+  onReply,
+  onReplyClick,
+}: MessageBlockProps) => {
   return (
     <Stack
       alignItems="flex-end"
@@ -49,12 +60,20 @@ export const MessageBlock = ({ block }: MessageBlockProps) => {
 
         <Stack alignItems={block.isOwn ? "flex-end" : "flex-start"} gap={0.35}>
           {block.messages.map((message, messageIndex) => (
-            <MessageBubble
+            <Stack
               key={message.id}
-              content={message.content}
-              isFirstInBlock={messageIndex === 0}
-              isOwn={block.isOwn}
-            />
+              ref={(element) => onMessageRef(message.id, element)}
+            >
+              <MessageBubble
+                content={message.content}
+                highlighted={highlightedMessageId === message.id}
+                isFirstInBlock={messageIndex === 0}
+                isOwn={block.isOwn}
+                onReply={() => onReply(message)}
+                onReplyClick={onReplyClick}
+                replyTo={message.replyTo}
+              />
+            </Stack>
           ))}
         </Stack>
       </Stack>

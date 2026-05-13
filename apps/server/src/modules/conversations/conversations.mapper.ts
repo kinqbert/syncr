@@ -18,6 +18,12 @@ type ConversationMessageQueryData = {
   createdAt: Date;
   editedAt: Date | null;
   user: { id: number; name: string; surname: string } | null;
+  replyToId: number | null;
+  replyToContent: string | null;
+  replyToCreatedAt: Date | null;
+  replyToAuthorId: number | null;
+  replyToAuthorName: string | null;
+  replyToAuthorSurname: string | null;
 };
 
 export const mapListConversationToDto = (
@@ -51,6 +57,26 @@ export const mapConversationMessageToDto = (
       }
     : null,
   content: message.content,
+  replyTo:
+    message.replyToId != null &&
+    message.replyToContent != null &&
+    message.replyToCreatedAt != null
+      ? {
+          id: message.replyToId,
+          author:
+            message.replyToAuthorId != null &&
+            message.replyToAuthorName != null &&
+            message.replyToAuthorSurname != null
+              ? {
+                  id: message.replyToAuthorId,
+                  name: message.replyToAuthorName,
+                  surname: message.replyToAuthorSurname,
+                }
+              : null,
+          content: message.replyToContent,
+          createdAt: message.replyToCreatedAt.toISOString(),
+        }
+      : null,
   createdAt: message.createdAt.toISOString(),
   editedAt: message.editedAt?.toISOString() ?? null,
 });
@@ -60,6 +86,12 @@ export const mapCreatedMessageToPayload = (message: {
   content: string;
   conversationId: number;
   createdAt: Date;
+  replyToId: number | null;
+  replyToContent: string | null;
+  replyToCreatedAt: Date | null;
+  replyToAuthorId: number | null;
+  replyToAuthorName: string | null;
+  replyToAuthorSurname: string | null;
   sender: {
     id: number;
     name: string;
@@ -71,6 +103,26 @@ export const mapCreatedMessageToPayload = (message: {
     content: message.content,
     conversationId: message.conversationId,
     createdAt: message.createdAt.toISOString(),
+    replyTo:
+      message.replyToId != null &&
+      message.replyToContent != null &&
+      message.replyToCreatedAt != null
+        ? {
+            id: message.replyToId,
+            author:
+              message.replyToAuthorId != null &&
+              message.replyToAuthorName != null &&
+              message.replyToAuthorSurname != null
+                ? {
+                    id: message.replyToAuthorId,
+                    name: message.replyToAuthorName,
+                    surname: message.replyToAuthorSurname,
+                  }
+                : null,
+            content: message.replyToContent,
+            createdAt: message.replyToCreatedAt.toISOString(),
+          }
+        : null,
     sender: {
       id: message.sender.id,
       name: message.sender.name,

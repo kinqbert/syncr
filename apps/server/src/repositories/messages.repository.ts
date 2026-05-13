@@ -1,8 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { and, desc, eq, isNull } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import db from "../db/drizzle";
 import { conversations, messages, users } from "../db/schema";
+
+const replyMessages = alias(messages, "reply_messages");
+const replyUsers = alias(users, "reply_users");
 
 const conversationMessageColumns = {
   id: messages.id,
@@ -16,6 +20,12 @@ const conversationMessageColumns = {
     name: users.name,
     surname: users.surname,
   },
+  replyToId: replyMessages.id,
+  replyToContent: replyMessages.content,
+  replyToCreatedAt: replyMessages.createdAt,
+  replyToAuthorId: replyUsers.id,
+  replyToAuthorName: replyUsers.name,
+  replyToAuthorSurname: replyUsers.surname,
 };
 
 @Injectable()
@@ -25,6 +35,8 @@ export class MessagesRepository {
       .select(conversationMessageColumns)
       .from(messages)
       .leftJoin(users, eq(messages.senderId, users.id))
+      .leftJoin(replyMessages, eq(messages.replyToMessageId, replyMessages.id))
+      .leftJoin(replyUsers, eq(replyMessages.senderId, replyUsers.id))
       .where(and(eq(messages.conversationId, conversationId), isNull(messages.deletedAt)))
       .orderBy(desc(messages.createdAt), desc(messages.id))
       .limit(limit + 1)
@@ -33,13 +45,19 @@ export class MessagesRepository {
     return conversationMessages;
   }
 
-  async createMessage(conversationId: number, senderId: number, content: string) {
+  async createMessage(
+    conversationId: number,
+    senderId: number,
+    content: string,
+    replyToMessageId: number | null,
+  ) {
     return await db.transaction(async (tx) => {
       const [message] = await tx
         .insert(messages)
         .values({
           conversationId,
           senderId,
+          replyToMessageId,
           content,
         })
         .returning();
@@ -63,6 +81,12 @@ export class MessagesRepository {
         content: messages.content,
         createdAt: messages.createdAt,
         conversationId: messages.conversationId,
+        replyToId: replyMessages.id,
+        replyToContent: replyMessages.content,
+        replyToCreatedAt: replyMessages.createdAt,
+        replyToAuthorId: replyUsers.id,
+        replyToAuthorName: replyUsers.name,
+        replyToAuthorSurname: replyUsers.surname,
 
         sender: {
           id: users.id,
@@ -72,8 +96,26 @@ export class MessagesRepository {
       })
       .from(messages)
       .innerJoin(users, eq(messages.senderId, users.id))
+      .leftJoin(replyMessages, eq(messages.replyToMessageId, replyMessages.id))
+      .leftJoin(replyUsers, eq(replyMessages.senderId, replyUsers.id))
       .where(eq(messages.id, messageId));
 
     return payload;
+  }
+
+  async getConversationMessageReference(messageId: number, conversationId: number) {
+    const [message] = await db
+      .select({ id: messages.id })
+      .from(messages)
+      .where(
+        and(
+          eq(messages.id, messageId),
+          eq(messages.conversationId, conversationId),
+          isNull(messages.deletedAt),
+        ),
+      )
+      .limit(1);
+
+    return message;
   }
 }

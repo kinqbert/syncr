@@ -31,6 +31,7 @@ export const mapMessagePayloadToConversationMessage = (
   content: payload.content,
   createdAt: payload.createdAt,
   editedAt: null,
+  replyTo: payload.replyTo,
 });
 
 export const buildMessageBlocks = (

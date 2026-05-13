@@ -155,6 +155,13 @@
       "when": 1778693223592,
       "tag": "0021_bouncy_starfox",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1778710946032,
+      "tag": "0022_lying_maggott",
+      "breakpoints": true
     }
   ]
 }

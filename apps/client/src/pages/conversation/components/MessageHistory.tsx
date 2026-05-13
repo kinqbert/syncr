@@ -7,6 +7,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import type { ConversationMessage } from "@syncr/packages";
 import { ArrowDown } from "lucide-mui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -19,15 +20,20 @@ type MessageHistoryProps = {
   conversationId: number;
   currentUserId?: number;
   enabled: boolean;
+  onReply: (message: ConversationMessage) => void;
 };
 
 export const MessageHistory = ({
   conversationId,
   currentUserId,
   enabled,
+  onReply,
 }: MessageHistoryProps) => {
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const [highlightedMessageId, setHighlightedMessageId] = useState<number | null>(null);
+  const [pendingScrollMessageId, setPendingScrollMessageId] = useState<number | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const messageRefs = useRef(new Map<number, HTMLDivElement>());
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const isAtBottomRef = useRef(true);
   const {
@@ -75,9 +81,47 @@ export const MessageHistory = ({
     scroll();
   }, []);
 
+  const registerMessageRef = useCallback(
+    (messageId: number, element: HTMLDivElement | null) => {
+      if (element) {
+        messageRefs.current.set(messageId, element);
+      } else {
+        messageRefs.current.delete(messageId);
+      }
+    },
+    [],
+  );
+
+  const scrollToMessage = useCallback((messageId: number) => {
+    const element = messageRefs.current.get(messageId);
+
+    if (!element) {
+      return false;
+    }
+
+    element.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedMessageId(messageId);
+    window.setTimeout(() => setHighlightedMessageId(null), 1800);
+
+    return true;
+  }, []);
+
+  const handleReplyClick = useCallback(
+    (messageId: number) => {
+      if (scrollToMessage(messageId)) {
+        return;
+      }
+
+      setPendingScrollMessageId(messageId);
+    },
+    [scrollToMessage],
+  );
+
   useEffect(() => {
     scroll();
     isAtBottomRef.current = true;
+    setPendingScrollMessageId(null);
+    setHighlightedMessageId(null);
   }, [conversationId]);
 
   useEffect(() => {
@@ -85,6 +129,33 @@ export const MessageHistory = ({
       scroll({ smooth: true });
     }
   }, [messages.length]);
+
+  useEffect(() => {
+    if (pendingScrollMessageId == null) {
+      return;
+    }
+
+    if (scrollToMessage(pendingScrollMessageId)) {
+      setPendingScrollMessageId(null);
+      return;
+    }
+
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+      return;
+    }
+
+    if (!hasNextPage && !isFetchingNextPage) {
+      setPendingScrollMessageId(null);
+    }
+  }, [
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    messages.length,
+    pendingScrollMessageId,
+    scrollToMessage,
+  ]);
 
   return (
     <Box
@@ -159,7 +230,13 @@ export const MessageHistory = ({
                     </Stack>
                   ) : null}
 
-                  <MessageBlock block={block} />
+                  <MessageBlock
+                    block={block}
+                    highlightedMessageId={highlightedMessageId}
+                    onMessageRef={registerMessageRef}
+                    onReply={onReply}
+                    onReplyClick={handleReplyClick}
+                  />
                 </Stack>
               );
             })}

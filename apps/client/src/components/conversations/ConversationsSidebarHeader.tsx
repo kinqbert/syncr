@@ -57,6 +57,7 @@ export const ConversationsSidebarHeader = ({
               onClick={onClose}
               size="small"
               sx={{
+                justifySelf: "end",
                 color: "text.secondary",
                 height: 34,
                 ml: "auto",

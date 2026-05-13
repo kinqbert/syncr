@@ -1,6 +1,6 @@
 import { Stack } from "@mui/material";
-import type { ListConversation } from "@syncr/packages";
-import { useEffect } from "react";
+import type { ConversationMessage, ListConversation } from "@syncr/packages";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 
 import {
@@ -27,6 +27,8 @@ export const ConversationPage = () => {
     Number.isInteger(parsedConversationId) && parsedConversationId > 0;
 
   const currentUser = useAuthStore((state) => state.user);
+  const [replyToMessage, setReplyToMessage] =
+    useState<ConversationMessage | null>(null);
 
   const { data: conversations = [] } = useGetConversationsList();
   const { mutate: markConversationRead } = useMarkConversationRead();
@@ -39,6 +41,10 @@ export const ConversationPage = () => {
     conversationId: parsedConversationId,
     enabled: hasValidConversationId,
   });
+
+  useEffect(() => {
+    setReplyToMessage(null);
+  }, [parsedConversationId]);
 
   useEffect(() => {
     if (!hasValidConversationId) {
@@ -84,8 +90,13 @@ export const ConversationPage = () => {
         conversationId={parsedConversationId}
         currentUserId={currentUser?.id}
         enabled={hasValidConversationId}
+        onReply={setReplyToMessage}
       />
-      <MessageComposer conversationId={parsedConversationId} />
+      <MessageComposer
+        conversationId={parsedConversationId}
+        onCancelReply={() => setReplyToMessage(null)}
+        replyTo={replyToMessage}
+      />
     </Stack>
   );
 };

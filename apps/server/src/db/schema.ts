@@ -367,6 +367,9 @@ export const messages = pgTable("messages", {
     .notNull()
     .references(() => conversations.id, { onDelete: "cascade" }),
   senderId: integer().references(() => users.id, { onDelete: "set null" }),
+  replyToMessageId: integer().references((): AnyPgColumn => messages.id, {
+    onDelete: "set null",
+  }),
   content: text().notNull(),
   createdAt: timestamps.createdAt,
   editedAt: timestamp({
