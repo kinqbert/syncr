@@ -62,9 +62,7 @@ export const ProjectCard = ({
         },
       }}
     >
-      <CardContent
-        sx={{ display: "flex", flex: 1, p: { xs: 2, sm: 2.5 } }}
-      >
+      <CardContent sx={{ display: "flex", flex: 1, p: { xs: 2, sm: 2.5 } }}>
         <Stack gap={{ xs: 2, sm: 2.25 }} minWidth={0} width="100%">
           <Stack
             alignItems="flex-start"
@@ -90,21 +88,41 @@ export const ProjectCard = ({
               </Typography>
             </Stack>
 
-            <Chip
-              color="success"
-              label={project.status}
-              size="small"
-              sx={{
-                alignSelf: "flex-start",
-                bgcolor: "#ECFDF5",
-                borderColor: "#A7F3D0",
-                color: "#047857",
-                flexShrink: 0,
-                fontWeight: 700,
-                textTransform: "capitalize",
-              }}
-              variant="outlined"
-            />
+            <Stack alignItems="center" direction="row" flexShrink={0} gap={0.5}>
+              <Chip
+                color="success"
+                label={project.status}
+                size="small"
+                sx={{
+                  bgcolor: "#ECFDF5",
+                  borderColor: "#A7F3D0",
+                  color: "#047857",
+                  flexShrink: 0,
+                  fontWeight: 700,
+                  textTransform: "capitalize",
+                }}
+                variant="outlined"
+              />
+              <Tooltip title="Edit project">
+                <IconButton
+                  aria-label="Edit project"
+                  onClick={() => onEdit(project)}
+                  size="small"
+                  sx={{
+                    borderRadius: 1,
+                    color: "text.secondary",
+                    height: 32,
+                    width: 32,
+                    "&:hover": {
+                      bgcolor: "action.hover",
+                      color: "primary.main",
+                    },
+                  }}
+                >
+                  <Pencil fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Stack>
           </Stack>
 
           <Stack gap={1.25}>
@@ -195,8 +213,8 @@ export const ProjectCard = ({
               display: "grid",
               gap: 1,
               gridTemplateColumns: {
-                xs: "repeat(2, minmax(0, 1fr))",
-                sm: "repeat(3, minmax(0, 1fr)) 40px",
+                xs: "1fr",
+                sm: "repeat(3, minmax(0, 1fr))",
               },
               mt: "auto",
               pt: 0.5,
@@ -228,25 +246,6 @@ export const ProjectCard = ({
             >
               Calendar
             </Button>
-            <Tooltip title="Edit project">
-              <IconButton
-                aria-label="Edit project"
-                onClick={() => onEdit(project)}
-                sx={{
-                  borderRadius: 1,
-                  color: "text.secondary",
-                  height: 40,
-                  justifySelf: "end",
-                  width: 40,
-                  "&:hover": {
-                    bgcolor: "action.hover",
-                    color: "primary.main",
-                  },
-                }}
-              >
-                <Pencil fontSize="small" />
-              </IconButton>
-            </Tooltip>
           </Box>
         </Stack>
       </CardContent>
