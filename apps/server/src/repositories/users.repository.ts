@@ -69,6 +69,21 @@ export class UsersRepository {
     return user;
   }
 
+  async updateUserProfile(
+    userId: number,
+    data: Pick<typeof users.$inferInsert, "name" | "surname" | "weeklyLoadMinutes">,
+  ) {
+    const [user] = await db.update(users).set(data).where(eq(users.id, userId)).returning();
+
+    return user;
+  }
+
+  async updateUserPassword(userId: number, password: string) {
+    const [user] = await db.update(users).set({ password }).where(eq(users.id, userId)).returning();
+
+    return user;
+  }
+
   async isUserInCompany(userId: number, companyId: number) {
     const [userCompanyRole] = await db
       .select({ userId: userCompanyRoles.userId })

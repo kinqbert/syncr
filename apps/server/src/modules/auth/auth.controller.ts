@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
+  Res,
+  UseGuards,
+} from "@nestjs/common";
 import { Response } from "express";
 
 import { COOKIE_PARAM } from "../../common/constants/cookie-param";
@@ -7,7 +17,13 @@ import { SessionId } from "../../common/decorators/session-id.decorator";
 import { UserId } from "../../common/decorators/user-id.decorator";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { isProduction } from "../../common/utils/node-env";
-import { LoginDto, MeResponseDto, RegisterDto } from "./auth.dto";
+import {
+  LoginDto,
+  MeResponseDto,
+  RegisterDto,
+  UpdatePasswordDto,
+  UpdateProfileDto,
+} from "./auth.dto";
 import { AuthService } from "./auth.service";
 
 @Controller()
@@ -41,6 +57,22 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   async getMe(@UserId() userId: number): Promise<MeResponseDto> {
     return await this.authService.getMe(userId);
+  }
+
+  @Patch("me")
+  @UseGuards(JwtAuthGuard)
+  async updateProfile(
+    @UserId() userId: number,
+    @Body() updateProfileDto: UpdateProfileDto,
+  ): Promise<MeResponseDto> {
+    return await this.authService.updateProfile(userId, updateProfileDto);
+  }
+
+  @Patch("me/password")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updatePassword(@UserId() userId: number, @Body() updatePasswordDto: UpdatePasswordDto) {
+    await this.authService.updatePassword(userId, updatePasswordDto);
   }
 
   @Post("refresh")

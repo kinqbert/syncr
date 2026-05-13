@@ -12,4 +12,5 @@ export type User = {
   name: string;
   surname: string;
   status: UserStatus;
+  weeklyLoadMinutes: number;
 };

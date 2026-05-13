@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -15,7 +16,7 @@ import {
 } from "../../common/utils/jwt";
 import { AuthRepository } from "../../repositories/auth.repository";
 import { UsersRepository } from "../../repositories/users.repository";
-import { LoginDto, RegisterDto } from "./auth.dto";
+import { LoginDto, RegisterDto, UpdatePasswordDto, UpdateProfileDto } from "./auth.dto";
 import { mapMeResponseDto } from "./auth.mapper";
 
 @Injectable()
@@ -89,6 +90,49 @@ export class AuthService {
     }
 
     return mapMeResponseDto(user);
+  }
+
+  async updateProfile(userId: number, updateProfileDto: UpdateProfileDto) {
+    const { name, surname, weeklyLoadMinutes } = updateProfileDto;
+    const trimmedName = name.trim();
+    const trimmedSurname = surname.trim();
+
+    if (!trimmedName || !trimmedSurname) {
+      throw new BadRequestException("Name and surname are required");
+    }
+
+    const user = await this.userRepository.updateUserProfile(userId, {
+      name: trimmedName,
+      surname: trimmedSurname,
+      weeklyLoadMinutes,
+    });
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    return mapMeResponseDto(user);
+  }
+
+  async updatePassword(userId: number, updatePasswordDto: UpdatePasswordDto) {
+    const user = await this.userRepository.findUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    const isPasswordMatch = await this.comparePassword(
+      updatePasswordDto.currentPassword,
+      user.password,
+    );
+
+    if (!isPasswordMatch) {
+      throw new UnauthorizedException("Current password is incorrect");
+    }
+
+    const hashedPassword = await this.hashPassword(updatePasswordDto.newPassword);
+
+    await this.userRepository.updateUserPassword(userId, hashedPassword);
   }
 
   async refreshTokens(refreshToken: string, sessionId: string) {
