@@ -53,6 +53,8 @@ Syncr is a full-stack project management and team collaboration app built around
 - [ ] Implement CI/CD pipeline for automated testing and deployment
 - [ ] Option to turn off notifications for specific projects or tasks
 - [ ] Option to create more columns on the Kanban board and customize column names
+- [ ] Company branding and theming
+- [ ] Company-specific settings like working hours
 - [ ] Add actual image uploads for user avatars
 
 ### Done
