@@ -10,20 +10,21 @@ import {
   TaskStatus,
   UserStatus,
 } from "@syncr/packages";
-import { primaryKey } from "drizzle-orm/pg-core";
-import { uniqueIndex } from "drizzle-orm/pg-core";
-import { AnyPgColumn } from "drizzle-orm/pg-core";
-import { jsonb } from "drizzle-orm/pg-core";
 import {
+  AnyPgColumn,
   boolean,
   date,
+  index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   serial,
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -140,33 +141,50 @@ export const userCompanyRoles = pgTable(
       .notNull()
       .references(() => roles.id, { onDelete: "cascade" }),
   },
-  (table) => [unique().on(table.userId, table.companyId)],
+  (table) => [
+    unique().on(table.userId, table.companyId),
+    index("user_company_roles_company_user_idx").on(table.companyId, table.userId),
+  ],
 );
 
 // PROJECTS
 
 export const projectStatusEnum = pgEnum("project_status", enumToPgEnum(ProjectStatus));
 
-export const projects = pgTable("projects", {
-  id: serial().primaryKey(),
-  name: text().notNull(),
-  managerId: integer().references(() => users.id, { onDelete: "set null" }),
-  companyId: integer()
-    .notNull()
-    .references(() => companies.id, { onDelete: "cascade" }),
-  status: projectStatusEnum().notNull().default("active"),
-  startDate: timestamp().notNull(),
-  endDate: timestamp(),
-});
+export const projects = pgTable(
+  "projects",
+  {
+    id: serial().primaryKey(),
+    name: text().notNull(),
+    managerId: integer().references(() => users.id, { onDelete: "set null" }),
+    companyId: integer()
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    status: projectStatusEnum().notNull().default("active"),
+    startDate: timestamp().notNull(),
+    endDate: timestamp(),
+  },
+  (table) => [
+    index("projects_company_status_idx").on(table.companyId, table.status),
+    index("projects_company_start_name_idx").on(table.companyId, table.startDate, table.name),
+  ],
+);
 
-export const projectUsers = pgTable("project_users", {
-  userId: integer()
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  projectId: integer()
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-});
+export const projectUsers = pgTable(
+  "project_users",
+  {
+    userId: integer()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    projectId: integer()
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("project_users_project_user_idx").on(table.projectId, table.userId),
+    index("project_users_user_project_idx").on(table.userId, table.projectId),
+  ],
+);
 
 export const projectLabels = pgTable(
   "project_labels",
@@ -189,56 +207,96 @@ export const taskActivityActionEnum = pgEnum(
   enumToPgEnum(TaskActivityAction),
 );
 
-export const tasks = pgTable("tasks", {
-  id: serial().primaryKey(),
-  name: text().notNull(),
-  description: text().notNull(),
-  projectId: integer()
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-  assigneeId: integer().references(() => users.id, { onDelete: "set null" }),
-  status: taskStatusEnum().notNull().default(TaskStatus.Backlog),
-  priority: taskPriorityEnum().notNull().default(TaskPriority.Medium),
-  position: integer().notNull().default(0),
-  endDate: timestamp(),
-  completedAt: timestamp({
-    withTimezone: true,
-    mode: "date",
-  }),
-  estimateMinutes: integer(),
-});
+export const tasks = pgTable(
+  "tasks",
+  {
+    id: serial().primaryKey(),
+    name: text().notNull(),
+    description: text().notNull(),
+    projectId: integer()
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    assigneeId: integer().references(() => users.id, { onDelete: "set null" }),
+    status: taskStatusEnum().notNull().default(TaskStatus.Backlog),
+    priority: taskPriorityEnum().notNull().default(TaskPriority.Medium),
+    position: integer().notNull().default(0),
+    endDate: timestamp(),
+    completedAt: timestamp({
+      withTimezone: true,
+      mode: "date",
+    }),
+    estimateMinutes: integer(),
+  },
+  (table) => [
+    index("tasks_project_status_position_idx").on(
+      table.projectId,
+      table.status,
+      table.position,
+      table.id,
+    ),
+    index("tasks_assignee_end_priority_idx").on(
+      table.assigneeId,
+      table.endDate,
+      table.priority,
+      table.id,
+    ),
+    index("tasks_project_assignee_idx").on(table.projectId, table.assigneeId),
+    index("tasks_completed_at_idx").on(table.completedAt),
+  ],
+);
 
-export const taskAcceptanceCriteria = pgTable("task_acceptance_criteria", {
-  id: serial().primaryKey(),
-  taskId: integer()
-    .notNull()
-    .references(() => tasks.id, { onDelete: "cascade" }),
-  description: text().notNull(),
-  isDone: boolean().notNull().default(false),
-  position: integer().notNull().default(0),
-});
+export const taskAcceptanceCriteria = pgTable(
+  "task_acceptance_criteria",
+  {
+    id: serial().primaryKey(),
+    taskId: integer()
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    description: text().notNull(),
+    isDone: boolean().notNull().default(false),
+    position: integer().notNull().default(0),
+  },
+  (table) => [
+    index("task_acceptance_criteria_task_position_idx").on(table.taskId, table.position, table.id),
+  ],
+);
 
-export const taskComments = pgTable("task_comments", {
-  id: serial().primaryKey(),
-  taskId: integer()
-    .notNull()
-    .references(() => tasks.id, { onDelete: "cascade" }),
-  userId: integer().references(() => users.id, { onDelete: "set null" }),
-  content: text().notNull(),
-  createdAt: timestamps.createdAt,
-});
+export const taskComments = pgTable(
+  "task_comments",
+  {
+    id: serial().primaryKey(),
+    taskId: integer()
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    userId: integer().references(() => users.id, { onDelete: "set null" }),
+    content: text().notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (table) => [index("task_comments_task_created_idx").on(table.taskId, table.createdAt)],
+);
 
-export const taskActivities = pgTable("task_activities", {
-  id: serial().primaryKey(),
-  taskId: integer()
-    .notNull()
-    .references(() => tasks.id, { onDelete: "cascade" }),
-  userId: integer().references(() => users.id, { onDelete: "set null" }),
-  action: taskActivityActionEnum().notNull(),
-  previousValue: text(),
-  newValue: text(),
-  createdAt: timestamps.createdAt,
-});
+export const taskActivities = pgTable(
+  "task_activities",
+  {
+    id: serial().primaryKey(),
+    taskId: integer()
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    userId: integer().references(() => users.id, { onDelete: "set null" }),
+    action: taskActivityActionEnum().notNull(),
+    previousValue: text(),
+    newValue: text(),
+    createdAt: timestamps.createdAt,
+  },
+  (table) => [
+    index("task_activities_task_created_idx").on(
+      table.taskId,
+      table.createdAt.desc(),
+      table.id.desc(),
+    ),
+    index("task_activities_created_idx").on(table.createdAt.desc(), table.id.desc()),
+  ],
+);
 
 export const taskLabels = pgTable(
   "task_labels",
@@ -257,18 +315,30 @@ export const taskLabels = pgTable(
 
 export const invitationStatusEnum = pgEnum("invitation_status", enumToPgEnum(InvitationStatus));
 
-export const invitations = pgTable("invitations", {
-  id: serial().primaryKey(),
-  status: invitationStatusEnum().default(InvitationStatus.Active),
-  companyId: integer()
-    .notNull()
-    .references(() => companies.id, { onDelete: "cascade" }),
-  userId: integer().references(() => users.id, { onDelete: "cascade" }),
-  inviteeEmail: text().notNull(),
-  roleId: integer()
-    .notNull()
-    .references(() => roles.id, { onDelete: "cascade" }),
-});
+export const invitations = pgTable(
+  "invitations",
+  {
+    id: serial().primaryKey(),
+    status: invitationStatusEnum().default(InvitationStatus.Active),
+    companyId: integer()
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    userId: integer().references(() => users.id, { onDelete: "cascade" }),
+    inviteeEmail: text().notNull(),
+    roleId: integer()
+      .notNull()
+      .references(() => roles.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("invitations_company_status_email_idx").on(
+      table.companyId,
+      table.status,
+      table.inviteeEmail,
+    ),
+    index("invitations_user_status_idx").on(table.userId, table.status),
+    index("invitations_email_status_idx").on(table.inviteeEmail, table.status),
+  ],
+);
 
 // NOTIFICATIONS
 
@@ -278,21 +348,37 @@ export const notificationEntityTypeEnum = pgEnum(
   enumToPgEnum(NotificationEntityType),
 );
 
-export const notifications = pgTable("notifications", {
-  id: serial().primaryKey(),
-  recipientId: integer()
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  actorId: integer()
-    .notNull()
-    .references(() => users.id, { onDelete: "set null" }),
-  type: notificationTypeEnum().notNull(),
-  entityType: notificationEntityTypeEnum().notNull(),
-  entityId: integer().notNull(),
-  metadata: jsonb().$type<NotificationMetadata>(),
-  isRead: boolean().notNull().default(false),
-  createdAt: timestamps.createdAt,
-});
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: serial().primaryKey(),
+    recipientId: integer()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    actorId: integer()
+      .notNull()
+      .references(() => users.id, { onDelete: "set null" }),
+    type: notificationTypeEnum().notNull(),
+    entityType: notificationEntityTypeEnum().notNull(),
+    entityId: integer().notNull(),
+    metadata: jsonb().$type<NotificationMetadata>(),
+    isRead: boolean().notNull().default(false),
+    createdAt: timestamps.createdAt,
+  },
+  (table) => [
+    index("notifications_recipient_created_idx").on(
+      table.recipientId,
+      table.createdAt.desc(),
+      table.id.desc(),
+    ),
+    index("notifications_recipient_read_idx").on(table.recipientId, table.isRead),
+    index("notifications_recipient_type_entity_idx").on(
+      table.recipientId,
+      table.type,
+      table.entityId,
+    ),
+  ],
+);
 
 export const taskWatchers = pgTable("task_watchers", {
   userId: integer()
@@ -316,7 +402,10 @@ export const calendarTaskEvents = pgTable(
     providerEventId: text().notNull(),
     lastSyncedAt: timestamp().notNull().defaultNow(),
   },
-  (table) => [unique().on(table.connectionId, table.taskId)],
+  (table) => [
+    unique().on(table.connectionId, table.taskId),
+    index("calendar_task_events_task_idx").on(table.taskId),
+  ],
 );
 
 // CHATS
@@ -339,7 +428,10 @@ export const conversations = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     ...timestamps,
   },
-  (table) => [uniqueIndex("direct_conversation_key_idx").on(table.directConversationKey)],
+  (table) => [
+    uniqueIndex("direct_conversation_key_idx").on(table.directConversationKey),
+    index("conversations_company_last_message_idx").on(table.companyId, table.lastMessageId),
+  ],
 );
 
 export const conversationParticipants = pgTable(
@@ -358,26 +450,39 @@ export const conversationParticipants = pgTable(
     primaryKey({
       columns: [table.conversationId, table.userId],
     }),
+    index("conversation_participants_user_conversation_idx").on(table.userId, table.conversationId),
   ],
 );
 
-export const messages = pgTable("messages", {
-  id: serial().primaryKey(),
-  conversationId: integer()
-    .notNull()
-    .references(() => conversations.id, { onDelete: "cascade" }),
-  senderId: integer().references(() => users.id, { onDelete: "set null" }),
-  replyToMessageId: integer().references((): AnyPgColumn => messages.id, {
-    onDelete: "set null",
-  }),
-  content: text().notNull(),
-  createdAt: timestamps.createdAt,
-  editedAt: timestamp({
-    withTimezone: true,
-    mode: "date",
-  }),
-  deletedAt: timestamp({
-    withTimezone: true,
-    mode: "date",
-  }),
-});
+export const messages = pgTable(
+  "messages",
+  {
+    id: serial().primaryKey(),
+    conversationId: integer()
+      .notNull()
+      .references(() => conversations.id, { onDelete: "cascade" }),
+    senderId: integer().references(() => users.id, { onDelete: "set null" }),
+    replyToMessageId: integer().references((): AnyPgColumn => messages.id, {
+      onDelete: "set null",
+    }),
+    content: text().notNull(),
+    createdAt: timestamps.createdAt,
+    editedAt: timestamp({
+      withTimezone: true,
+      mode: "date",
+    }),
+    deletedAt: timestamp({
+      withTimezone: true,
+      mode: "date",
+    }),
+  },
+  (table) => [
+    index("messages_conversation_created_idx").on(
+      table.conversationId,
+      table.createdAt.desc(),
+      table.id.desc(),
+    ),
+    index("messages_conversation_id_idx").on(table.conversationId, table.id.desc()),
+    index("messages_reply_to_idx").on(table.replyToMessageId),
+  ],
+);

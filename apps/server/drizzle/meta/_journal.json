@@ -162,6 +162,13 @@
       "when": 1778710946032,
       "tag": "0022_lying_maggott",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1778755046270,
+      "tag": "0023_hot_mikhail_rasputin",
+      "breakpoints": true
     }
   ]
 }
