@@ -1,0 +1,56 @@
+services:
+  client:
+    image: ${CLIENT_IMAGE}
+    container_name: syncr-client
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "${CLIENT_PORT:-80}:80"
+
+  server:
+    image: ${SERVER_IMAGE}
+    container_name: syncr-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${SERVER_PORT:-3000}:3000"
+
+  migrate:
+    image: ${SERVER_IMAGE}
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["npm", "run", "db:migrate", "-w", "server"]
+    profiles:
+      - deploy
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: syncr-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-syncr-db}
+    volumes:
+      - syncr-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-syncr-db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  syncr-postgres-data:

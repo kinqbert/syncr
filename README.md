@@ -176,3 +176,34 @@ npm run build           # Build all workspaces that define a build script
 npm run lint            # Run workspace lint scripts
 npm run db:migrate -w server
 ```
+
+## DigitalOcean Deployment
+
+The repository includes `.github/workflows/deploy-digitalocean.yml`, which builds the client and server Docker images, pushes them to GitHub Container Registry, writes the deployment `.env` from GitHub Actions secrets, runs database migrations, and starts the stack on a DigitalOcean Droplet.
+
+Configure these GitHub Actions secrets:
+
+```bash
+CLIENT_API_URL=https://your-domain.com/api
+CLIENT_SOCKET_URL=https://your-domain.com
+CLIENT_URL=https://your-domain.com
+CLIENT_PORT=8080
+SERVER_PORT=3000
+DATABASE_URL=postgresql://postgres:replace-with-a-strong-password@postgres:5432/syncr-db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=replace-with-a-strong-password
+POSTGRES_DB=syncr-db
+ACCESS_TOKEN_SECRET=replace-with-a-long-random-secret
+REFRESH_TOKEN_SECRET=replace-with-a-long-random-secret
+GOOGLE_CALENDAR_CLIENT_ID=
+GOOGLE_CALENDAR_CLIENT_SECRET=
+GOOGLE_CALENDAR_REDIRECT_URI=https://your-domain.com/api/calendar-connections/google/callback
+CALENDAR_TOKEN_SECRET=replace-with-a-long-random-secret
+DO_HOST=your-droplet-ip-or-hostname
+DO_USER=root
+DO_SSH_KEY=your-private-ssh-key
+DO_SSH_PORT=22
+DO_APP_DIR=/opt/syncr
+```
+
+The Droplet needs Docker with the Compose plugin installed. On each deploy, the workflow pulls the new images, starts PostgreSQL, runs the committed Drizzle migrations with `npm run db:migrate -w server`, then starts the client and server containers.
