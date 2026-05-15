@@ -19,4 +19,8 @@ export type ClientToServerEvents = {
   "conversation.join": (payload: { conversationId: number }) => void;
 
   "conversation.leave": (payload: { conversationId: number }) => void;
+
+  "typing.started": (payload: { conversationId: number }) => void;
+
+  "typing.stopped": (payload: { conversationId: number }) => void;
 };

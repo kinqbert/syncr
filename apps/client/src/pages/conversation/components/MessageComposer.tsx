@@ -1,16 +1,20 @@
 import { Box, IconButton, Stack, TextField, Typography } from "@mui/material";
 import type { ConversationMessage } from "@syncr/packages";
 import { SendHorizontal, X } from "lucide-mui";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { useSendConversationMessage } from "@/api/conversations";
+import { useSocket } from "@/hooks/sockets";
 import { getErrorMessage } from "@/utils/getErrorMessage";
+
+import { TypingIndicator, type TypingUser } from "./TypingIndicator";
 
 type MessageComposerProps = {
   conversationId: number;
   onCancelReply: () => void;
   replyTo: ConversationMessage | null;
+  typingUsers: TypingUser[];
 };
 
 const getReplyAuthorName = (message: ConversationMessage) => {
@@ -23,14 +27,47 @@ export const MessageComposer = ({
   conversationId,
   onCancelReply,
   replyTo,
+  typingUsers,
 }: MessageComposerProps) => {
   const [messageText, setMessageText] = useState("");
   const [exitingReply, setExitingReply] =
     useState<ConversationMessage | null>(null);
+  const idleTimerRef = useRef<number | null>(null);
+  const isTypingRef = useRef(false);
   const sendMessage = useSendConversationMessage();
+  const socket = useSocket();
   const hasContent = Boolean(messageText.trim());
   const displayedReply = replyTo ?? exitingReply;
   const isReplyVisible = Boolean(replyTo);
+
+  const clearIdleTimer = useCallback(() => {
+    if (idleTimerRef.current != null) {
+      window.clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = null;
+    }
+  }, []);
+
+  const stopTyping = useCallback(() => {
+    clearIdleTimer();
+
+    if (!isTypingRef.current) {
+      return;
+    }
+
+    socket.emit("typing.stopped", { conversationId });
+    isTypingRef.current = false;
+  }, [clearIdleTimer, conversationId, socket]);
+
+  const registerTypingActivity = useCallback(() => {
+    socket.emit("typing.started", { conversationId });
+
+    if (!isTypingRef.current) {
+      isTypingRef.current = true;
+    }
+
+    clearIdleTimer();
+    idleTimerRef.current = window.setTimeout(stopTyping, 3000);
+  }, [clearIdleTimer, conversationId, socket, stopTyping]);
 
   const handleCancelReply = () => {
     if (replyTo) {
@@ -52,12 +89,19 @@ export const MessageComposer = ({
         body: { content, replyToMessageId: replyTo?.id ?? null },
         conversationId,
       });
+      stopTyping();
       setMessageText("");
       handleCancelReply();
     } catch (error) {
       toast.error(getErrorMessage(error));
     }
   };
+
+  useEffect(() => {
+    return () => {
+      stopTyping();
+    };
+  }, [stopTyping]);
 
   return (
     <Box
@@ -148,6 +192,7 @@ export const MessageComposer = ({
             ) : null}
           </Box>
         </Box>
+        <TypingIndicator users={typingUsers} />
         <Stack
           alignItems="center"
           direction="row"
@@ -173,7 +218,10 @@ export const MessageComposer = ({
             placeholder="Write a message"
             variant="standard"
             value={messageText}
-            onChange={(event) => setMessageText(event.target.value)}
+            onChange={(event) => {
+              setMessageText(event.target.value);
+              registerTypingActivity();
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();

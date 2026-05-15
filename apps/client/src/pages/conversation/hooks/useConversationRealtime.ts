@@ -1,6 +1,11 @@
-import type { ConversationHistoryPage, MessagePayload } from "@syncr/packages";
+import type {
+  ConversationHistoryPage,
+  MessagePayload,
+  StartTypingPayload,
+  StopTypingPayload,
+} from "@syncr/packages";
 import type { InfiniteData } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { conversationsKeys } from "@/api/conversations";
 import { useSocket } from "@/hooks/sockets";
@@ -10,14 +15,37 @@ import { mapMessagePayloadToConversationMessage } from "../utils/conversationMes
 
 type UseConversationRealtimeParams = {
   conversationId: number;
+  currentUserId?: number;
   enabled: boolean;
 };
 
 export const useConversationRealtime = ({
   conversationId,
+  currentUserId,
   enabled,
 }: UseConversationRealtimeParams) => {
   const socket = useSocket();
+  const [typingUserIds, setTypingUserIds] = useState<number[]>([]);
+  const typingTimersRef = useRef(new Map<number, number>());
+
+  const clearTypingTimer = useCallback((userId: number) => {
+    const timerId = typingTimersRef.current.get(userId);
+
+    if (timerId != null) {
+      window.clearTimeout(timerId);
+      typingTimersRef.current.delete(userId);
+    }
+  }, []);
+
+  const removeTypingUser = useCallback(
+    (userId: number) => {
+      clearTypingTimer(userId);
+      setTypingUserIds((currentUserIds) =>
+        currentUserIds.filter((currentUserId) => currentUserId !== userId),
+      );
+    },
+    [clearTypingTimer],
+  );
 
   useEffect(() => {
     if (!enabled) {
@@ -42,12 +70,72 @@ export const useConversationRealtime = ({
       return;
     }
 
+    const typingTimers = typingTimersRef.current;
+
+    const handleTypingStarted = (payload: StartTypingPayload) => {
+      if (
+        payload.conversationId !== conversationId ||
+        payload.userId === currentUserId
+      ) {
+        return;
+      }
+
+      clearTypingTimer(payload.userId);
+      setTypingUserIds((currentUserIds) =>
+        currentUserIds.includes(payload.userId)
+          ? currentUserIds
+          : [...currentUserIds, payload.userId],
+      );
+
+      const timerId = window.setTimeout(() => {
+        removeTypingUser(payload.userId);
+      }, 4000);
+
+      typingTimers.set(payload.userId, timerId);
+    };
+
+    const handleTypingStopped = (payload: StopTypingPayload) => {
+      if (payload.conversationId !== conversationId) {
+        return;
+      }
+
+      removeTypingUser(payload.userId);
+    };
+
+    socket.on("typing.started", handleTypingStarted);
+    socket.on("typing.stopped", handleTypingStopped);
+
+    return () => {
+      socket.off("typing.started", handleTypingStarted);
+      socket.off("typing.stopped", handleTypingStopped);
+      typingTimers.forEach((timerId) => {
+        window.clearTimeout(timerId);
+      });
+      typingTimers.clear();
+      setTypingUserIds([]);
+    };
+  }, [
+    clearTypingTimer,
+    conversationId,
+    currentUserId,
+    enabled,
+    removeTypingUser,
+    socket,
+  ]);
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     const handleMessageCreated = (payload: MessagePayload) => {
       if (payload.conversationId !== conversationId) {
         return;
       }
 
       const message = mapMessagePayloadToConversationMessage(payload);
+
+      removeTypingUser(payload.sender.id);
 
       queryClient.setQueryData<InfiniteData<ConversationHistoryPage>>(
         conversationsKeys.history(conversationId),
@@ -82,5 +170,9 @@ export const useConversationRealtime = ({
     return () => {
       socket.off("message.created", handleMessageCreated);
     };
-  }, [conversationId, enabled, socket]);
+  }, [conversationId, enabled, removeTypingUser, socket]);
+
+  return {
+    typingUserIds,
+  };
 };

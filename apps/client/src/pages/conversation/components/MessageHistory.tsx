@@ -76,17 +76,20 @@ export const MessageHistory = ({
     setIsAtBottom(nextIsAtBottom);
   }, []);
 
-  const scroll = useCallback(({ smooth = false }: { smooth?: boolean } = {}) => {
-    bottomRef.current?.scrollIntoView({
-      block: "end",
-      behavior: smooth ? "smooth" : "auto",
-    });
-  }, []);
+  const scroll = useCallback(
+    ({ smooth = false }: { smooth?: boolean } = {}) => {
+      bottomRef.current?.scrollIntoView({
+        block: "end",
+        behavior: smooth ? "smooth" : "auto",
+      });
+    },
+    [],
+  );
 
   const handleScrollToBottom = useCallback(() => {
     setIsAtBottom(true);
     isAtBottomRef.current = true;
-    scroll();
+    scroll({ smooth: true });
   }, [scroll]);
 
   const registerMessageRef = useCallback(
@@ -249,11 +252,13 @@ export const MessageHistory = ({
             <CircularProgress size={28} />
           </Stack>
         ) : messages.length === 0 ? (
-          <Stack flex={1} alignItems="center" justifyContent="center" gap={1}>
-            <Typography fontWeight={800}>Start the conversation</Typography>
-            <Typography color="text.secondary" variant="body2">
-              Send the first message below.
-            </Typography>
+          <Stack flex={1} minHeight={0}>
+            <Stack flex={1} alignItems="center" justifyContent="center" gap={1}>
+              <Typography fontWeight={800}>Start the conversation</Typography>
+              <Typography color="text.secondary" variant="body2">
+                Send the first message below.
+              </Typography>
+            </Stack>
           </Stack>
         ) : (
           <Stack gap={{ xs: 2, sm: 2.5 }}>
@@ -288,9 +293,9 @@ export const MessageHistory = ({
                 </Stack>
               );
             })}
-            <Box ref={bottomRef} />
           </Stack>
         )}
+        <Box ref={bottomRef} sx={{ height: 0 }} />
       </Stack>
 
       <IconButton

@@ -1,5 +1,6 @@
 import { Stack } from "@mui/material";
 import type { ConversationMessage, ListConversation } from "@syncr/packages";
+import { ConversationType } from "@syncr/packages";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 
@@ -8,8 +9,10 @@ import {
   useGetConversationsList,
   useMarkConversationRead,
 } from "@/api/conversations";
+import { useGetTeamMembers } from "@/api/team";
 import { queryClient } from "@/lib/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
+import { getUserFullName } from "@/utils/getUserFullName";
 
 import {
   ConversationHeader,
@@ -27,24 +30,42 @@ export const ConversationPage = () => {
     Number.isInteger(parsedConversationId) && parsedConversationId > 0;
 
   const currentUser = useAuthStore((state) => state.user);
-  const [replyToMessage, setReplyToMessage] =
-    useState<ConversationMessage | null>(null);
+  const [replyToMessageState, setReplyToMessageState] = useState<{
+    conversationId: number;
+    message: ConversationMessage;
+  } | null>(null);
 
   const { data: conversations = [] } = useGetConversationsList();
+  const { data: teamMembers = [] } = useGetTeamMembers();
   const { mutate: markConversationRead } = useMarkConversationRead();
 
   const conversation = conversations.find(
     (item) => item.id === parsedConversationId,
   );
+  const replyToMessage =
+    replyToMessageState?.conversationId === parsedConversationId
+      ? replyToMessageState.message
+      : null;
 
-  useConversationRealtime({
+  const { typingUserIds } = useConversationRealtime({
     conversationId: parsedConversationId,
+    currentUserId: currentUser?.id,
     enabled: hasValidConversationId,
   });
+  const typingUsers = typingUserIds.map((userId) => {
+    const member = teamMembers.find((member) => member.id === userId);
+    const fallbackName =
+      conversation?.type === ConversationType.Direct && conversation.title
+        ? conversation.title
+        : "Someone";
 
-  useEffect(() => {
-    setReplyToMessage(null);
-  }, [parsedConversationId]);
+    return {
+      id: userId,
+      name: member
+        ? getUserFullName(member.name, member.surname) || member.email
+        : fallbackName,
+    };
+  });
 
   useEffect(() => {
     if (!hasValidConversationId) {
@@ -90,12 +111,18 @@ export const ConversationPage = () => {
         conversationId={parsedConversationId}
         currentUserId={currentUser?.id}
         enabled={hasValidConversationId}
-        onReply={setReplyToMessage}
+        onReply={(message) =>
+          setReplyToMessageState({
+            conversationId: parsedConversationId,
+            message,
+          })
+        }
       />
       <MessageComposer
         conversationId={parsedConversationId}
-        onCancelReply={() => setReplyToMessage(null)}
+        onCancelReply={() => setReplyToMessageState(null)}
         replyTo={replyToMessage}
+        typingUsers={typingUsers}
       />
     </Stack>
   );
