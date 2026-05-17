@@ -3,7 +3,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Box, Stack } from "@mui/material";
+import { Box, Skeleton, Stack } from "@mui/material";
 import {
   type CreateTaskBody,
   type ProjectAssignee,
@@ -44,14 +44,32 @@ const columns: KanbanColumn[] = [
 const columnStatuses = columns.map((column) => column.status);
 
 type KanbanProps = {
+  isProjectAssigneesLoading?: boolean;
   projectAssignees: ProjectAssignee[];
 };
 
 type CreateTaskFormBody = CreateTaskBody;
 
-export const Kanban = ({ projectAssignees }: KanbanProps) => {
+const renderTaskSkeletons = () => (
+  <Stack gap={1}>
+    {Array.from({ length: 3 }, (_, index) => (
+      <Skeleton
+        key={index}
+        height={112}
+        sx={{ borderRadius: 2 }}
+        variant="rectangular"
+      />
+    ))}
+  </Stack>
+);
+
+export const Kanban = ({
+  isProjectAssigneesLoading = false,
+  projectAssignees,
+}: KanbanProps) => {
   const { projectId } = useProject();
-  const { data: tasks } = useGetProjectTasks(projectId);
+  const { data: tasks, isLoading: areTasksLoading } =
+    useGetProjectTasks(projectId);
   const createTask = useCreateTask();
   const {
     activeTask,
@@ -66,6 +84,8 @@ export const Kanban = ({ projectAssignees }: KanbanProps) => {
     columnStatuses,
     tasks,
   });
+  const isBoardBusy =
+    createTask.isPending || areTasksLoading || isProjectAssigneesLoading;
 
   const handleCreateTask = async (body: CreateTaskFormBody) => {
     await createTask.mutateAsync({
@@ -97,20 +117,25 @@ export const Kanban = ({ projectAssignees }: KanbanProps) => {
             key={column.status}
             column={column}
             isDragOver={dragOverStatus === column.status}
-            isCreating={createTask.isPending}
+            isCreating={isBoardBusy}
+            isLoading={areTasksLoading}
             onCreateTask={handleCreateTask}
             projectAssignees={projectAssignees}
           >
-            <SortableContext
-              items={tasksByStatus[column.status].map((task) => task.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <Stack gap={1}>
-                {tasksByStatus[column.status].map((task) => (
-                  <SortableTaskCard key={task.id} task={task} />
-                ))}
-              </Stack>
-            </SortableContext>
+            {areTasksLoading ? (
+              renderTaskSkeletons()
+            ) : (
+              <SortableContext
+                items={tasksByStatus[column.status].map((task) => task.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <Stack gap={1}>
+                  {tasksByStatus[column.status].map((task) => (
+                    <SortableTaskCard key={task.id} task={task} />
+                  ))}
+                </Stack>
+              </SortableContext>
+            )}
           </KanbanColumn>
         ))}
       </Stack>

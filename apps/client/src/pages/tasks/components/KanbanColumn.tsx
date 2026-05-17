@@ -18,6 +18,7 @@ type KanbanColumnProps = {
   column: KanbanColumn;
   isCreating?: boolean;
   isDragOver?: boolean;
+  isLoading?: boolean;
   onCreateTask: (body: CreateTaskBody) => Promise<void>;
   projectAssignees: ProjectAssignee[];
 };
@@ -29,6 +30,7 @@ export const KanbanColumn = ({
   column,
   isCreating = false,
   isDragOver = false,
+  isLoading = false,
   onCreateTask,
   projectAssignees,
 }: KanbanColumnProps) => {
@@ -77,7 +79,7 @@ export const KanbanColumn = ({
         <Tooltip title={isFormOpen ? "Close form" : "Create task"}>
           <IconButton
             aria-label={isFormOpen ? "Close task form" : "Create task"}
-            disabled={isCreating}
+            disabled={isCreating || isLoading}
             onClick={isFormOpen ? handleCloseForm : handleOpenForm}
           >
             {isFormOpen ? <X /> : <Plus />}

@@ -19,7 +19,10 @@ export const TasksPage = () => {
   const numericProjectId = Number(projectId);
   const [isMembersDialogOpen, setIsMembersDialogOpen] = useState(false);
 
-  const { data: project } = useGetProject(numericProjectId, Boolean(projectId));
+  const { data: project, isLoading: isProjectLoading } = useGetProject(
+    numericProjectId,
+    Boolean(projectId),
+  );
   const { data: members = [], isLoading: isMembersLoading } =
     useGetProjectAssignees(numericProjectId, Boolean(projectId));
   const { data: memberCandidates = [], isLoading: isMemberCandidatesLoading } =
@@ -68,7 +71,7 @@ export const TasksPage = () => {
             variant="h4"
             sx={{ fontSize: { xs: 28, sm: 34 }, lineHeight: 1.2 }}
           >
-            {project?.name}
+            {isProjectLoading ? "Loading project..." : project?.name}
           </Typography>
           <Typography color="text.secondary">
             Drag and drop tasks to update their status
@@ -86,7 +89,10 @@ export const TasksPage = () => {
           pb: 1,
         }}
       >
-        <Kanban projectAssignees={members} />
+        <Kanban
+          isProjectAssigneesLoading={isMembersLoading}
+          projectAssignees={members}
+        />
       </Box>
       <ProjectMembersDialog
         candidates={memberCandidates}

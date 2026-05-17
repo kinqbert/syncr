@@ -98,8 +98,11 @@ export const ProjectsPage = () => {
               Projects
             </Typography>
             <Typography color="text.secondary">
-              {projects.length} active workspace project
-              {projects.length === 1 ? "" : "s"}
+              {areProjectsLoading
+                ? "Loading workspace projects..."
+                : `${projects.length} active workspace project${
+                    projects.length === 1 ? "" : "s"
+                  }`}
             </Typography>
           </Stack>
           <Button

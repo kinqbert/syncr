@@ -187,7 +187,7 @@ Configure these GitHub Actions secrets:
 CLIENT_API_URL=https://your-domain.com/api
 CLIENT_SOCKET_URL=https://your-domain.com
 CLIENT_URL=https://your-domain.com
-CLIENT_PORT=8080
+CLIENT_PORT=5173
 SERVER_PORT=3000
 DATABASE_URL=postgresql://postgres:replace-with-a-strong-password@postgres:5432/syncr-db
 POSTGRES_USER=postgres
@@ -205,5 +205,3 @@ DO_SSH_KEY=your-private-ssh-key
 DO_SSH_PORT=22
 DO_APP_DIR=/opt/syncr
 ```
-
-The Droplet needs Docker with the Compose plugin installed. On each deploy, the workflow pulls the new images, starts PostgreSQL, runs the committed Drizzle migrations with `npm run db:migrate -w server`, then starts the client and server containers.
