@@ -1,17 +1,28 @@
 import { Box, CircularProgress, Paper, Stack, Typography } from "@mui/material";
-import { Bell, CircleCheck, Clock, Folders, ListTodo, Users } from "lucide-mui";
+import {
+  Bell,
+  CircleCheck,
+  Clock,
+  Folders,
+  ListTodo,
+  Users,
+} from "lucide-mui";
+import { useMemo } from "react";
 
 import { useGetDashboard } from "@/api/dashboard";
 
 import {
   BirthdaysPanel,
+  DashboardQuickLinks,
   RecentActivity,
   SummaryCard,
   TasksCompletedChart,
 } from "./components";
+import { getTimeBasedGreeting } from "./utils/getTimeBasedGreeting";
 
 export const DashboardPage = () => {
   const { data, isError, isLoading } = useGetDashboard();
+  const greeting = useMemo(() => getTimeBasedGreeting(new Date()), []);
 
   if (isLoading) {
     return (
@@ -59,12 +70,14 @@ export const DashboardPage = () => {
             variant="h4"
             sx={{ fontSize: { xs: 28, sm: 34 }, lineHeight: 1.2 }}
           >
-            Dashboard
+            {greeting}
           </Typography>
           <Typography color="text.secondary">
             Welcome back. Here's what's happening with your projects.
           </Typography>
         </Stack>
+
+        <DashboardQuickLinks />
 
         <Box
           sx={{
