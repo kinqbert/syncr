@@ -2,8 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { InvitationStatus } from "@syncr/packages";
 import { and, eq, inArray, or } from "drizzle-orm";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import { companies, invitations, roles, userCompanyRoles, users } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 type InvitationRecipient = {
   userId: number | null;
@@ -11,9 +12,13 @@ type InvitationRecipient = {
 };
 
 @Injectable()
-export class InvitationsRepository {
+export class InvitationsRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async getCompanyActiveInvitations(companyId: number) {
-    return db
+    return this.db
       .select({
         invitation: invitations,
         role: roles,
@@ -30,7 +35,7 @@ export class InvitationsRepository {
       return [];
     }
 
-    return db
+    return this.db
       .select()
       .from(invitations)
       .where(
@@ -43,7 +48,7 @@ export class InvitationsRepository {
   }
 
   async getUserActiveInvitations(userId: number) {
-    return db
+    return this.db
       .select({
         invitation: invitations,
         role: roles,
@@ -61,16 +66,12 @@ export class InvitationsRepository {
       );
   }
 
-  async createInvitations(
-    companyId: number,
-    roleId: number,
-    recipients: InvitationRecipient[],
-  ) {
+  async createInvitations(companyId: number, roleId: number, recipients: InvitationRecipient[]) {
     if (recipients.length === 0) {
       return [];
     }
 
-    return db
+    return this.db
       .insert(invitations)
       .values(
         recipients.map((recipient) => ({
@@ -85,7 +86,7 @@ export class InvitationsRepository {
   }
 
   async getInvitationForUser(invitationId: number, userId: number) {
-    const [invitation] = await db
+    const [invitation] = await this.db
       .select({
         invitation: invitations,
         role: roles,
@@ -107,7 +108,7 @@ export class InvitationsRepository {
   }
 
   async acceptInvitation(invitationId: number, userId: number) {
-    return db.transaction(async (tx) => {
+    return this.db.transaction(async (tx) => {
       const [invitation] = await tx
         .select()
         .from(invitations)
@@ -148,7 +149,7 @@ export class InvitationsRepository {
   }
 
   async declineInvitation(invitationId: number, userId: number) {
-    return db.transaction(async (tx) => {
+    return this.db.transaction(async (tx) => {
       const [invitation] = await tx
         .select()
         .from(invitations)

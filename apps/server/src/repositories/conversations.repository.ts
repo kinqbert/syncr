@@ -5,20 +5,25 @@ import { alias } from "drizzle-orm/pg-core";
 import { ListConversationQueryData } from "src/modules/conversations/conversations.mapper";
 import { buildDirectConversationKey } from "src/utils/buildDirectConversationKey";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import { conversationParticipants, conversations, messages, users } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 const otherParticipants = alias(conversationParticipants, "other_participants");
 const otherUsers = alias(users, "other_users");
 const lastMessages = alias(messages, "last_messages");
 
 @Injectable()
-export class ConversationsRepository {
+export class ConversationsRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async getUserConversationsList(
     userId: number,
     companyId: number,
   ): Promise<ListConversationQueryData[]> {
-    const userConversations = await db
+    const userConversations = await this.db
       .select({
         conversation: conversations,
         otherUser: {
@@ -57,6 +62,7 @@ export class ConversationsRepository {
 
         and(
           eq(otherParticipants.conversationId, conversations.id),
+          eq(conversations.type, ConversationType.Direct),
           ne(otherParticipants.userId, userId),
         ),
       )
@@ -77,7 +83,7 @@ export class ConversationsRepository {
   }
 
   async getConversationById(conversationId: number) {
-    const [conversation] = await db
+    const [conversation] = await this.db
       .select()
       .from(conversations)
       .where(eq(conversations.id, conversationId));
@@ -86,14 +92,14 @@ export class ConversationsRepository {
   }
 
   async markConversationRead(conversationId: number, userId: number) {
-    const [latestMessage] = await db
+    const [latestMessage] = await this.db
       .select({ id: messages.id })
       .from(messages)
       .where(and(eq(messages.conversationId, conversationId), isNull(messages.deletedAt)))
       .orderBy(desc(messages.id))
       .limit(1);
 
-    await db
+    await this.db
       .update(conversationParticipants)
       .set({ lastReadMessageId: latestMessage?.id ?? null })
       .where(
@@ -105,7 +111,7 @@ export class ConversationsRepository {
   }
 
   async getConversationParticipantIds(conversationId: number) {
-    const rows = await db
+    const rows = await this.db
       .select({ userId: conversationParticipants.userId })
       .from(conversationParticipants)
       .where(eq(conversationParticipants.conversationId, conversationId));
@@ -120,7 +126,7 @@ export class ConversationsRepository {
   ): Promise<ListConversationQueryData> {
     const directConversationKey = buildDirectConversationKey(userId, targetUserId);
 
-    const newConversationData = await db.transaction(async (tx) => {
+    const newConversationData = await this.db.transaction(async (tx) => {
       const [createdConversation] = await tx
         .insert(conversations)
         .values({
@@ -179,7 +185,7 @@ export class ConversationsRepository {
     targetUsersIds: number[],
     title: string,
   ): Promise<ListConversationQueryData> {
-    const newConversationData = await db.transaction(async (tx) => {
+    const newConversationData = await this.db.transaction(async (tx) => {
       const [conversation] = await tx
         .insert(conversations)
         .values({
@@ -209,7 +215,7 @@ export class ConversationsRepository {
   }
 
   async isConversationParticipant(conversationId: number, userId: number) {
-    const participant = await db.query.conversationParticipants.findFirst({
+    const participant = await this.db.query.conversationParticipants.findFirst({
       where: and(
         eq(conversationParticipants.conversationId, conversationId),
         eq(conversationParticipants.userId, userId),

@@ -108,6 +108,7 @@ Create `apps/server/.env`:
 ```bash
 CLIENT_URL=http://localhost:5173
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/syncr-db
+DEMO_DATABASE_URL=postgresql://postgres:postgres@localhost:5433/syncr-demo-db
 
 ACCESS_TOKEN_SECRET=replace-with-a-long-random-secret
 REFRESH_TOKEN_SECRET=replace-with-a-long-random-secret
@@ -190,9 +191,13 @@ CLIENT_URL=https://your-domain.com
 CLIENT_PORT=5173
 SERVER_PORT=3000
 DATABASE_URL=postgresql://postgres:replace-with-a-strong-password@postgres:5432/syncr-db
+DEMO_DATABASE_URL=postgresql://postgres:replace-with-a-strong-password@demo-postgres:5432/syncr-demo-db
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=replace-with-a-strong-password
 POSTGRES_DB=syncr-db
+DEMO_POSTGRES_USER=postgres
+DEMO_POSTGRES_PASSWORD=replace-with-a-strong-password
+DEMO_POSTGRES_DB=syncr-demo-db
 ACCESS_TOKEN_SECRET=replace-with-a-long-random-secret
 REFRESH_TOKEN_SECRET=replace-with-a-long-random-secret
 GOOGLE_CALENDAR_CLIENT_ID=

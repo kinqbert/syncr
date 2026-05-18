@@ -163,10 +163,7 @@ export class ConversationsService {
     return value;
   }
 
-  private async getValidReplyToMessageId(
-    conversationId: number,
-    replyToMessageId?: number | null,
-  ) {
+  private async getValidReplyToMessageId(conversationId: number, replyToMessageId?: number | null) {
     if (replyToMessageId == null) {
       return null;
     }

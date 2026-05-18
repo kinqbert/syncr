@@ -1,15 +1,20 @@
 import { Injectable } from "@nestjs/common";
 import { and, asc, eq, inArray } from "drizzle-orm";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import { projectLabels, projects, taskLabels } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 export const DEFAULT_PROJECT_LABELS = ["bug", "feature", "misc"] as const;
 
 @Injectable()
-export class LabelsRepository {
+export class LabelsRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async getProjectLabels(projectId: number, companyId: number) {
-    return await db
+    return await this.db
       .select({
         id: projectLabels.id,
         projectId: projectLabels.projectId,
@@ -26,7 +31,7 @@ export class LabelsRepository {
       return [];
     }
 
-    return await db
+    return await this.db
       .select({
         taskId: taskLabels.taskId,
         id: projectLabels.id,
@@ -50,12 +55,12 @@ export class LabelsRepository {
       return [];
     }
 
-    await db
+    await this.db
       .insert(projectLabels)
       .values(names.map((name) => ({ projectId, name })))
       .onConflictDoNothing();
 
-    return await db
+    return await this.db
       .select()
       .from(projectLabels)
       .where(and(eq(projectLabels.projectId, projectId), inArray(projectLabels.name, names)))
@@ -65,7 +70,7 @@ export class LabelsRepository {
   async setTaskLabels(taskId: number, projectId: number, labelNames: string[]) {
     const labels = await this.ensureProjectLabels(projectId, labelNames);
 
-    await db.transaction(async (tx) => {
+    await this.db.transaction(async (tx) => {
       await tx.delete(taskLabels).where(eq(taskLabels.taskId, taskId));
 
       if (labels.length > 0) {

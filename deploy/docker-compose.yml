@@ -20,6 +20,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      demo-postgres:
+        condition: service_healthy
     ports:
       - "${SERVER_PORT:-3000}:3000"
 
@@ -32,7 +34,9 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["npm", "run", "db:migrate", "-w", "server"]
+      demo-postgres:
+        condition: service_healthy
+    command: ["npm", "run", "db:migrate:all", "-w", "server"]
     profiles:
       - deploy
 
@@ -52,5 +56,22 @@ services:
       timeout: 5s
       retries: 5
 
+  demo-postgres:
+    image: postgres:17-alpine
+    container_name: syncr-demo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DEMO_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${DEMO_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DEMO_POSTGRES_DB:-syncr-demo-db}
+    volumes:
+      - syncr-demo-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DEMO_POSTGRES_USER:-postgres} -d ${DEMO_POSTGRES_DB:-syncr-demo-db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   syncr-postgres-data:
+  syncr-demo-postgres-data:

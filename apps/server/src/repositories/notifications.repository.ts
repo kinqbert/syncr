@@ -1,16 +1,21 @@
 import { Injectable } from "@nestjs/common";
-import { NotificationType, type NotificationMetadata } from "@syncr/packages";
+import { type NotificationMetadata, NotificationType } from "@syncr/packages";
 import { and, desc, eq } from "drizzle-orm";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import { notifications } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 export const DEFAULT_PROJECT_LABELS = ["bug", "feature", "misc"] as const;
 
 @Injectable()
-export class NotificationsRepository {
+export class NotificationsRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async getUserNotifications(userId: number) {
-    return await db
+    return await this.db
       .select()
       .from(notifications)
       .where(eq(notifications.recipientId, userId))
@@ -18,17 +23,17 @@ export class NotificationsRepository {
   }
 
   async addNotification(values: typeof notifications.$inferInsert) {
-    const [notification] = await db.insert(notifications).values(values).returning();
+    const [notification] = await this.db.insert(notifications).values(values).returning();
 
     return notification;
   }
 
   async addNotifications(values: (typeof notifications.$inferInsert)[]) {
-    return await db.insert(notifications).values(values).returning();
+    return await this.db.insert(notifications).values(values).returning();
   }
 
   async markNotificationAsRead(userId: number, notificationId: number) {
-    const [notification] = await db
+    const [notification] = await this.db
       .update(notifications)
       .set({ isRead: true })
       .where(and(eq(notifications.id, notificationId), eq(notifications.recipientId, userId)))
@@ -38,7 +43,7 @@ export class NotificationsRepository {
   }
 
   async markAllUserNotificationsRead(userId: number) {
-    return await db
+    return await this.db
       .update(notifications)
       .set({ isRead: true })
       .where(eq(notifications.recipientId, userId))
@@ -50,7 +55,7 @@ export class NotificationsRepository {
     invitationId: number,
     metadata: NotificationMetadata,
   ) {
-    const [notification] = await db
+    const [notification] = await this.db
       .update(notifications)
       .set({ isRead: true, metadata })
       .where(

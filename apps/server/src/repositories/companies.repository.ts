@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import { companies, roles, userCompanyRoles } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 const OWNER_ROLE = {
   key: "owner",
@@ -10,9 +11,13 @@ const OWNER_ROLE = {
 };
 
 @Injectable()
-export class CompaniesRepository {
+export class CompaniesRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async getUserCompanies(userId: number) {
-    const userCompanies = await db
+    const userCompanies = await this.db
       .select({
         id: companies.id,
         name: companies.name,
@@ -27,16 +32,34 @@ export class CompaniesRepository {
   }
 
   async findCompanyById(companyId: number) {
-    const [company] = await db.select().from(companies).where(eq(companies.id, companyId)).limit(1);
+    const [company] = await this.db
+      .select()
+      .from(companies)
+      .where(eq(companies.id, companyId))
+      .limit(1);
 
     return company;
   }
 
   async createUserCompany(userId: number, name: string) {
-    return await db.transaction(async (tx) => {
+    return await this.db.transaction(async (tx) => {
       const [company] = await tx.insert(companies).values({ name }).returning();
 
-      const ownerRole = await this.findOrCreateOwnerRole(tx);
+      const [createdOwnerRole] = await tx
+        .insert(roles)
+        .values(OWNER_ROLE)
+        .onConflictDoNothing()
+        .returning();
+
+      const [existingOwnerRole] = createdOwnerRole
+        ? []
+        : await tx.select().from(roles).where(eq(roles.key, OWNER_ROLE.key)).limit(1);
+
+      const ownerRole = createdOwnerRole ?? existingOwnerRole;
+
+      if (!ownerRole) {
+        throw new Error("Owner role is not configured");
+      }
 
       await tx.insert(userCompanyRoles).values({
         userId,
@@ -46,21 +69,5 @@ export class CompaniesRepository {
 
       return company;
     });
-  }
-
-  private async findOrCreateOwnerRole(tx: Parameters<Parameters<typeof db.transaction>[0]>[0]) {
-    const [createdRole] = await tx
-      .insert(roles)
-      .values(OWNER_ROLE)
-      .onConflictDoNothing()
-      .returning();
-
-    if (createdRole) {
-      return createdRole;
-    }
-
-    const [existingRole] = await tx.select().from(roles).where(eq(roles.key, OWNER_ROLE.key));
-
-    return existingRole;
   }
 }

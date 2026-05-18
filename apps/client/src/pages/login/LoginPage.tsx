@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Link as RouterLink, Navigate } from "react-router";
 
 import { useMe } from "@/api";
+import { isDemoView } from "@/lib/demo";
 import { useAuthStore } from "@/store/useAuthStore";
 import { buildStoreUserFromMe } from "@/utils/buildStoreUserFromMe";
 
@@ -20,6 +21,10 @@ export const LoginPage = () => {
 
     setUser(buildStoreUserFromMe(user));
   }, [isSuccess, setUser, user]);
+
+  if (isDemoView()) {
+    return <Navigate to="/" replace />;
+  }
 
   if (isPending || (!user && isFetching)) {
     return (

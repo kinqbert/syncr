@@ -2,8 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import { conversations, messages, users } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 const replyMessages = alias(messages, "reply_messages");
 const replyUsers = alias(users, "reply_users");
@@ -29,9 +30,13 @@ const conversationMessageColumns = {
 };
 
 @Injectable()
-export class MessagesRepository {
+export class MessagesRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async getConversationMessages(conversationId: number, limit: number, offset: number) {
-    const conversationMessages = await db
+    const conversationMessages = await this.db
       .select(conversationMessageColumns)
       .from(messages)
       .leftJoin(users, eq(messages.senderId, users.id))
@@ -51,7 +56,7 @@ export class MessagesRepository {
     content: string,
     replyToMessageId: number | null,
   ) {
-    return await db.transaction(async (tx) => {
+    return await this.db.transaction(async (tx) => {
       const [message] = await tx
         .insert(messages)
         .values({
@@ -75,7 +80,7 @@ export class MessagesRepository {
   }
 
   async getMessagePayloadData(messageId: number) {
-    const [payload] = await db
+    const [payload] = await this.db
       .select({
         id: messages.id,
         content: messages.content,
@@ -104,7 +109,7 @@ export class MessagesRepository {
   }
 
   async getConversationMessageReference(messageId: number, conversationId: number) {
-    const [message] = await db
+    const [message] = await this.db
       .select({ id: messages.id })
       .from(messages)
       .where(

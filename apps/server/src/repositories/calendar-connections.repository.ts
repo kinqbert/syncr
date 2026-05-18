@@ -2,20 +2,30 @@ import { Injectable } from "@nestjs/common";
 import { CalendarProvider } from "@syncr/packages";
 import { and, eq } from "drizzle-orm";
 
-import db from "../db/drizzle";
-import { nessages, calendarTaskEvents } from "../db/schema";
+import { DbProvider } from "../db/db.provider";
+import { calendarConnections, calendarTaskEvents } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 @Injectable()
-export class CalendarConnectionsRepository {
+export class CalendarConnectionsRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async getConnectionsByUserId(userId: number) {
-    return await db.select().from(nessages).where(eq(nessages.userId, userId));
+    return await this.db
+      .select()
+      .from(calendarConnections)
+      .where(eq(calendarConnections.userId, userId));
   }
 
   async getConnection(userId: number, provider: CalendarProvider) {
-    const [connection] = await db
+    const [connection] = await this.db
       .select()
-      .from(nessages)
-      .where(and(eq(nessages.userId, userId), eq(nessages.provider, provider)))
+      .from(calendarConnections)
+      .where(
+        and(eq(calendarConnections.userId, userId), eq(calendarConnections.provider, provider)),
+      )
       .limit(1);
 
     return connection;
@@ -25,12 +35,12 @@ export class CalendarConnectionsRepository {
     return await this.getConnectionsByUserId(userId);
   }
 
-  async upsertConnection(data: typeof nessages.$inferInsert) {
-    const [connection] = await db
-      .insert(nessages)
+  async upsertConnection(data: typeof calendarConnections.$inferInsert) {
+    const [connection] = await this.db
+      .insert(calendarConnections)
       .values(data)
       .onConflictDoUpdate({
-        target: [nessages.userId, nessages.provider],
+        target: [calendarConnections.userId, calendarConnections.provider],
         set: {
           providerAccountEmail: data.providerAccountEmail,
           calendarId: data.calendarId,
@@ -47,26 +57,28 @@ export class CalendarConnectionsRepository {
 
   async updateConnectionTokens(
     connectionId: number,
-    data: Pick<typeof nessages.$inferInsert, "accessToken" | "expiresAt"> &
-      Partial<Pick<typeof nessages.$inferInsert, "refreshToken">>,
+    data: Pick<typeof calendarConnections.$inferInsert, "accessToken" | "expiresAt"> &
+      Partial<Pick<typeof calendarConnections.$inferInsert, "refreshToken">>,
   ) {
-    const [connection] = await db
-      .update(nessages)
+    const [connection] = await this.db
+      .update(calendarConnections)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(nessages.id, connectionId))
+      .where(eq(calendarConnections.id, connectionId))
       .returning();
 
     return connection;
   }
 
   async deleteConnection(userId: number, provider: CalendarProvider) {
-    await db
-      .delete(nessages)
-      .where(and(eq(nessages.userId, userId), eq(nessages.provider, provider)));
+    await this.db
+      .delete(calendarConnections)
+      .where(
+        and(eq(calendarConnections.userId, userId), eq(calendarConnections.provider, provider)),
+      );
   }
 
   async getTaskEventLink(connectionId: number, taskId: number) {
-    const [link] = await db
+    const [link] = await this.db
       .select()
       .from(calendarTaskEvents)
       .where(
@@ -81,7 +93,7 @@ export class CalendarConnectionsRepository {
   }
 
   async upsertTaskEventLink(connectionId: number, taskId: number, providerEventId: string) {
-    const [link] = await db
+    const [link] = await this.db
       .insert(calendarTaskEvents)
       .values({ connectionId, taskId, providerEventId, lastSyncedAt: new Date() })
       .onConflictDoUpdate({
@@ -94,7 +106,7 @@ export class CalendarConnectionsRepository {
   }
 
   async deleteTaskEventLink(connectionId: number, taskId: number) {
-    await db
+    await this.db
       .delete(calendarTaskEvents)
       .where(
         and(
@@ -105,20 +117,20 @@ export class CalendarConnectionsRepository {
   }
 
   async getTaskEventLinksForConnection(connectionId: number) {
-    return await db
+    return await this.db
       .select()
       .from(calendarTaskEvents)
       .where(eq(calendarTaskEvents.connectionId, connectionId));
   }
 
   async getTaskEventLinks(taskId: number) {
-    return await db
+    return await this.db
       .select({
         link: calendarTaskEvents,
-        connection: nessages,
+        connection: calendarConnections,
       })
       .from(calendarTaskEvents)
-      .innerJoin(nessages, eq(calendarTaskEvents.connectionId, nessages.id))
+      .innerJoin(calendarConnections, eq(calendarTaskEvents.connectionId, calendarConnections.id))
       .where(eq(calendarTaskEvents.taskId, taskId));
   }
 }

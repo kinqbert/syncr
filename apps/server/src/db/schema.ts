@@ -84,7 +84,7 @@ export const userSessions = pgTable("user_sessions", {
 
 export const calendarProviderEnum = pgEnum("calendar_provider", ["google"]);
 
-export const nessages = pgTable(
+export const calendarConnections = pgTable(
   "calendar_connections",
   {
     id: serial().primaryKey(),

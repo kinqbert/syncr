@@ -1,12 +1,5 @@
 import { Box, CircularProgress, Paper, Stack, Typography } from "@mui/material";
-import {
-  Bell,
-  CircleCheck,
-  Clock,
-  Folders,
-  ListTodo,
-  Users,
-} from "lucide-mui";
+import { Bell, CircleCheck, Clock, Folders, ListTodo, Users } from "lucide-mui";
 import { useMemo } from "react";
 
 import { useGetDashboard } from "@/api/dashboard";
@@ -107,7 +100,6 @@ export const DashboardPage = () => {
             color="#e9ebff"
             icon={<Clock />}
             label="Tasks Due Today"
-            trendLabel={data.summary.tasksDueToday > 0 ? "Due Soon" : undefined}
             value={data.summary.tasksDueToday}
           />
           <SummaryCard

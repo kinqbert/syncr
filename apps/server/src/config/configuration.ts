@@ -11,6 +11,7 @@ const envSchema = Joi.object({
     .default("development"),
   CLIENT_URL: Joi.string().required(),
   DATABASE_URL: Joi.string().required(),
+  DEMO_DATABASE_URL: Joi.string().allow("").optional(),
   ACCESS_TOKEN_SECRET: Joi.string().required(),
   REFRESH_TOKEN_SECRET: Joi.string().required(),
   GOOGLE_CALENDAR_CLIENT_ID: Joi.string().allow("").optional(),
@@ -26,6 +27,7 @@ interface EnvVars {
   NODE_ENV: NODE_ENV;
   CLIENT_URL: string;
   DATABASE_URL: string;
+  DEMO_DATABASE_URL?: string;
   ACCESS_TOKEN_SECRET: string;
   REFRESH_TOKEN_SECRET: string;
   GOOGLE_CALENDAR_CLIENT_ID?: string;
@@ -47,6 +49,7 @@ export const CONFIG = {
   NODE_ENV: envVars.NODE_ENV,
   CLIENT_URL: envVars.CLIENT_URL,
   DATABASE_URL: envVars.DATABASE_URL,
+  DEMO_DATABASE_URL: envVars.DEMO_DATABASE_URL,
   ACCESS_TOKEN_SECRET: envVars.ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_SECRET: envVars.REFRESH_TOKEN_SECRET,
   GOOGLE_CALENDAR_CLIENT_ID: envVars.GOOGLE_CALENDAR_CLIENT_ID,

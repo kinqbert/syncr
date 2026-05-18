@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import { taskComments, users } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 const taskWithAuthorColumns = {
   id: taskComments.id,
@@ -19,15 +20,19 @@ const taskWithAuthorColumns = {
 };
 
 @Injectable()
-export class TaskCommentsRepository {
+export class TaskCommentsRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async createTaskComment(data: typeof taskComments.$inferInsert) {
-    const [comment] = await db.insert(taskComments).values(data).returning();
+    const [comment] = await this.db.insert(taskComments).values(data).returning();
 
     return this.getTaskComment(comment.id);
   }
 
   async getTaskComment(commentId: number) {
-    const [comment] = await db
+    const [comment] = await this.db
       .select(taskWithAuthorColumns)
       .from(taskComments)
       .leftJoin(users, eq(taskComments.userId, users.id))
@@ -38,7 +43,7 @@ export class TaskCommentsRepository {
   }
 
   async getTaskComments(taskId: number) {
-    const comments = await db
+    const comments = await this.db
       .select(taskWithAuthorColumns)
       .from(taskComments)
       .leftJoin(users, eq(taskComments.userId, users.id))

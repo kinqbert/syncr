@@ -22,6 +22,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:generate": "drizzle-kit generate --config=./src/db/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config=./src/db/drizzle.config.ts",
+    "db:migrate:all": "drizzle-kit migrate --config=./src/db/drizzle.config.ts && drizzle-kit migrate --config=./src/db/drizzle-demo.config.ts",
     "db:push": "drizzle-kit push --config=./src/db/drizzle.config.ts",
     "db:studio": "drizzle-kit studio --config=./src/db/drizzle.config.ts",
     "db:check": "drizzle-kit check --config=./src/db/drizzle.config.ts"

@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { and, asc, count, eq, inArray } from "drizzle-orm";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import { projects, taskAcceptanceCriteria, tasks } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 const taskAcceptanceCriterionColumns = {
   id: taskAcceptanceCriteria.id,
@@ -13,13 +14,17 @@ const taskAcceptanceCriterionColumns = {
 };
 
 @Injectable()
-export class AcceptanceCriteriaRepository {
+export class AcceptanceCriteriaRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async getByTaskIds(taskIds: number[]) {
     if (taskIds.length === 0) {
       return [];
     }
 
-    return await db
+    return await this.db
       .select(taskAcceptanceCriterionColumns)
       .from(taskAcceptanceCriteria)
       .where(inArray(taskAcceptanceCriteria.taskId, taskIds))
@@ -31,7 +36,7 @@ export class AcceptanceCriteriaRepository {
   }
 
   async getNextPosition(taskId: number) {
-    const [result] = await db
+    const [result] = await this.db
       .select({ criteriaCount: count() })
       .from(taskAcceptanceCriteria)
       .where(eq(taskAcceptanceCriteria.taskId, taskId));
@@ -40,7 +45,7 @@ export class AcceptanceCriteriaRepository {
   }
 
   async createAcceptanceCriterion(data: typeof taskAcceptanceCriteria.$inferInsert) {
-    const [criterion] = await db.insert(taskAcceptanceCriteria).values(data).returning();
+    const [criterion] = await this.db.insert(taskAcceptanceCriteria).values(data).returning();
 
     return criterion;
   }
@@ -49,7 +54,7 @@ export class AcceptanceCriteriaRepository {
     criterionId: number,
     data: Partial<typeof taskAcceptanceCriteria.$inferInsert>,
   ) {
-    const [criterion] = await db
+    const [criterion] = await this.db
       .update(taskAcceptanceCriteria)
       .set(data)
       .where(eq(taskAcceptanceCriteria.id, criterionId))
@@ -59,7 +64,7 @@ export class AcceptanceCriteriaRepository {
   }
 
   async deleteAcceptanceCriterion(criterionId: number) {
-    const [criterion] = await db
+    const [criterion] = await this.db
       .delete(taskAcceptanceCriteria)
       .where(eq(taskAcceptanceCriteria.id, criterionId))
       .returning({ id: taskAcceptanceCriteria.id });
@@ -73,7 +78,7 @@ export class AcceptanceCriteriaRepository {
     projectId: number,
     companyId: number,
   ) {
-    const [criterion] = await db
+    const [criterion] = await this.db
       .select({ id: taskAcceptanceCriteria.id })
       .from(taskAcceptanceCriteria)
       .innerJoin(tasks, eq(taskAcceptanceCriteria.taskId, tasks.id))

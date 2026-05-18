@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { desc, eq } from "drizzle-orm";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import { taskActivities, tasks, users } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 const taskActivityColumns = {
   id: taskActivities.id,
@@ -29,19 +30,23 @@ const projectTaskActivityColumns = {
 };
 
 @Injectable()
-export class TaskActivitiesRepository {
+export class TaskActivitiesRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async createTaskActivity(data: typeof taskActivities.$inferInsert) {
-    const [activity] = await db.insert(taskActivities).values(data).returning();
+    const [activity] = await this.db.insert(taskActivities).values(data).returning();
 
     return this.getTaskActivity(activity.id);
   }
 
   async createTaskActivities(data: (typeof taskActivities.$inferInsert)[]) {
-    await db.insert(taskActivities).values(data).returning();
+    await this.db.insert(taskActivities).values(data).returning();
   }
 
   async getTaskActivity(activityId: number) {
-    const [activity] = await db
+    const [activity] = await this.db
       .select(taskActivityColumns)
       .from(taskActivities)
       .leftJoin(users, eq(taskActivities.userId, users.id))
@@ -52,7 +57,7 @@ export class TaskActivitiesRepository {
   }
 
   async getTaskActivities(taskId: number, limit: number, offset: number) {
-    const activities = await db
+    const activities = await this.db
       .select(taskActivityColumns)
       .from(taskActivities)
       .leftJoin(users, eq(taskActivities.userId, users.id))
@@ -65,7 +70,7 @@ export class TaskActivitiesRepository {
   }
 
   async getProjectTaskActivities(projectId: number, limit: number, offset: number) {
-    const activities = await db
+    const activities = await this.db
       .select(projectTaskActivityColumns)
       .from(taskActivities)
       .innerJoin(tasks, eq(taskActivities.taskId, tasks.id))

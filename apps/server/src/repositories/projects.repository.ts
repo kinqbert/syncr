@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { RoleKey, TaskStatus } from "@syncr/packages";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import {
   projectLabels,
   projects,
@@ -12,12 +12,17 @@ import {
   userCompanyRoles,
   users,
 } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 import { DEFAULT_PROJECT_LABELS } from "./labels.repository";
 
 @Injectable()
-export class ProjectsRepository {
+export class ProjectsRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async getCompanyProjects(companyId: number) {
-    return await db
+    return await this.db
       .select({
         project: projects,
         assignedPeopleCount: sql<number>`count(distinct ${projectUsers.userId})::int`,
@@ -33,7 +38,7 @@ export class ProjectsRepository {
   }
 
   async getCompanyProject(companyId: number, projectId: number) {
-    const [project] = await db
+    const [project] = await this.db
       .select()
       .from(projects)
       .where(and(eq(projects.companyId, companyId), eq(projects.id, projectId)))
@@ -43,13 +48,17 @@ export class ProjectsRepository {
   }
 
   async getProject(projectId: number) {
-    const [project] = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1);
+    const [project] = await this.db
+      .select()
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .limit(1);
 
     return project;
   }
 
   async getProjectManagerCandidates(companyId: number) {
-    const candidates = await db
+    const candidates = await this.db
       .select({
         id: users.id,
         email: users.email,
@@ -73,7 +82,7 @@ export class ProjectsRepository {
   }
 
   async getProjectAssignees(companyId: number, projectId: number) {
-    return await db
+    return await this.db
       .select({
         id: users.id,
         email: users.email,
@@ -88,7 +97,7 @@ export class ProjectsRepository {
   }
 
   async getProjectMemberCandidates(companyId: number) {
-    return await db
+    return await this.db
       .select({
         id: users.id,
         email: users.email,
@@ -105,7 +114,7 @@ export class ProjectsRepository {
   }
 
   async isUserInCompany(companyId: number, userId: number) {
-    const [companyUser] = await db
+    const [companyUser] = await this.db
       .select({ userId: userCompanyRoles.userId })
       .from(userCompanyRoles)
       .where(and(eq(userCompanyRoles.companyId, companyId), eq(userCompanyRoles.userId, userId)))
@@ -115,7 +124,7 @@ export class ProjectsRepository {
   }
 
   async isUserAssignedToProject(companyId: number, projectId: number, userId: number) {
-    const [projectUser] = await db
+    const [projectUser] = await this.db
       .select({ userId: projectUsers.userId })
       .from(projectUsers)
       .innerJoin(projects, eq(projectUsers.projectId, projects.id))
@@ -132,13 +141,16 @@ export class ProjectsRepository {
   }
 
   async addProjectMember(projectId: number, userId: number) {
-    const [projectUser] = await db.insert(projectUsers).values({ projectId, userId }).returning();
+    const [projectUser] = await this.db
+      .insert(projectUsers)
+      .values({ projectId, userId })
+      .returning();
 
     return projectUser;
   }
 
   async removeProjectMember(companyId: number, projectId: number, userId: number) {
-    return await db.transaction(async (tx) => {
+    return await this.db.transaction(async (tx) => {
       const [projectUser] = await tx
         .delete(projectUsers)
         .where(and(eq(projectUsers.projectId, projectId), eq(projectUsers.userId, userId)))
@@ -169,7 +181,7 @@ export class ProjectsRepository {
   }
 
   async isProjectManagerCandidate(companyId: number, userId: number) {
-    const [candidate] = await db
+    const [candidate] = await this.db
       .select({ id: users.id })
       .from(userCompanyRoles)
       .where(
@@ -187,7 +199,7 @@ export class ProjectsRepository {
   }
 
   async createProject(data: typeof projects.$inferInsert) {
-    return await db.transaction(async (tx) => {
+    return await this.db.transaction(async (tx) => {
       const [project] = await tx.insert(projects).values(data).returning();
 
       if (data.managerId) {
@@ -207,7 +219,7 @@ export class ProjectsRepository {
     companyId: number,
     data: Partial<typeof projects.$inferInsert>,
   ) {
-    const [project] = await db
+    const [project] = await this.db
       .update(projects)
       .set(data)
       .where(and(eq(projects.id, projectId), eq(projects.companyId, companyId)))

@@ -2,8 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { ProjectStatus, TaskStatus } from "@syncr/packages";
 import { and, asc, count, eq, inArray, sql } from "drizzle-orm";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import { projects, tasks, users } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 const taskWithAssigneeColumns = {
   id: tasks.id,
@@ -33,9 +34,13 @@ const assignedTaskColumns = {
 };
 
 @Injectable()
-export class TasksRepository {
+export class TasksRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async getProjectTasks(projectId: number, companyId: number) {
-    return await db
+    return await this.db
       .select(taskWithAssigneeColumns)
       .from(tasks)
       .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -45,7 +50,7 @@ export class TasksRepository {
   }
 
   async getAssignedTasks(userId: number, companyId: number) {
-    return await db
+    return await this.db
       .select(assignedTaskColumns)
       .from(tasks)
       .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -55,7 +60,7 @@ export class TasksRepository {
   }
 
   async getAssignedTasksWithDeadlines(userId: number) {
-    return await db
+    return await this.db
       .select(taskWithAssigneeColumns)
       .from(tasks)
       .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -65,7 +70,7 @@ export class TasksRepository {
   }
 
   async getProject(projectId: number, companyId: number) {
-    const [project] = await db
+    const [project] = await this.db
       .select({ id: projects.id })
       .from(projects)
       .where(and(eq(projects.id, projectId), eq(projects.companyId, companyId)))
@@ -75,7 +80,7 @@ export class TasksRepository {
   }
 
   async getTask(taskId: number) {
-    const [task] = await db
+    const [task] = await this.db
       .select(taskWithAssigneeColumns)
       .from(tasks)
       .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -87,7 +92,7 @@ export class TasksRepository {
   }
 
   async getCompanyTask(taskId: number, projectId: number, companyId: number) {
-    const [task] = await db
+    const [task] = await this.db
       .select(taskWithAssigneeColumns)
       .from(tasks)
       .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -105,7 +110,7 @@ export class TasksRepository {
   }
 
   async getCompanyTeamTasksData(companyId: number) {
-    const [data] = await db
+    const [data] = await this.db
       .select({
         activeProjects: sql<number>`count(distinct ${projects.id}) filter (where ${projects.status} = ${ProjectStatus.Active})::int`,
         tasksCompleted: sql<number>`count(${tasks.id}) filter (where ${tasks.status} = ${TaskStatus.Done})::int`,
@@ -118,7 +123,7 @@ export class TasksRepository {
   }
 
   async getNextPosition(projectId: number, status: typeof tasks.$inferSelect.status) {
-    const [result] = await db
+    const [result] = await this.db
       .select({ taskCount: count() })
       .from(tasks)
       .where(and(eq(tasks.projectId, projectId), eq(tasks.status, status)));
@@ -127,19 +132,22 @@ export class TasksRepository {
   }
 
   async createTask(data: typeof tasks.$inferInsert) {
-    const [task] = await db.insert(tasks).values(data).returning();
+    const [task] = await this.db.insert(tasks).values(data).returning();
 
     return await this.getTaskById(task.id);
   }
 
   async updateTask(taskId: number, data: Partial<typeof tasks.$inferInsert>) {
-    const [task] = await db.update(tasks).set(data).where(eq(tasks.id, taskId)).returning();
+    const [task] = await this.db.update(tasks).set(data).where(eq(tasks.id, taskId)).returning();
 
     return await this.getTaskById(task.id);
   }
 
   async deleteTask(taskId: number) {
-    const [task] = await db.delete(tasks).where(eq(tasks.id, taskId)).returning({ id: tasks.id });
+    const [task] = await this.db
+      .delete(tasks)
+      .where(eq(tasks.id, taskId))
+      .returning({ id: tasks.id });
 
     return task;
   }
@@ -155,7 +163,7 @@ export class TasksRepository {
 
     const taskIds = items.map((item) => item.id);
 
-    const existingTasks = await db
+    const existingTasks = await this.db
       .select({ id: tasks.id })
       .from(tasks)
       .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -171,7 +179,7 @@ export class TasksRepository {
       return null;
     }
 
-    await db.transaction(async (tx) => {
+    await this.db.transaction(async (tx) => {
       for (const item of items) {
         await tx
           .update(tasks)
@@ -184,7 +192,7 @@ export class TasksRepository {
   }
 
   private async getTaskById(taskId: number) {
-    const [task] = await db
+    const [task] = await this.db
       .select(taskWithAssigneeColumns)
       .from(tasks)
       .leftJoin(users, eq(tasks.assigneeId, users.id))

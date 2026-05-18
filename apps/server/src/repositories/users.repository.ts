@@ -2,19 +2,24 @@ import { Injectable } from "@nestjs/common";
 import { TaskStatus } from "@syncr/packages";
 import { and, count, eq, inArray, sql } from "drizzle-orm";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import { projects, projectUsers, roles, tasks, userCompanyRoles, users } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 @Injectable()
-export class UsersRepository {
+export class UsersRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async createUser(data: typeof users.$inferInsert) {
-    const [user] = await db.insert(users).values(data).returning();
+    const [user] = await this.db.insert(users).values(data).returning();
 
     return user;
   }
 
   async getCompanyUsers(companyId: number) {
-    const result = await db
+    const result = await this.db
       .select()
       .from(userCompanyRoles)
       .where(eq(userCompanyRoles.companyId, companyId))
@@ -24,7 +29,7 @@ export class UsersRepository {
   }
 
   async getCompanyTeamUserData(companyId: number) {
-    const companyUsers = await db
+    const companyUsers = await this.db
       .select({
         user: users,
         role: roles,
@@ -50,7 +55,7 @@ export class UsersRepository {
   }
 
   async findUserByEmail(email: string) {
-    const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    const [user] = await this.db.select().from(users).where(eq(users.email, email)).limit(1);
 
     return user;
   }
@@ -60,11 +65,11 @@ export class UsersRepository {
       return [];
     }
 
-    return db.select().from(users).where(inArray(users.email, emails));
+    return this.db.select().from(users).where(inArray(users.email, emails));
   }
 
   async findUserById(id: number) {
-    const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    const [user] = await this.db.select().from(users).where(eq(users.id, id)).limit(1);
 
     return user;
   }
@@ -73,19 +78,23 @@ export class UsersRepository {
     userId: number,
     data: Pick<typeof users.$inferInsert, "name" | "surname" | "birthday" | "weeklyLoadMinutes">,
   ) {
-    const [user] = await db.update(users).set(data).where(eq(users.id, userId)).returning();
+    const [user] = await this.db.update(users).set(data).where(eq(users.id, userId)).returning();
 
     return user;
   }
 
   async updateUserPassword(userId: number, password: string) {
-    const [user] = await db.update(users).set({ password }).where(eq(users.id, userId)).returning();
+    const [user] = await this.db
+      .update(users)
+      .set({ password })
+      .where(eq(users.id, userId))
+      .returning();
 
     return user;
   }
 
   async isUserInCompany(userId: number, companyId: number) {
-    const [userCompanyRole] = await db
+    const [userCompanyRole] = await this.db
       .select({ userId: userCompanyRoles.userId })
       .from(userCompanyRoles)
       .where(and(eq(userCompanyRoles.userId, userId), eq(userCompanyRoles.companyId, companyId)))
@@ -95,7 +104,7 @@ export class UsersRepository {
   }
 
   async areUsersInCompany(userIds: number[], companyId: number) {
-    const companyUsers = await db
+    const companyUsers = await this.db
       .select({
         userId: userCompanyRoles.userId,
       })
@@ -116,7 +125,7 @@ export class UsersRepository {
       return [];
     }
 
-    return db
+    return this.db
       .select({
         user: users,
       })
@@ -126,7 +135,7 @@ export class UsersRepository {
   }
 
   async isUserAssignedToProject(userId: number, projectId: number, companyId: number) {
-    const [projectUser] = await db
+    const [projectUser] = await this.db
       .select({ userId: projectUsers.userId })
       .from(projectUsers)
       .innerJoin(projects, eq(projectUsers.projectId, projects.id))

@@ -1,8 +1,9 @@
 import { Logger } from "@nestjs/common";
 import { PermissionKey, RoleKey } from "@syncr/packages";
 
-import db from "../db/drizzle";
+import db, { type AppDb } from "../db/drizzle";
 import { permissions, rolePermissions, roles } from "../db/schema";
+import { seedDemoData } from "./demo-seed";
 
 // CONSTANTS
 
@@ -121,20 +122,21 @@ const getInitialRolePermissions = (
 
 // SEEDERS
 
-const seedRoles = async () => {
-  await db.insert(roles).values(initialRoles).onConflictDoNothing();
-  await db.insert(permissions).values(initialPermissions).onConflictDoNothing();
+const seedRoles = async (targetDb: AppDb) => {
+  await targetDb.insert(roles).values(initialRoles).onConflictDoNothing();
+  await targetDb.insert(permissions).values(initialPermissions).onConflictDoNothing();
 
-  const dbRoles = await db.select().from(roles);
-  const dbPermissions = await db.select().from(permissions);
+  const dbRoles = await targetDb.select().from(roles);
+  const dbPermissions = await targetDb.select().from(permissions);
   const rolePermissionsInserts = getInitialRolePermissions(dbRoles, dbPermissions);
 
-  await db.insert(rolePermissions).values(rolePermissionsInserts).onConflictDoNothing();
+  await targetDb.insert(rolePermissions).values(rolePermissionsInserts).onConflictDoNothing();
 };
 
 export const seedDb = async () => {
   try {
-    await seedRoles();
+    await seedRoles(db);
+    await seedDemoData(seedRoles);
 
     Logger.log("Roles seeded!");
   } catch (error) {

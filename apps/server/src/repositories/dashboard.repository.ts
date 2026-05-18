@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ProjectStatus, TaskActivityAction, TaskStatus } from "@syncr/packages";
 import { and, asc, desc, eq, gte, isNotNull, lt, ne, sql } from "drizzle-orm";
 
-import db from "../db/drizzle";
+import { DbProvider } from "../db/db.provider";
 import {
   notifications,
   projects,
@@ -11,9 +11,14 @@ import {
   userCompanyRoles,
   users,
 } from "../db/schema";
+import { BaseRepository } from "./base.repository";
 
 @Injectable()
-export class DashboardRepository {
+export class DashboardRepository extends BaseRepository {
+  constructor(dbProvider: DbProvider) {
+    super(dbProvider);
+  }
+
   async getSummary(companyId: number, userId: number) {
     const [
       activeProjects,
@@ -23,27 +28,20 @@ export class DashboardRepository {
       myAssignedTasks,
       unreadNotifications,
     ] = await Promise.all([
-      db
+      this.db
         .select({
           value: sql<number>`count(*)::int`.mapWith(Number),
         })
         .from(projects)
-        .where(
-          and(
-            eq(projects.companyId, companyId),
-            eq(projects.status, ProjectStatus.Active),
-          ),
-        ),
-      db
+        .where(and(eq(projects.companyId, companyId), eq(projects.status, ProjectStatus.Active))),
+      this.db
         .select({
           value: sql<number>`count(${tasks.id})::int`.mapWith(Number),
         })
         .from(tasks)
         .innerJoin(projects, eq(tasks.projectId, projects.id))
-        .where(
-          and(eq(projects.companyId, companyId), eq(tasks.status, TaskStatus.Done)),
-        ),
-      db
+        .where(and(eq(projects.companyId, companyId), eq(tasks.status, TaskStatus.Done))),
+      this.db
         .select({
           value: sql<number>`count(${tasks.id})::int`.mapWith(Number),
         })
@@ -56,13 +54,13 @@ export class DashboardRepository {
             sql`${tasks.endDate}::date = current_date`,
           ),
         ),
-      db
+      this.db
         .select({
           value: sql<number>`count(distinct ${userCompanyRoles.userId})::int`.mapWith(Number),
         })
         .from(userCompanyRoles)
         .where(eq(userCompanyRoles.companyId, companyId)),
-      db
+      this.db
         .select({
           value: sql<number>`count(${tasks.id})::int`.mapWith(Number),
         })
@@ -75,17 +73,12 @@ export class DashboardRepository {
             ne(tasks.status, TaskStatus.Done),
           ),
         ),
-      db
+      this.db
         .select({
           value: sql<number>`count(${notifications.id})::int`.mapWith(Number),
         })
         .from(notifications)
-        .where(
-          and(
-            eq(notifications.recipientId, userId),
-            eq(notifications.isRead, false),
-          ),
-        ),
+        .where(and(eq(notifications.recipientId, userId), eq(notifications.isRead, false))),
     ]);
 
     return {
@@ -101,7 +94,7 @@ export class DashboardRepository {
   async getTasksCompletedThisWeek(companyId: number) {
     const day = sql<string>`to_char(${tasks.completedAt}, 'YYYY-MM-DD')`;
 
-    return await db
+    return await this.db
       .select({
         day,
         value: sql<number>`count(${tasks.id})::int`.mapWith(Number),
@@ -121,7 +114,7 @@ export class DashboardRepository {
   }
 
   async getUpcomingBirthdays(companyId: number) {
-    return await db
+    return await this.db
       .select({
         userId: users.id,
         name: users.name,
@@ -130,16 +123,11 @@ export class DashboardRepository {
       })
       .from(userCompanyRoles)
       .innerJoin(users, eq(users.id, userCompanyRoles.userId))
-      .where(
-        and(
-          eq(userCompanyRoles.companyId, companyId),
-          isNotNull(users.birthday),
-        ),
-      );
+      .where(and(eq(userCompanyRoles.companyId, companyId), isNotNull(users.birthday)));
   }
 
   async getRecentActivity(companyId: number, limit = 5) {
-    return await db
+    return await this.db
       .select({
         id: taskActivities.id,
         action: taskActivities.action,
