@@ -47,6 +47,91 @@ const addDays = (base: Date, days: number) => {
   return date;
 };
 
+const DEMO_PROJECTS = [
+  {
+    name: "Customer Portal Relaunch",
+    status: ProjectStatus.Active,
+    startOffset: -42,
+    endOffset: 35,
+    managerIndex: 1,
+  },
+  {
+    name: "Mobile Sprint",
+    status: ProjectStatus.Active,
+    startOffset: -18,
+    endOffset: 24,
+    managerIndex: 2,
+  },
+  {
+    name: "Analytics Foundation",
+    status: ProjectStatus.Paused,
+    startOffset: -64,
+    endOffset: 58,
+    managerIndex: 0,
+  },
+  {
+    name: "Billing Reliability",
+    status: ProjectStatus.Active,
+    startOffset: -28,
+    endOffset: 42,
+    managerIndex: 5,
+  },
+  {
+    name: "Workspace Automation",
+    status: ProjectStatus.Active,
+    startOffset: -9,
+    endOffset: 31,
+    managerIndex: 1,
+  },
+  {
+    name: "Design System Refresh",
+    status: ProjectStatus.Completed,
+    startOffset: -110,
+    endOffset: -7,
+    managerIndex: 2,
+  },
+] as const;
+
+const DEMO_TASK_NAMES = [
+  "Audit onboarding funnel",
+  "Build account overview cards",
+  "Wire invitation reminders",
+  "Polish empty states",
+  "Tune task calendar queries",
+  "Add regression coverage",
+  "Ship responsive header",
+  "Review notification copy",
+  "Document project handoff checklist",
+  "Improve slow dashboard summary query",
+  "Add keyboard flow to task details",
+  "Rework overdue task filters",
+  "Validate role permissions matrix",
+  "Refine mobile kanban spacing",
+  "Prepare release readiness report",
+  "Add loading states to activity feed",
+  "Normalize team member workload data",
+  "Reconcile calendar sync failures",
+] as const;
+
+const DEMO_TASK_DESCRIPTIONS = [
+  "Trace the current workflow, capture gaps, and leave notes that make the next implementation step obvious.",
+  "Implement the visible UI and connect it to the existing API contracts without changing unrelated behavior.",
+  "Review edge cases from recent demos and add enough coverage to prevent regressions.",
+  "Coordinate with design and product notes, then update the task with the agreed scope.",
+  "Investigate the production-shaped path and record the fix in a way the whole team can follow.",
+] as const;
+
+const DEMO_LABELS = [
+  "bug",
+  "feature",
+  "ux",
+  "backend",
+  "ops",
+  "research",
+  "release",
+  "docs",
+] as const;
+
 const updateExistingDemoUserNames = async () => {
   if (!demoDb) {
     return;
@@ -161,6 +246,30 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
           birthday: "1991-07-12",
           weeklyLoadMinutes: 40 * 60,
         },
+        {
+          email: "shosanna.dreyfus@syncr.cc",
+          name: "Shosanna",
+          surname: "Dreyfus",
+          password: "demo",
+          birthday: "1993-08-08",
+          weeklyLoadMinutes: 34 * 60,
+        },
+        {
+          email: "calvin.candie@syncr.cc",
+          name: "Calvin",
+          surname: "Candie",
+          password: "demo",
+          birthday: "1987-09-16",
+          weeklyLoadMinutes: 30 * 60,
+        },
+        {
+          email: "mr.pink@syncr.cc",
+          name: "Mr.",
+          surname: "Pink",
+          password: "demo",
+          birthday: "1989-11-03",
+          weeklyLoadMinutes: 36 * 60,
+        },
       ])
       .returning();
 
@@ -173,38 +282,22 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
       seededUsers.map((user, index) => ({
         userId: user.id,
         companyId: company.id,
-        roleId: index === 0 ? ownerRole.id : index <= 2 ? managerRole.id : developerRole.id,
+        roleId: index === 0 ? ownerRole.id : index <= 3 ? managerRole.id : developerRole.id,
       })),
     );
 
     const seededProjects = await tx
       .insert(projects)
-      .values([
-        {
-          name: "Customer Portal Relaunch",
+      .values(
+        DEMO_PROJECTS.map((project) => ({
+          name: project.name,
           companyId: company.id,
-          managerId: seededUsers[1].id,
-          status: ProjectStatus.Active,
-          startDate: dayOffset(-42),
-          endDate: dayOffset(35),
-        },
-        {
-          name: "Mobile Sprint",
-          companyId: company.id,
-          managerId: seededUsers[2].id,
-          status: ProjectStatus.Active,
-          startDate: dayOffset(-18),
-          endDate: dayOffset(24),
-        },
-        {
-          name: "Analytics Foundation",
-          companyId: company.id,
-          managerId: seededUsers[0].id,
-          status: ProjectStatus.Paused,
-          startDate: dayOffset(-64),
-          endDate: dayOffset(58),
-        },
-      ])
+          managerId: seededUsers[project.managerIndex].id,
+          status: project.status,
+          startDate: dayOffset(project.startOffset),
+          endDate: dayOffset(project.endOffset),
+        })),
+      )
       .returning();
 
     await tx
@@ -212,7 +305,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
       .values(
         seededProjects.flatMap((project, projectIndex) =>
           seededUsers
-            .filter((_, userIndex) => projectIndex !== 2 || userIndex !== 4)
+            .filter((_, userIndex) => (projectIndex + userIndex) % 4 !== 0 || userIndex < 3)
             .map((user) => ({ projectId: project.id, userId: user.id })),
         ),
       );
@@ -221,7 +314,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
       .insert(projectLabels)
       .values(
         seededProjects.flatMap((project) =>
-          ["bug", "feature", "ux", "backend", "ops"].map((name) => ({
+          DEMO_LABELS.map((name) => ({
             projectId: project.id,
             name,
           })),
@@ -233,21 +326,10 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
       .insert(tasks)
       .values(
         seededProjects.flatMap((project, projectIndex) => {
-          const names = [
-            "Audit onboarding funnel",
-            "Build account overview cards",
-            "Wire invitation reminders",
-            "Polish empty states",
-            "Tune task calendar queries",
-            "Add regression coverage",
-            "Ship responsive header",
-            "Review notification copy",
-          ];
-
-          return names.map((name, index) => ({
-            name: projectIndex === 0 ? name : `${name} ${projectIndex + 1}`,
+          return DEMO_TASK_NAMES.map((name, index) => ({
+            name: `${name} - ${project.name}`,
             description:
-              "Demo task with enough context for project planning, assignment, comments, and activity history.",
+              DEMO_TASK_DESCRIPTIONS[(index + projectIndex) % DEMO_TASK_DESCRIPTIONS.length],
             projectId: project.id,
             assigneeId: seededUsers[(index + projectIndex) % seededUsers.length].id,
             status: [
@@ -256,12 +338,14 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
               TaskStatus.InProgress,
               TaskStatus.Review,
               TaskStatus.Done,
-            ][index % 5],
-            priority: [TaskPriority.Low, TaskPriority.Medium, TaskPriority.High][index % 3],
+            ][(index + projectIndex) % 5],
+            priority: [TaskPriority.Low, TaskPriority.Medium, TaskPriority.High][
+              (index + projectIndex) % 3
+            ],
             position: index,
-            endDate: dayOffset(index - 2 + projectIndex * 3),
-            completedAt: index % 5 === 4 ? dayOffset(-index) : null,
-            estimateMinutes: [60, 120, 180, 240][index % 4],
+            endDate: dayOffset(index - 8 + projectIndex * 4),
+            completedAt: (index + projectIndex) % 5 === 4 ? dayOffset(-index - projectIndex) : null,
+            estimateMinutes: [45, 60, 90, 120, 180, 240, 360][(index + projectIndex) % 7],
           }));
         }),
       )
@@ -285,7 +369,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
     );
 
     await tx.insert(taskComments).values(
-      seededTasks.slice(0, 14).map((task, index) => ({
+      seededTasks.slice(0, 54).map((task, index) => ({
         taskId: task.id,
         userId: seededUsers[index % seededUsers.length].id,
         content: [
@@ -293,7 +377,11 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
           "This is ready for a second pass.",
           "I split the remaining work into smaller follow-ups.",
           "Design review is reflected in the current scope.",
-        ][index % 4],
+          "The remaining risk is called out in the acceptance criteria.",
+          "I checked this against the demo workflow and updated the estimate.",
+          "Backend and UI changes are aligned for the next review.",
+          "Leaving this here so the next person has the decision context.",
+        ][index % 8],
         createdAt: addDays(dayOffset(-7), index),
       })),
     );
@@ -318,7 +406,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
     );
 
     await tx.insert(notifications).values(
-      seededTasks.slice(0, 8).map((task, index) => ({
+      seededTasks.slice(0, 24).map((task, index) => ({
         recipientId:
           DEMO_USER_EMAIL === seededUsers[index % seededUsers.length].email
             ? seededUsers[1].id
@@ -371,10 +459,16 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
 
     if (labelRows.length > 0) {
       await tx.insert(taskLabels).values(
-        seededTasks.slice(0, 18).map((task, index) => ({
-          taskId: task.id,
-          labelId: labelRows[index % labelRows.length].id,
-        })),
+        seededTasks.slice(0, 72).flatMap((task, index) => [
+          {
+            taskId: task.id,
+            labelId: labelRows[index % labelRows.length].id,
+          },
+          {
+            taskId: task.id,
+            labelId: labelRows[(index + 3) % labelRows.length].id,
+          },
+        ]),
       );
     }
   });

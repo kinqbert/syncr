@@ -1,8 +1,10 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import cookieParser from "cookie-parser";
+import { NextFunction, Request, Response } from "express";
 
 import { AppModule } from "./app.module";
+import { runWithDemoContext } from "./common/demo";
 import { CONFIG } from "./config/configuration";
 import { seedDb } from "./config/seed";
 
@@ -18,6 +20,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.use(cookieParser());
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    runWithDemoContext(req, next);
+  });
 
   app.setGlobalPrefix("api");
 
