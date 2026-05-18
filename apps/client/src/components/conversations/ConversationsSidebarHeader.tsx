@@ -4,17 +4,15 @@ import { PanelLeftClose, PanelLeftOpen } from "lucide-mui";
 import { CONVERSATIONS_SIDEBAR_HEADER_HEIGHT } from "./constants";
 
 type ConversationsSidebarHeaderProps = {
-  onClose: () => void;
-  onOpen: () => void;
   open: boolean;
   unreadCount: number;
+  toggleSidebar: () => void;
 };
 
 export const ConversationsSidebarHeader = ({
-  onClose,
-  onOpen,
   open,
   unreadCount,
+  toggleSidebar,
 }: ConversationsSidebarHeaderProps) => {
   return (
     <Stack
@@ -29,59 +27,37 @@ export const ConversationsSidebarHeader = ({
         alignItems: "center",
       }}
     >
-      {open ? (
-        <>
-          <Stack direction="row" alignItems="center" gap={1} minWidth={0}>
-            <Typography fontWeight={800} noWrap variant="h6">
-              Chats
-            </Typography>
-            {unreadCount > 0 && (
-              <Typography
-                bgcolor="primary.main"
-                borderRadius={999}
-                color="primary.contrastText"
-                fontSize={12}
-                fontWeight={800}
-                minWidth={22}
-                px={0.75}
-                textAlign="center"
-              >
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </Typography>
-            )}
-          </Stack>
-
-          <Tooltip title="Collapse chats">
-            <IconButton
-              aria-label="Collapse chats"
-              onClick={onClose}
-              size="small"
-              sx={{
-                justifySelf: "end",
-                color: "text.secondary",
-                height: 34,
-                ml: "auto",
-                width: 34,
-                "&:hover": {
-                  bgcolor: "action.hover",
-                  color: "text.primary",
-                },
-              }}
+      <>
+        <Stack direction="row" alignItems="center" gap={1} minWidth={0}>
+          <Typography fontWeight={800} noWrap variant="h6">
+            Chats
+          </Typography>
+          {unreadCount > 0 && (
+            <Typography
+              bgcolor="primary.main"
+              borderRadius={999}
+              color="primary.contrastText"
+              fontSize={12}
+              fontWeight={800}
+              minWidth={22}
+              px={0.75}
+              textAlign="center"
             >
-              <PanelLeftClose fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </>
-      ) : (
-        <Tooltip title="Expand chats">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </Typography>
+          )}
+        </Stack>
+
+        <Tooltip title="Collapse chats">
           <IconButton
-            aria-label="Expand chats"
-            onClick={onOpen}
+            aria-label="Collapse chats"
+            onClick={toggleSidebar}
             size="small"
             sx={{
+              justifySelf: "end",
               color: "text.secondary",
               height: 34,
-              mx: "auto",
+              ml: "auto",
               width: 34,
               "&:hover": {
                 bgcolor: "action.hover",
@@ -89,10 +65,14 @@ export const ConversationsSidebarHeader = ({
               },
             }}
           >
-            <PanelLeftOpen fontSize="small" />
+            {open ? (
+              <PanelLeftClose fontSize="small" />
+            ) : (
+              <PanelLeftOpen fontSize="small" />
+            )}
           </IconButton>
         </Tooltip>
-      )}
+      </>
     </Stack>
   );
 };

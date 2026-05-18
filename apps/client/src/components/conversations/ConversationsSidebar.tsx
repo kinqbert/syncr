@@ -31,11 +31,8 @@ export const ConversationsSidebar = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const open = useConversationsSidebarStore((state) => state.isOpen);
   const visibleOpen = forceOpen || open;
-  const openSidebar = useConversationsSidebarStore(
-    (state) => state.openSidebar,
-  );
-  const closeSidebar = useConversationsSidebarStore(
-    (state) => state.closeSidebar,
+  const toggleSidebar = useConversationsSidebarStore(
+    (state) => state.toggleSidebar,
   );
 
   const unreadCount = conversations.reduce(
@@ -76,8 +73,7 @@ export const ConversationsSidebar = ({
         <ConversationsSidebarHeader
           open={visibleOpen}
           unreadCount={unreadCount}
-          onClose={closeSidebar}
-          onOpen={openSidebar}
+          toggleSidebar={toggleSidebar}
         />
 
         <Stack

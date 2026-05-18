@@ -60,7 +60,7 @@ export const BirthdaysPanel = ({ birthdays }: BirthdaysPanelProps) => {
                   surname={birthday.surname}
                 />
                 <Stack minWidth={0} flex={1}>
-                  <Typography fontSize={14} fontWeight={700} noWrap>
+                  <Typography fontSize={14} fontWeight={500} noWrap>
                     {getUserFullName(birthday.name, birthday.surname)}
                   </Typography>
                   <Typography color="text.secondary" fontSize={12}>
@@ -74,7 +74,7 @@ export const BirthdaysPanel = ({ birthdays }: BirthdaysPanelProps) => {
                       : "text.secondary"
                   }
                   fontSize={13}
-                  fontWeight={800}
+                  fontWeight={600}
                   whiteSpace="nowrap"
                 >
                   {getBirthdayCountdownLabel(birthday.daysRemaining)}

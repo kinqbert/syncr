@@ -10,12 +10,10 @@ type RecentActivityProps = {
   activities: DashboardActivity[];
 };
 
-const getActivityText = (activity: DashboardActivity) => {
-  const actor = activity.actor
+const getActivityActorName = (activity: DashboardActivity) => {
+  return activity.actor
     ? getUserFullName(activity.actor.name, activity.actor.surname)
     : "Deleted user";
-
-  return `${actor} ${TASK_ACTIVITY_LABEL[activity.action]} ${activity.task.name}`;
 };
 
 export const RecentActivity = ({ activities }: RecentActivityProps) => {
@@ -52,8 +50,11 @@ export const RecentActivity = ({ activities }: RecentActivityProps) => {
               surname={activity.actor?.surname}
             />
             <Stack minWidth={0}>
-              <Typography fontSize={14} fontWeight={650}>
-                {getActivityText(activity)}
+              <Typography fontSize={14}>
+                <Typography component="span" fontSize="inherit" fontWeight={650}>
+                  {getActivityActorName(activity)}
+                </Typography>{" "}
+                {TASK_ACTIVITY_LABEL[activity.action]} {activity.task.name}
               </Typography>
               <Typography color="text.secondary" fontSize={12}>
                 {formatRelativeDate(activity.createdAt)}
