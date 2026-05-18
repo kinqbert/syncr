@@ -1,9 +1,10 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import type {
   DashboardBirthday,
-  DashboardChartPoint,
   DashboardData,
+  DashboardTaskStatusPoint,
 } from "@syncr/packages";
+import { TaskStatus } from "@syncr/packages";
 import { DashboardRepository } from "src/repositories/dashboard.repository";
 import { UsersRepository } from "src/repositories/users.repository";
 
@@ -17,10 +18,10 @@ export class DashboardService {
   async getDashboard(companyId: number, userId: number): Promise<DashboardData> {
     await this.userBelongsToCompany(userId, companyId);
 
-    const [summary, completedByDay, upcomingBirthdays, recentActivity] =
+    const [summary, tasksByStatus, upcomingBirthdays, recentActivity] =
       await Promise.all([
         this.dashboardRepository.getSummary(companyId, userId),
-        this.dashboardRepository.getTasksCompletedThisWeek(companyId),
+        this.dashboardRepository.getTasksByStatus(companyId),
         this.dashboardRepository.getUpcomingBirthdays(companyId),
         this.dashboardRepository.getRecentActivity(companyId),
       ]);
@@ -34,7 +35,7 @@ export class DashboardService {
         myAssignedTasks: summary.myAssignedTasks,
         unreadNotifications: summary.unreadNotifications,
       },
-      tasksCompletedThisWeek: this.mapCompletedWeek(completedByDay),
+      tasksByStatus: this.mapTasksByStatus(tasksByStatus),
       upcomingBirthdays: this.mapUpcomingBirthdays(upcomingBirthdays),
       recentActivity: recentActivity.map((activity) => ({
         id: activity.id,
@@ -55,30 +56,21 @@ export class DashboardService {
     };
   }
 
-  private mapCompletedWeek(
-    rows: { day: string; value: number }[],
-  ): DashboardChartPoint[] {
-    const valueByDay = new Map(rows.map((row) => [row.day, row.value]));
-    const startOfWeek = new Date();
-    const daysSinceMonday = (startOfWeek.getDay() + 6) % 7;
+  private mapTasksByStatus(
+    rows: { status: TaskStatus; value: number }[],
+  ): DashboardTaskStatusPoint[] {
+    const valueByStatus = new Map(rows.map((row) => [row.status, row.value]));
 
-    startOfWeek.setDate(startOfWeek.getDate() - daysSinceMonday);
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
-      (label, index) => {
-        const day = new Date(startOfWeek);
-
-        day.setDate(startOfWeek.getDate() + index);
-
-        const key = day.toISOString().slice(0, 10);
-
-        return {
-          label,
-          value: valueByDay.get(key) ?? 0,
-        };
-      },
-    );
+    return [
+      TaskStatus.Backlog,
+      TaskStatus.Todo,
+      TaskStatus.InProgress,
+      TaskStatus.Review,
+      TaskStatus.Done,
+    ].map((status) => ({
+      status,
+      value: valueByStatus.get(status) ?? 0,
+    }));
   }
 
   private mapUpcomingBirthdays(

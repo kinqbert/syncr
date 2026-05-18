@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ProjectStatus, TaskActivityAction, TaskStatus } from "@syncr/packages";
-import { and, asc, desc, eq, gte, isNotNull, lt, ne, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
 
 import { DbProvider } from "../db/db.provider";
 import {
@@ -91,26 +91,16 @@ export class DashboardRepository extends BaseRepository {
     };
   }
 
-  async getTasksCompletedThisWeek(companyId: number) {
-    const day = sql<string>`to_char(${tasks.completedAt}, 'YYYY-MM-DD')`;
-
+  async getTasksByStatus(companyId: number) {
     return await this.db
       .select({
-        day,
+        status: tasks.status,
         value: sql<number>`count(${tasks.id})::int`.mapWith(Number),
       })
       .from(tasks)
       .innerJoin(projects, eq(tasks.projectId, projects.id))
-      .where(
-        and(
-          eq(projects.companyId, companyId),
-          isNotNull(tasks.completedAt),
-          gte(tasks.completedAt, sql`date_trunc('week', current_date)`),
-          lt(tasks.completedAt, sql`date_trunc('week', current_date) + interval '7 days'`),
-        ),
-      )
-      .groupBy(day)
-      .orderBy(asc(day));
+      .where(and(eq(projects.companyId, companyId), eq(projects.status, ProjectStatus.Active)))
+      .groupBy(tasks.status);
   }
 
   async getUpcomingBirthdays(companyId: number) {

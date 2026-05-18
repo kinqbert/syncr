@@ -132,6 +132,36 @@ const DEMO_LABELS = [
   "docs",
 ] as const;
 
+const DEMO_ACTIVE_PROJECT_STATUS_PATTERN = [
+  TaskStatus.Todo,
+  TaskStatus.Todo,
+  TaskStatus.Todo,
+  TaskStatus.InProgress,
+  TaskStatus.InProgress,
+  TaskStatus.Backlog,
+  TaskStatus.Backlog,
+  TaskStatus.Backlog,
+  TaskStatus.Backlog,
+  TaskStatus.Backlog,
+  TaskStatus.Backlog,
+  TaskStatus.Review,
+  TaskStatus.Done,
+  TaskStatus.Todo,
+  TaskStatus.InProgress,
+  TaskStatus.Backlog,
+  TaskStatus.Backlog,
+  TaskStatus.Done,
+] as const;
+
+const DEMO_INACTIVE_PROJECT_STATUS_PATTERN = [
+  TaskStatus.Done,
+  TaskStatus.Done,
+  TaskStatus.Done,
+  TaskStatus.Done,
+  TaskStatus.Review,
+  TaskStatus.Backlog,
+] as const;
+
 const updateExistingDemoUserNames = async () => {
   if (!demoDb) {
     return;
@@ -326,27 +356,35 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
       .insert(tasks)
       .values(
         seededProjects.flatMap((project, projectIndex) => {
-          return DEMO_TASK_NAMES.map((name, index) => ({
-            name: `${name} - ${project.name}`,
-            description:
-              DEMO_TASK_DESCRIPTIONS[(index + projectIndex) % DEMO_TASK_DESCRIPTIONS.length],
-            projectId: project.id,
-            assigneeId: seededUsers[(index + projectIndex) % seededUsers.length].id,
-            status: [
-              TaskStatus.Backlog,
-              TaskStatus.Todo,
-              TaskStatus.InProgress,
-              TaskStatus.Review,
-              TaskStatus.Done,
-            ][(index + projectIndex) % 5],
-            priority: [TaskPriority.Low, TaskPriority.Medium, TaskPriority.High][
-              (index + projectIndex) % 3
-            ],
-            position: index,
-            endDate: dayOffset(index - 8 + projectIndex * 4),
-            completedAt: (index + projectIndex) % 5 === 4 ? dayOffset(-index - projectIndex) : null,
-            estimateMinutes: [45, 60, 90, 120, 180, 240, 360][(index + projectIndex) % 7],
-          }));
+          return DEMO_TASK_NAMES.map((name, index) => {
+            const status =
+              project.status === ProjectStatus.Active
+                ? DEMO_ACTIVE_PROJECT_STATUS_PATTERN[
+                    (index + projectIndex * 2) % DEMO_ACTIVE_PROJECT_STATUS_PATTERN.length
+                  ]
+                : DEMO_INACTIVE_PROJECT_STATUS_PATTERN[
+                    (index + projectIndex) % DEMO_INACTIVE_PROJECT_STATUS_PATTERN.length
+                  ];
+
+            return {
+              name: `${name} - ${project.name}`,
+              description:
+                DEMO_TASK_DESCRIPTIONS[(index + projectIndex) % DEMO_TASK_DESCRIPTIONS.length],
+              projectId: project.id,
+              assigneeId: seededUsers[(index + projectIndex) % seededUsers.length].id,
+              status,
+              priority: [TaskPriority.Low, TaskPriority.Medium, TaskPriority.High][
+                (index + projectIndex) % 3
+              ],
+              position: index,
+              endDate: dayOffset(index - 8 + projectIndex * 4),
+              completedAt:
+                project.status !== ProjectStatus.Active || status === TaskStatus.Done
+                  ? dayOffset(-index - projectIndex)
+                  : null,
+              estimateMinutes: [45, 60, 90, 120, 180, 240, 360][(index + projectIndex) % 7],
+            };
+          });
         }),
       )
       .returning();

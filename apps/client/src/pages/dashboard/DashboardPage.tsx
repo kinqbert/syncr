@@ -9,7 +9,7 @@ import {
   DashboardQuickLinks,
   RecentActivity,
   SummaryCard,
-  TasksCompletedChart,
+  TasksByStatusChart,
 } from "./components";
 import { getTimeBasedGreeting } from "./utils/getTimeBasedGreeting";
 
@@ -123,8 +123,7 @@ export const DashboardPage = () => {
           <Box
             sx={{
               display: "flex",
-              gridColumn: { xs: "1", sm: "1 / -1", lg: "span 4" },
-              gridRow: { lg: "span 2" },
+              gridColumn: { xs: "1", sm: "1 / -1", lg: "span 2" },
               minHeight: 0,
               minWidth: 0,
               "& > .MuiPaper-root": {
@@ -133,7 +132,7 @@ export const DashboardPage = () => {
               },
             }}
           >
-            <TasksCompletedChart data={data.tasksCompletedThisWeek} />
+            <TasksByStatusChart data={data.tasksByStatus} />
           </Box>
           <Box
             sx={{

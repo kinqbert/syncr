@@ -1,4 +1,4 @@
-import type { TaskActivityAction } from "./tasks";
+import type { TaskActivityAction, TaskStatus } from "./tasks";
 
 export type DashboardSummary = {
   activeProjects: number;
@@ -9,8 +9,8 @@ export type DashboardSummary = {
   unreadNotifications: number;
 };
 
-export type DashboardChartPoint = {
-  label: string;
+export type DashboardTaskStatusPoint = {
+  status: TaskStatus;
   value: number;
 };
 
@@ -39,7 +39,7 @@ export type DashboardBirthday = {
 
 export type DashboardData = {
   summary: DashboardSummary;
-  tasksCompletedThisWeek: DashboardChartPoint[];
+  tasksByStatus: DashboardTaskStatusPoint[];
   upcomingBirthdays: DashboardBirthday[];
   recentActivity: DashboardActivity[];
 };
