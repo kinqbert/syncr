@@ -1,5 +1,14 @@
-import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  Divider,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { CalendarCheck, ExternalLink, Unplug } from "lucide-mui";
+import { toast } from "sonner";
 
 import {
   CalendarProvider,
@@ -7,6 +16,7 @@ import {
   useCalendarConnections,
   useDisconnectCalendar,
 } from "@/api/calendar";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { SettingsSectionHeader } from "./SettingsSectionHeader";
 
@@ -17,7 +27,12 @@ const providerLabels: Record<CalendarProvider, string> = {
 const providers = [CalendarProvider.Google];
 
 export const CalendarSettingsSection = () => {
-  const { data: connections = [], isLoading } = useCalendarConnections();
+  const {
+    data: connections = [],
+    error,
+    isError,
+    isLoading,
+  } = useCalendarConnections();
   const disconnectCalendar = useDisconnectCalendar();
 
   const getConnection = (provider: CalendarProvider) =>
@@ -37,6 +52,12 @@ export const CalendarSettingsSection = () => {
         icon={<CalendarCheck sx={{ color: "primary.main", fontSize: 20 }} />}
         title="Calendar sync"
       />
+
+      {isError ? (
+        <Alert severity="error" sx={{ m: 2 }}>
+          {getErrorMessage(error, "Could not load calendar connections.")}
+        </Alert>
+      ) : null}
 
       {providers.map((provider) => {
         const connection = getConnection(provider);
@@ -85,7 +106,18 @@ export const CalendarSettingsSection = () => {
               <Button
                 color="inherit"
                 disabled={disconnectCalendar.isPending}
-                onClick={() => disconnectCalendar.mutate(provider)}
+                onClick={() =>
+                  disconnectCalendar.mutate(provider, {
+                    onError: (error) => {
+                      toast.error(
+                        getErrorMessage(
+                          error,
+                          "Could not disconnect calendar.",
+                        ),
+                      );
+                    },
+                  })
+                }
                 startIcon={<Unplug sx={{ fontSize: 16 }} />}
                 sx={{ width: { xs: "100%", sm: "auto" } }}
                 variant="outlined"

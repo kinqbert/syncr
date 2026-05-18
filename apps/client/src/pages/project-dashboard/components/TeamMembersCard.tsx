@@ -1,4 +1,5 @@
 import {
+  Alert,
   CircularProgress,
   IconButton,
   Paper,
@@ -19,6 +20,7 @@ import {
 } from "@/api/projects";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ProjectMembersDialog } from "@/pages/tasks/components/ProjectMembersDialog";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 import { getUserFullName } from "@/utils/getUserFullName";
 
 type TeamMembersCardProps = {
@@ -36,8 +38,12 @@ export const TeamMembersCard = ({
 }: TeamMembersCardProps) => {
   const [isMembersDialogOpen, setIsMembersDialogOpen] = useState(false);
   const { data: project } = useGetProject(projectId);
-  const { data: members = [], isLoading: areMembersLoading } =
-    useGetProjectAssignees(projectId);
+  const {
+    data: members = [],
+    error: membersError,
+    isError: areMembersError,
+    isLoading: areMembersLoading,
+  } = useGetProjectAssignees(projectId);
   const { data: memberCandidates = [], isLoading: isMemberCandidatesLoading } =
     useGetProjectMemberCandidates(projectId, isMembersDialogOpen);
   const addProjectMember = useAddProjectMember();
@@ -103,13 +109,19 @@ export const TeamMembersCard = ({
               </Stack>
             ) : null}
 
-            {!areMembersLoading && members.length === 0 ? (
+            {areMembersError ? (
+              <Alert severity="error">
+                {getErrorMessage(membersError, "Could not load members.")}
+              </Alert>
+            ) : null}
+
+            {!areMembersLoading && !areMembersError && members.length === 0 ? (
               <Typography color="text.secondary" fontSize={14}>
                 No members assigned yet.
               </Typography>
             ) : null}
 
-            {members.slice(0, 5).map((member) => (
+            {!areMembersError && members.slice(0, 5).map((member) => (
               <Stack
                 key={member.id}
                 alignItems="center"

@@ -3,6 +3,7 @@ import { Stack, Typography } from "@mui/material";
 import { useGetProject } from "@/api/projects";
 import { useGetProjectTasks } from "@/api/tasks";
 import { TaskDeadlineCalendar } from "@/components/calendar";
+import { ErrorState } from "@/components/ErrorState";
 import { ProjectViewNav } from "@/components/ProjectViewNav";
 import { useProject } from "@/hooks";
 
@@ -10,13 +11,31 @@ import { toProjectTaskEvents } from "./utils/toProjectTaskEvents";
 
 export const ProjectCalendarPage = () => {
   const { projectId } = useProject();
-  const { data: project, isLoading: isProjectLoading } =
-    useGetProject(projectId);
-  const { data: tasks = [], isLoading: areTasksLoading } =
-    useGetProjectTasks(projectId);
+  const {
+    data: project,
+    error: projectError,
+    isError: isProjectError,
+    isLoading: isProjectLoading,
+  } = useGetProject(projectId);
+  const {
+    data: tasks = [],
+    error: tasksError,
+    isError: areTasksError,
+    isLoading: areTasksLoading,
+  } = useGetProjectTasks(projectId);
 
   const events = toProjectTaskEvents(tasks);
   const isLoading = isProjectLoading || areTasksLoading;
+
+  if (isProjectError || areTasksError) {
+    return (
+      <ErrorState
+        error={projectError ?? tasksError}
+        fallback="Could not load project calendar."
+        title="Could not load project calendar."
+      />
+    );
+  }
 
   return (
     <Stack

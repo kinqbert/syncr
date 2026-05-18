@@ -2,10 +2,14 @@
 
 Syncr is a full-stack project management and team collaboration app built around projects, task ownership, calendar planning, team communication, and realtime workplace updates. It is designed as a practical workspace for small product teams: users can organize project work, move tasks through a Kanban flow, review activity, manage company members, receive notifications, and discuss work in conversations.
 
+<p align="center">
+  <a href="https://demo.syncr.cc"><strong>Open the live demo</strong></a>
+</p>
+
 > Media below uses placeholders for now.
 
 <p align="center">
-  <img src="https://placehold.co/1280x720?text=Syncr+Dashboard+Screenshot" alt="Syncr dashboard screenshot placeholder" width="100%" />
+  <img src="./assets/dashboard.png" alt="Syncr dashboard screenshot placeholder" width="100%" />
 </p>
 
 ## Features
@@ -24,27 +28,19 @@ Syncr is a full-stack project management and team collaboration app built around
 
 ## Product Preview
 
-| Dashboard                                                                             | Projects                                                                                 | Kanban Tasks                                                                                |
-| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| <img src="https://placehold.co/640x400?text=Dashboard" alt="Dashboard placeholder" /> | <img src="https://placehold.co/640x400?text=Projects" alt="Projects page placeholder" /> | <img src="https://placehold.co/640x400?text=Kanban+Board" alt="Kanban board placeholder" /> |
+| Dashboard                                                        | Projects                                                            | Kanban Tasks                                                     |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| <img src="./assets/dashboard.png" alt="Dashboard placeholder" /> | <img src="./assets/projects.png" alt="Projects page placeholder" /> | <img src="./assets/kanban.png" alt="Kanban board placeholder" /> |
 
-| Task Details                                                                                | Calendar                                                                            | Conversations                                                                                 |
-| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| <img src="https://placehold.co/640x400?text=Task+Details" alt="Task details placeholder" /> | <img src="https://placehold.co/640x400?text=Calendar" alt="Calendar placeholder" /> | <img src="https://placehold.co/640x400?text=Conversations" alt="Conversations placeholder" /> |
-
-## Demo GIF Placeholders
-
-| Workflow                                 | Preview                                                                                                                                    |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Creating a project and task              | <img src="https://placehold.co/900x506?text=GIF:+Create+Project+and+Task" alt="Create project and task GIF placeholder" />                 |
-| Dragging a task through the Kanban board | <img src="https://placehold.co/900x506?text=GIF:+Kanban+Drag+and+Drop" alt="Kanban drag and drop GIF placeholder" />                       |
-| Realtime conversation and notifications  | <img src="https://placehold.co/900x506?text=GIF:+Realtime+Chat+and+Notifications" alt="Realtime chat and notifications GIF placeholder" /> |
+| Task Details                                                           | Calendar                                                       | Conversations                                                            |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| <img src="./assets/task-details.png" alt="Task details placeholder" /> | <img src="./assets/calendar.png" alt="Calendar placeholder" /> | <img src="./assets/conversations.png" alt="Conversations placeholder" /> |
 
 ## Roadmap
 
 ### Pending
 
-- [ ] Implement demonstration environment with seeded data and demo user accounts
+- [ ] Add random realtime events to the demo environment
 - [ ] Improve main dashboard with more stats, activity feed, and company news
 - [ ] Live activity feed for tasks, projects and dashboard
 - [ ] Implement menu for team page
@@ -59,7 +55,8 @@ Syncr is a full-stack project management and team collaboration app built around
 
 ### Done
 
-- [x] Display of a person typing in conversations
+- [x] ~~Implement demonstration environment with seeded data and demo user accounts~~
+- [x] ~~Display of a person typing in conversations~~
 - [x] ~~Mobile adaptation~~
 - [x] ~~Main dashboard~~
 - [x] ~~Settings page~~

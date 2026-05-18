@@ -1,9 +1,10 @@
-import { Box, CircularProgress, Stack } from "@mui/material";
+import { Alert, Box, CircularProgress, Stack } from "@mui/material";
 import type { Task } from "@syncr/packages";
 import { TaskStatus } from "@syncr/packages";
 import { Activity, FolderKanban, TrendingUp } from "lucide-mui";
 
 import { useGetProjectTasks } from "@/api/tasks";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { StatCard } from "./StatCard";
 import { TaskDistributionCard } from "./TaskDistributionCard";
@@ -28,7 +29,12 @@ const getCompletionProgress = (tasks: Task[]) => {
 export const ProjectOverviewGrid = ({
   projectId,
 }: ProjectOverviewGridProps) => {
-  const { data: tasks = [], isLoading } = useGetProjectTasks(projectId);
+  const {
+    data: tasks = [],
+    error,
+    isError,
+    isLoading,
+  } = useGetProjectTasks(projectId);
   const completionProgress = getCompletionProgress(tasks);
   const completedTasksCount = tasks.filter(
     (task) => task.status === TaskStatus.Done,
@@ -56,7 +62,13 @@ export const ProjectOverviewGrid = ({
         </Stack>
       ) : null}
 
-      {!isLoading ? (
+      {isError ? (
+        <Alert severity="error" sx={{ gridColumn: "1 / -1" }}>
+          {getErrorMessage(error, "Could not load project tasks.")}
+        </Alert>
+      ) : null}
+
+      {!isLoading && !isError ? (
         <>
           <StatCard
             helper={`${completedTasksCount} completed`}

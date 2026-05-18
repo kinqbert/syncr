@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   capitalize,
   CircularProgress,
@@ -12,6 +13,7 @@ import { CalendarDays, Info, Users } from "lucide-mui";
 
 import { useGetProjectAssignees } from "@/api/projects";
 import { formatDate } from "@/utils/formatDate";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 import { getUserFullName } from "@/utils/getUserFullName";
 
 type ProjectDashboardHeaderProps = {
@@ -46,10 +48,22 @@ export const ProjectDashboardHeader = ({
   project,
   isProjectLoading = false,
 }: ProjectDashboardHeaderProps) => {
-  const { data: members = [], isLoading: areMembersLoading } =
-    useGetProjectAssignees(project?.id ?? 0, Boolean(project));
+  const {
+    data: members = [],
+    error: membersError,
+    isError: areMembersError,
+    isLoading: areMembersLoading,
+  } = useGetProjectAssignees(project?.id ?? 0, Boolean(project));
 
   const isLoading = isProjectLoading || areMembersLoading;
+
+  if (areMembersError) {
+    return (
+      <Alert severity="error">
+        {getErrorMessage(membersError, "Could not load project members.")}
+      </Alert>
+    );
+  }
 
   if (isLoading) {
     return (

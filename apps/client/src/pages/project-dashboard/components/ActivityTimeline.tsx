@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   CircularProgress,
   Paper,
@@ -12,6 +13,7 @@ import { useGetProjectActivities } from "@/api/projects";
 import { UserAvatar } from "@/components/UserAvatar";
 import { TASK_ACTIVITY_LABEL } from "@/constants/taskActivityLabels";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 import { getUserFullName } from "@/utils/getUserFullName";
 
 type ActivityTimelineProps = {
@@ -35,6 +37,8 @@ export const ActivityTimeline = ({ projectId }: ActivityTimelineProps) => {
     data,
     fetchNextPage,
     hasNextPage,
+    error,
+    isError,
     isFetchingNextPage,
     isPending: isLoading,
   } = useGetProjectActivities(projectId, ACTIVITY_PAGE_SIZE);
@@ -64,13 +68,19 @@ export const ActivityTimeline = ({ projectId }: ActivityTimelineProps) => {
           </Stack>
         ) : null}
 
-        {!isLoading && activities.length === 0 ? (
+        {isError ? (
+          <Alert severity="error">
+            {getErrorMessage(error, "Could not load project activity.")}
+          </Alert>
+        ) : null}
+
+        {!isLoading && !isError && activities.length === 0 ? (
           <Typography color="text.secondary" fontSize={14}>
             No activity yet.
           </Typography>
         ) : null}
 
-        {activities.map((item) => (
+        {!isError && activities.map((item) => (
           <Stack
             key={item.id}
             alignItems="center"
@@ -94,7 +104,7 @@ export const ActivityTimeline = ({ projectId }: ActivityTimelineProps) => {
           </Stack>
         ))}
 
-        {hasNextPage ? (
+        {!isError && hasNextPage ? (
           <Button
             disabled={isFetchingNextPage}
             onClick={() => void fetchNextPage()}

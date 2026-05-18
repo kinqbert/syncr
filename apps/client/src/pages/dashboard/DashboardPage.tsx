@@ -1,8 +1,9 @@
-import { Box, CircularProgress, Paper, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { Bell, CircleCheck, Clock, Folders, ListTodo, Users } from "lucide-mui";
 import { useMemo } from "react";
 
 import { useGetDashboard } from "@/api/dashboard";
+import { ErrorState } from "@/components/ErrorState";
 
 import {
   BirthdaysPanel,
@@ -14,7 +15,7 @@ import {
 import { getTimeBasedGreeting } from "./utils/getTimeBasedGreeting";
 
 export const DashboardPage = () => {
-  const { data, isError, isLoading } = useGetDashboard();
+  const { data, error, isError, isLoading } = useGetDashboard();
   const greeting = useMemo(() => getTimeBasedGreeting(new Date()), []);
 
   if (isLoading) {
@@ -33,17 +34,11 @@ export const DashboardPage = () => {
 
   if (isError || !data) {
     return (
-      <Stack component="main" p={{ xs: 2, sm: 3 }} width="100%">
-        <Paper
-          elevation={0}
-          sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 3 }}
-        >
-          <Typography fontWeight={700}>Could not load dashboard.</Typography>
-          <Typography color="text.secondary" fontSize={14}>
-            Refresh the page or try again later.
-          </Typography>
-        </Paper>
-      </Stack>
+      <ErrorState
+        error={error}
+        fallback="Refresh the page or try again later."
+        title="Could not load dashboard."
+      />
     );
   }
 

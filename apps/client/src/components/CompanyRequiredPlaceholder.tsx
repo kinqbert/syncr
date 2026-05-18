@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import { type UserInvitation } from "@syncr/packages";
+import { toast } from "sonner";
 
 import {
   useAcceptInvitation,
@@ -14,6 +15,7 @@ import {
   useGetPendingInvitations,
 } from "@/api/invitations";
 import { useCompanyStore } from "@/store/useCompanyStore";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { CompanyInvitationCard } from "./CompanyInvitationCard";
 import { HEADER_HEIGHT } from "./Header";
@@ -22,14 +24,30 @@ export const CompanyRequiredPlaceholder = () => {
   const setSelectedCompanyId = useCompanyStore(
     (state) => state.setSelectedCompanyId,
   );
-  const { data: pendingInvitations = [], isPending: areInvitationsPending } =
-    useGetPendingInvitations();
+  const {
+    data: pendingInvitations = [],
+    error: invitationsError,
+    isError: areInvitationsError,
+    isPending: areInvitationsPending,
+  } = useGetPendingInvitations();
   const acceptInvitation = useAcceptInvitation();
   const declineInvitation = useDeclineInvitation();
 
   const handleAcceptInvitation = async (invitation: UserInvitation) => {
-    await acceptInvitation.mutateAsync(invitation.id);
-    setSelectedCompanyId(invitation.companyId);
+    try {
+      await acceptInvitation.mutateAsync(invitation.id);
+      setSelectedCompanyId(invitation.companyId);
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Could not accept invitation."));
+    }
+  };
+
+  const handleDeclineInvitation = async (invitation: UserInvitation) => {
+    try {
+      await declineInvitation.mutateAsync(invitation.id);
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Could not decline invitation."));
+    }
   };
 
   return (
@@ -41,7 +59,17 @@ export const CompanyRequiredPlaceholder = () => {
       minHeight={`calc(100vh - ${HEADER_HEIGHT}px)`}
       sx={{ width: "100%", p: 3, textAlign: "center" }}
     >
-      {areInvitationsPending ? (
+      {areInvitationsError ? (
+        <Paper
+          elevation={0}
+          sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 3 }}
+        >
+          <Typography fontWeight={700}>Could not load invitations.</Typography>
+          <Typography color="text.secondary" fontSize={14}>
+            {getErrorMessage(invitationsError, "Could not load invitations.")}
+          </Typography>
+        </Paper>
+      ) : areInvitationsPending ? (
         <CircularProgress />
       ) : pendingInvitations.length > 0 ? (
         <Stack gap={2} maxWidth={640} width="100%">
@@ -65,7 +93,7 @@ export const CompanyRequiredPlaceholder = () => {
                     void handleAcceptInvitation(invitation)
                   }
                   onDecline={(invitation) =>
-                    declineInvitation.mutate(invitation.id)
+                    void handleDeclineInvitation(invitation)
                   }
                 />
                 {index < pendingInvitations.length - 1 && <Divider />}

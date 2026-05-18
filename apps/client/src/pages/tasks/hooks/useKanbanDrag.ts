@@ -11,10 +11,12 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import type { Task, TaskStatus } from "@syncr/packages";
 import { useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { taskKeys, useReorderTasks } from "@/api/tasks";
 import { useProject } from "@/hooks";
 import { queryClient } from "@/lib/react-query";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 type TasksByStatus = Record<TaskStatus, Task[]>;
 type DragOverTarget = NonNullable<DragOverEvent["over"]>;
@@ -301,8 +303,9 @@ export const useKanbanDrag = ({
       });
 
       queryClient.setQueryData(taskQueryKey, savedTasks);
-    } catch {
+    } catch (error) {
       queryClient.setQueryData(taskQueryKey, rollbackTasks);
+      toast.error(getErrorMessage(error, "Could not reorder tasks."));
     }
   };
 

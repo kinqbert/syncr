@@ -7,9 +7,11 @@ import {
   Typography,
 } from "@mui/material";
 import type { Task } from "@syncr/packages";
+import { toast } from "sonner";
 
 import { useDeleteTask } from "@/api/tasks";
 import { useProject } from "@/hooks";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 type TaskDeleteDialogProps = {
   task: Task;
@@ -40,12 +42,16 @@ export const TaskDeleteDialog = ({
           color="error"
           variant="contained"
           onClick={async () => {
-            await mutateAsync({
-              taskId: task.id,
-              projectId,
-            });
+            try {
+              await mutateAsync({
+                taskId: task.id,
+                projectId,
+              });
 
-            onClose();
+              onClose();
+            } catch (error) {
+              toast.error(getErrorMessage(error, "Could not delete task."));
+            }
           }}
         >
           Delete

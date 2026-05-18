@@ -30,10 +30,12 @@ const getAuthorName = (author: TaskComment["author"]) => {
 export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
   const { projectId } = useProject();
 
-  const { data: comments = [], isPending } = useGetTaskComments(
-    projectId,
-    taskId,
-  );
+  const {
+    data: comments = [],
+    error: commentsError,
+    isError: areCommentsError,
+    isPending,
+  } = useGetTaskComments(projectId, taskId);
   const createTaskComment = useCreateTaskComment();
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -70,19 +72,25 @@ export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
 
         {error ? <Alert severity="error">{error}</Alert> : null}
 
+        {areCommentsError ? (
+          <Alert severity="error">
+            {getErrorMessage(commentsError, "Could not load comments.")}
+          </Alert>
+        ) : null}
+
         {isPending ? (
           <Stack alignItems="center" py={1}>
             <CircularProgress size={24} />
           </Stack>
         ) : null}
 
-        {!isPending && comments.length === 0 ? (
+        {!isPending && !areCommentsError && comments.length === 0 ? (
           <Typography color="text.secondary" variant="body2">
             No comments yet.
           </Typography>
         ) : null}
 
-        {comments.map((item) => (
+        {!areCommentsError && comments.map((item) => (
           <Stack
             alignItems="flex-start"
             direction="row"
