@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -11,6 +12,7 @@ import { useGetTaskActivities } from "@/api/tasks";
 import { useProject } from "@/hooks";
 import { formatDuration } from "@/utils/formatDuration";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { Panel } from "../../../components/Panel";
 
@@ -73,8 +75,15 @@ const getEstimateChangeText = (activity: TaskActivity) => {
 export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
   const { projectId } = useProject();
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending } =
-    useGetTaskActivities(projectId, taskId, ACTIVITY_PAGE_SIZE);
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isError,
+    isFetchingNextPage,
+    isPending,
+  } = useGetTaskActivities(projectId, taskId, ACTIVITY_PAGE_SIZE);
 
   const activities = data?.pages.flatMap((page) => page.items) ?? [];
 
@@ -89,13 +98,19 @@ export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
           </Stack>
         ) : null}
 
-        {!isPending && activities.length === 0 ? (
+        {isError ? (
+          <Alert severity="error">
+            {getErrorMessage(error, "Could not load task activity.")}
+          </Alert>
+        ) : null}
+
+        {!isPending && !isError && activities.length === 0 ? (
           <Typography color="text.secondary" variant="body2">
             No activity yet.
           </Typography>
         ) : null}
 
-        {activities.map((activity) => {
+        {!isError && activities.map((activity) => {
           const finalTextArr = [ACTIVITY_LABEL[activity.action]];
           const titleChangeText = getTitleChangeText(activity);
           const estimateChangeText = getEstimateChangeText(activity);
@@ -137,7 +152,7 @@ export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
           );
         })}
 
-        {hasNextPage ? (
+        {!isError && hasNextPage ? (
           <Button
             disabled={isFetchingNextPage}
             onClick={() => void fetchNextPage()}

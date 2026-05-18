@@ -23,6 +23,7 @@ import {
   UserPlus,
 } from "lucide-mui";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { useAcceptInvitation, useDeclineInvitation } from "@/api/invitations";
 import {
@@ -30,8 +31,10 @@ import {
   useMarkAllNotificationsRead,
   useMarkNotificationAsRead,
 } from "@/api/notifications";
+import { ErrorState } from "@/components/ErrorState";
 import { Notification } from "@/components/Notification";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 type NotificationFilter = "all" | "unread" | "tasks" | "comments" | "deadlines";
 
@@ -144,7 +147,12 @@ const matchesFilter = (
 
 export const NotificationsPage = () => {
   const [filter, setFilter] = useState<NotificationFilter>("all");
-  const { data: notifications = [], isPending } = useGetNotifications();
+  const {
+    data: notifications = [],
+    error,
+    isError,
+    isPending,
+  } = useGetNotifications();
   const markNotificationAsRead = useMarkNotificationAsRead();
   const markAllNotificationsRead = useMarkAllNotificationsRead();
   const acceptInvitation = useAcceptInvitation();
@@ -160,6 +168,48 @@ export const NotificationsPage = () => {
       ),
     [filter, notifications],
   );
+
+  const handleMarkAllRead = () => {
+    markAllNotificationsRead.mutate(undefined, {
+      onError: (error) => {
+        toast.error(getErrorMessage(error, "Could not mark notifications read."));
+      },
+    });
+  };
+
+  const handleMarkRead = (notificationId: number) => {
+    markNotificationAsRead.mutate(notificationId, {
+      onError: (error) => {
+        toast.error(getErrorMessage(error, "Could not mark notification read."));
+      },
+    });
+  };
+
+  const handleAcceptInvitation = (invitationId: number) => {
+    acceptInvitation.mutate(invitationId, {
+      onError: (error) => {
+        toast.error(getErrorMessage(error, "Could not accept invitation."));
+      },
+    });
+  };
+
+  const handleDeclineInvitation = (invitationId: number) => {
+    declineInvitation.mutate(invitationId, {
+      onError: (error) => {
+        toast.error(getErrorMessage(error, "Could not decline invitation."));
+      },
+    });
+  };
+
+  if (isError) {
+    return (
+      <ErrorState
+        error={error}
+        fallback="Could not load notifications."
+        title="Could not load notifications."
+      />
+    );
+  }
 
   return (
     <Box
@@ -187,7 +237,7 @@ export const NotificationsPage = () => {
         </Stack>
         <Button
           disabled={unreadCount === 0 || markAllNotificationsRead.isPending}
-          onClick={() => markAllNotificationsRead.mutate()}
+          onClick={handleMarkAllRead}
           sx={{ alignSelf: { xs: "stretch", sm: "flex-start", lg: "center" } }}
         >
           Mark all as read
@@ -293,9 +343,7 @@ export const NotificationsPage = () => {
                       {!notification.isRead && (
                         <Button
                           disabled={markNotificationAsRead.isPending}
-                          onClick={() =>
-                            markNotificationAsRead.mutate(notification.id)
-                          }
+                          onClick={() => handleMarkRead(notification.id)}
                           size="small"
                           sx={{ minWidth: 0, p: 0, textTransform: "none" }}
                         >
@@ -315,7 +363,7 @@ export const NotificationsPage = () => {
                             const invitationId = getInvitationId(notification);
 
                             if (invitationId) {
-                              acceptInvitation.mutate(invitationId);
+                              handleAcceptInvitation(invitationId);
                             }
                           }}
                           size="small"
@@ -331,7 +379,7 @@ export const NotificationsPage = () => {
                             const invitationId = getInvitationId(notification);
 
                             if (invitationId) {
-                              declineInvitation.mutate(invitationId);
+                              handleDeclineInvitation(invitationId);
                             }
                           }}
                           size="small"

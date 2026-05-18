@@ -2,12 +2,28 @@ import { Stack, Typography } from "@mui/material";
 
 import { useGetMyAssignedTasks } from "@/api/tasks";
 import { TaskDeadlineCalendar } from "@/components/calendar";
+import { ErrorState } from "@/components/ErrorState";
 
 import { toUserTaskEvents } from "./utils/toUserTaskEvents";
 
 export const MyCalendarPage = () => {
-  const { data: tasks = [], isLoading } = useGetMyAssignedTasks();
+  const {
+    data: tasks = [],
+    error,
+    isError,
+    isLoading,
+  } = useGetMyAssignedTasks();
   const events = toUserTaskEvents(tasks);
+
+  if (isError) {
+    return (
+      <ErrorState
+        error={error}
+        fallback="Could not load calendar tasks."
+        title="Could not load calendar."
+      />
+    );
+  }
 
   return (
     <Stack height="100%" minWidth={0} p={3} width="100%">

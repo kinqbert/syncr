@@ -1,6 +1,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 
 import { useGetProject } from "@/api/projects";
+import { ErrorState } from "@/components/ErrorState";
 import { ProjectViewNav } from "@/components/ProjectViewNav";
 import { useProject } from "@/hooks";
 
@@ -12,8 +13,22 @@ import {
 
 export const ProjectDashboardPage = () => {
   const { projectId } = useProject();
-  const { data: project, isLoading: isProjectLoading } =
-    useGetProject(projectId);
+  const {
+    data: project,
+    error: projectError,
+    isError: isProjectError,
+    isLoading: isProjectLoading,
+  } = useGetProject(projectId);
+
+  if (isProjectError) {
+    return (
+      <ErrorState
+        error={projectError}
+        fallback="Could not load project dashboard."
+        title="Could not load project dashboard."
+      />
+    );
+  }
 
   return (
     <Box

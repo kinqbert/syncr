@@ -32,6 +32,7 @@ import { useState } from "react";
 
 import { useInviteTeamMembers } from "@/api/invitations";
 import { useGetTeam } from "@/api/team";
+import { ErrorState } from "@/components/ErrorState";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { getErrorMessage } from "@/utils/getErrorMessage";
@@ -74,11 +75,21 @@ export const TeamPage = () => {
   const [emails, setEmails] = useState("");
   const [roleKey, setRoleKey] = useState<RoleKey>(RoleKey.Developer);
   const [formError, setFormError] = useState<string | null>(null);
-  const { data, isLoading } = useGetTeam();
+  const { data, error, isError, isLoading } = useGetTeam();
   const inviteTeamMembers = useInviteTeamMembers();
 
   const members = data?.members ?? [];
   const invitations = data?.invitations ?? [];
+
+  if (isError) {
+    return (
+      <ErrorState
+        error={error}
+        fallback="Could not load team."
+        title="Could not load team."
+      />
+    );
+  }
 
   const handleInviteDialogClose = () => {
     setIsInviteDialogOpen(false);

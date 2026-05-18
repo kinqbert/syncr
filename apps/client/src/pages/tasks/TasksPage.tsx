@@ -9,6 +9,7 @@ import {
   useGetProjectMemberCandidates,
   useRemoveProjectMember,
 } from "@/api/projects";
+import { ErrorState } from "@/components/ErrorState";
 import { ProjectViewNav } from "@/components/ProjectViewNav";
 
 import { Kanban } from "./components/Kanban";
@@ -19,10 +20,12 @@ export const TasksPage = () => {
   const numericProjectId = Number(projectId);
   const [isMembersDialogOpen, setIsMembersDialogOpen] = useState(false);
 
-  const { data: project, isLoading: isProjectLoading } = useGetProject(
-    numericProjectId,
-    Boolean(projectId),
-  );
+  const {
+    data: project,
+    error: projectError,
+    isError: isProjectError,
+    isLoading: isProjectLoading,
+  } = useGetProject(numericProjectId, Boolean(projectId));
   const { data: members = [], isLoading: isMembersLoading } =
     useGetProjectAssignees(numericProjectId, Boolean(projectId));
   const { data: memberCandidates = [], isLoading: isMemberCandidatesLoading } =
@@ -36,6 +39,16 @@ export const TasksPage = () => {
 
   if (!projectId) {
     return null;
+  }
+
+  if (isProjectError) {
+    return (
+      <ErrorState
+        error={projectError}
+        fallback="Could not load project."
+        title="Could not load project."
+      />
+    );
   }
 
   const handleAddProjectMember = async (userId: number) => {

@@ -16,14 +16,19 @@ import {
   useGetProjectManagerCandidates,
   useUpdateProject,
 } from "@/api/projects";
+import { ErrorState } from "@/components/ErrorState";
 
 import { NoProjectsCard, ProjectCard, ProjectFormDialog } from "./components";
 
 export const ProjectsPage = () => {
   const navigate = useNavigate();
 
-  const { data: projects = [], isLoading: areProjectsLoading } =
-    useGetMyProjects();
+  const {
+    data: projects = [],
+    error: projectsError,
+    isError: areProjectsError,
+    isLoading: areProjectsLoading,
+  } = useGetMyProjects();
   const { data: managerCandidates = [], isLoading: areManagersLoading } =
     useGetProjectManagerCandidates();
   const createProject = useCreateProject();
@@ -41,6 +46,16 @@ export const ProjectsPage = () => {
   }, [managerCandidates]);
 
   const isSaving = createProject.isPending || updateProject.isPending;
+
+  if (areProjectsError) {
+    return (
+      <ErrorState
+        error={projectsError}
+        fallback="Could not load projects."
+        title="Could not load projects."
+      />
+    );
+  }
 
   const handleOpenCreateDialog = () => {
     setDialogProject(null);

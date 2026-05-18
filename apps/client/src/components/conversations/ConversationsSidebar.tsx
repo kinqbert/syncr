@@ -1,9 +1,10 @@
-import { CircularProgress, Stack } from "@mui/material";
+import { Alert, CircularProgress, Stack } from "@mui/material";
 import type { ListConversation } from "@syncr/packages";
 import { useState } from "react";
 
 import { theme } from "@/lib/theme";
 import { useConversationsSidebarStore } from "@/store/useConversationsSidebarStore";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { ConversationListItem } from "./ConversationListItem";
 import { ConversationsSidebarHeader } from "./ConversationsSidebarHeader";
@@ -12,14 +13,18 @@ import { NewConversationDialog } from "./NewConversationDialog";
 
 type ConversationsSidebarProps = {
   conversations: ListConversation[];
+  error?: unknown;
   forceOpen?: boolean;
+  hasError?: boolean;
   loading?: boolean;
   onConversationSelect?: () => void;
 };
 
 export const ConversationsSidebar = ({
   conversations,
+  error,
   forceOpen = false,
+  hasError = false,
   loading = false,
   onConversationSelect,
 }: ConversationsSidebarProps) => {
@@ -91,6 +96,12 @@ export const ConversationsSidebar = ({
             open={visibleOpen}
             onClick={() => setDialogOpen(true)}
           />
+
+          {hasError ? (
+            <Alert severity="error" sx={{ m: visibleOpen ? 1 : 0 }}>
+              {getErrorMessage(error, "Could not load conversations.")}
+            </Alert>
+          ) : null}
 
           {conversations.map((conversation) => (
             <ConversationListItem

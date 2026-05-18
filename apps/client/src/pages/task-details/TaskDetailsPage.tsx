@@ -10,6 +10,7 @@ import { Link, useParams } from "react-router";
 
 import { useGetProjectAssignees, useGetProjectLabels } from "@/api/projects";
 import { useGetProjectTasks } from "@/api/tasks";
+import { ErrorState } from "@/components/ErrorState";
 
 import { TaskActivityPanel } from "./components/TaskActivityPanel";
 import { TaskCommentsPanel } from "./components/TaskCommentsPanel";
@@ -20,18 +21,38 @@ export const TaskDetailsPage = () => {
   const { projectId, taskId } = useParams();
   const numericProjectId = Number(projectId);
   const numericTaskId = Number(taskId);
-  const { data: tasks = [], isPending } = useGetProjectTasks(
-    numericProjectId,
-    Boolean(projectId),
-  );
-  const { data: projectAssignees = [], isPending: areAssigneesPending } =
-    useGetProjectAssignees(numericProjectId, Boolean(projectId));
-  const { data: projectLabels = [], isPending: areLabelsPending } =
-    useGetProjectLabels(numericProjectId, Boolean(projectId));
+  const {
+    data: tasks = [],
+    error: tasksError,
+    isError: areTasksError,
+    isPending,
+  } = useGetProjectTasks(numericProjectId, Boolean(projectId));
+  const {
+    data: projectAssignees = [],
+    error: assigneesError,
+    isError: areAssigneesError,
+    isPending: areAssigneesPending,
+  } = useGetProjectAssignees(numericProjectId, Boolean(projectId));
+  const {
+    data: projectLabels = [],
+    error: labelsError,
+    isError: areLabelsError,
+    isPending: areLabelsPending,
+  } = useGetProjectLabels(numericProjectId, Boolean(projectId));
   const task = tasks.find((item) => item.id === numericTaskId);
 
   if (!projectId || !taskId) {
     return null;
+  }
+
+  if (areTasksError || areAssigneesError || areLabelsError) {
+    return (
+      <ErrorState
+        error={tasksError ?? assigneesError ?? labelsError}
+        fallback="Could not load task details."
+        title="Could not load task details."
+      />
+    );
   }
 
   if (isPending) {

@@ -12,7 +12,12 @@ import {
 import { ConversationsSidebar } from "./ConversationsSidebar";
 
 export const ConversationsLayout = () => {
-  const { data: conversations = [], isLoading } = useGetConversationsList();
+  const {
+    data: conversations = [],
+    error,
+    isError,
+    isLoading,
+  } = useGetConversationsList();
   const open = useConversationsSidebarStore((state) => state.isOpen);
   const closeSidebar = useConversationsSidebarStore(
     (state) => state.closeSidebar,
@@ -52,7 +57,9 @@ export const ConversationsLayout = () => {
         >
           <ConversationsSidebar
             conversations={conversations}
+            error={error}
             forceOpen
+            hasError={isError}
             loading={isLoading}
             onConversationSelect={closeSidebar}
           />
@@ -60,6 +67,8 @@ export const ConversationsLayout = () => {
       ) : (
         <ConversationsSidebar
           conversations={conversations}
+          error={error}
+          hasError={isError}
           loading={isLoading}
         />
       )}

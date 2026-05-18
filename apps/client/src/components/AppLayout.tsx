@@ -9,13 +9,19 @@ import { useCompanyStore } from "@/store/useCompanyStore";
 
 import { CompanyRequiredPlaceholder } from "./CompanyRequiredPlaceholder";
 import { ConversationEventsListener } from "./ConversationEventsListener";
+import { ErrorState } from "./ErrorState";
 import { Header, HEADER_HEIGHT } from "./Header";
 import { NotificationsListener } from "./NotificationsListener";
 import { Sidebar } from "./Sidebar";
 
 const CompanyContent = () => {
   const selectedCompanyId = useCompanyStore((state) => state.selectedCompanyId);
-  const { data: companies = [], isPending } = useGetMyCompanies();
+  const {
+    data: companies = [],
+    error,
+    isError,
+    isPending,
+  } = useGetMyCompanies();
 
   return (
     <Box
@@ -51,7 +57,13 @@ const CompanyContent = () => {
         },
       }}
     >
-      {isPending ? (
+      {isError ? (
+        <ErrorState
+          error={error}
+          fallback="Could not load your companies."
+          title="Could not load workspace."
+        />
+      ) : isPending ? (
         <Stack
           alignItems="center"
           component="main"
@@ -76,7 +88,14 @@ export const AppLayout = () => {
     <AuthenticatedLayout>
       <SocketProvider>
         <>
-          <Toaster />
+          <Toaster
+            richColors
+            toastOptions={{
+              classNames: {
+                error: "sonner-error-toast",
+              },
+            }}
+          />
           <NotificationsListener />
           <ConversationEventsListener />
         </>

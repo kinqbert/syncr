@@ -11,12 +11,13 @@ import {
 } from "@syncr/packages";
 
 import { useCreateTask, useGetProjectTasks } from "@/api/tasks";
+import { ErrorState } from "@/components/ErrorState";
 import { useProject } from "@/hooks";
 
 import { useKanbanDrag } from "../hooks/useKanbanDrag";
 import { KanbanColumn } from "./KanbanColumn";
 import { SortableTaskCard } from "./SortableTaskCard";
-import { TaskCard, TASK_CARD_WIDTH } from "./TaskCard";
+import { TASK_CARD_WIDTH, TaskCard } from "./TaskCard";
 
 const columns: KanbanColumn[] = [
   {
@@ -68,8 +69,12 @@ export const Kanban = ({
   projectAssignees,
 }: KanbanProps) => {
   const { projectId } = useProject();
-  const { data: tasks, isLoading: areTasksLoading } =
-    useGetProjectTasks(projectId);
+  const {
+    data: tasks,
+    error: tasksError,
+    isError: areTasksError,
+    isLoading: areTasksLoading,
+  } = useGetProjectTasks(projectId);
   const createTask = useCreateTask();
   const {
     activeTask,
@@ -93,6 +98,16 @@ export const Kanban = ({
       body,
     });
   };
+
+  if (areTasksError) {
+    return (
+      <ErrorState
+        error={tasksError}
+        fallback="Could not load tasks."
+        title="Could not load tasks."
+      />
+    );
+  }
 
   return (
     <DndContext

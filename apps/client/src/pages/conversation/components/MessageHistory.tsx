@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -12,6 +13,7 @@ import { ArrowDown } from "lucide-mui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useGetConversationHistory } from "@/api/conversations";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { buildMessageBlocks } from "../utils/conversationMessages";
 import { MessageBlock } from "./MessageBlock";
@@ -44,6 +46,8 @@ export const MessageHistory = ({
     data: conversationHistory,
     fetchNextPage,
     hasNextPage,
+    error,
+    isError,
     isFetchingNextPage,
     isLoading,
   } = useGetConversationHistory(conversationId, 30, enabled);
@@ -247,7 +251,11 @@ export const MessageHistory = ({
           </Box>
         ) : null}
 
-        {isLoading ? (
+        {isError ? (
+          <Alert severity="error">
+            {getErrorMessage(error, "Could not load messages.")}
+          </Alert>
+        ) : isLoading ? (
           <Stack flex={1} alignItems="center" justifyContent="center">
             <CircularProgress size={28} />
           </Stack>
