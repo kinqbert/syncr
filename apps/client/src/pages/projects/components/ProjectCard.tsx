@@ -10,7 +10,11 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import type { Project } from "@syncr/packages";
+import {
+  type Project,
+  ProjectStatus,
+  type ProjectStatus as ProjectStatusType,
+} from "@syncr/packages";
 import {
   CalendarDays,
   LayoutDashboard,
@@ -30,6 +34,32 @@ type ProjectCardProps = {
   project: Project;
 };
 
+const PROJECT_STATUS_CHIP_COLORS: Record<
+  ProjectStatusType,
+  { bgcolor: string; borderColor: string; color: string }
+> = {
+  [ProjectStatus.Active]: {
+    bgcolor: "#ECFDF5",
+    borderColor: "#A7F3D0",
+    color: "#047857",
+  },
+  [ProjectStatus.Paused]: {
+    bgcolor: "#FFFBEB",
+    borderColor: "#FDE68A",
+    color: "#B45309",
+  },
+  [ProjectStatus.Completed]: {
+    bgcolor: "#EFF6FF",
+    borderColor: "#BFDBFE",
+    color: "#1D4ED8",
+  },
+  [ProjectStatus.Archived]: {
+    bgcolor: "#F8FAFC",
+    borderColor: "#CBD5E1",
+    color: "#475569",
+  },
+};
+
 export const ProjectCard = ({
   managerName,
   onEdit,
@@ -42,6 +72,7 @@ export const ProjectCard = ({
           (project.completedTasksCount / project.totalTasksCount) * 100,
         )
       : 0;
+  const statusChipColors = PROJECT_STATUS_CHIP_COLORS[project.status];
 
   return (
     <Card
@@ -90,13 +121,12 @@ export const ProjectCard = ({
 
             <Stack alignItems="center" direction="row" flexShrink={0} gap={0.5}>
               <Chip
-                color="success"
                 label={project.status}
                 size="small"
                 sx={{
-                  bgcolor: "#ECFDF5",
-                  borderColor: "#A7F3D0",
-                  color: "#047857",
+                  bgcolor: statusChipColors.bgcolor,
+                  borderColor: statusChipColors.borderColor,
+                  color: statusChipColors.color,
                   flexShrink: 0,
                   fontWeight: 700,
                   textTransform: "capitalize",
