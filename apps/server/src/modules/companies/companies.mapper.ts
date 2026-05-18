@@ -12,6 +12,7 @@ type UserCompany = {
   id: number;
   name: string;
   roleName: string;
+  weeklyLoadMinutes: number;
 };
 
 export const mapUserCompanyToDto = (userCompany: UserCompany): UserCompanyDto => {
@@ -19,5 +20,6 @@ export const mapUserCompanyToDto = (userCompany: UserCompany): UserCompanyDto =>
     id: userCompany.id,
     name: userCompany.name,
     roleName: userCompany.roleName,
+    weeklyLoadMinutes: userCompany.weeklyLoadMinutes,
   };
 };

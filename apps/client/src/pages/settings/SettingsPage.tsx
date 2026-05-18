@@ -2,6 +2,7 @@ import { Stack, Typography } from "@mui/material";
 
 import {
   CalendarSettingsSection,
+  CompanyWorkHoursSettingsSection,
   PasswordSettingsSection,
   ProfileSettingsSection,
 } from "./components";
@@ -28,6 +29,7 @@ export const SettingsPage = () => {
       </Stack>
 
       <ProfileSettingsSection />
+      <CompanyWorkHoursSettingsSection />
       <PasswordSettingsSection />
       <CalendarSettingsSection />
     </Stack>

@@ -1,12 +1,4 @@
-import {
-  Alert,
-  Box,
-  Button,
-  Divider,
-  InputAdornment,
-  Stack,
-  TextField,
-} from "@mui/material";
+import { Alert, Box, Button, Divider, Stack, TextField } from "@mui/material";
 import { Save, UserRound } from "lucide-mui";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -21,11 +13,7 @@ type ProfileFormState = {
   name: string;
   surname: string;
   birthday: string;
-  weeklyLoadHours: number;
 };
-
-const minutesToHours = (minutes: number) => minutes / 60;
-const hoursToMinutes = (hours: number) => Math.round(hours * 60);
 
 export const ProfileSettingsSection = () => {
   const { data: user } = useMe();
@@ -42,7 +30,6 @@ export const ProfileSettingsSection = () => {
       name: "",
       surname: "",
       birthday: "",
-      weeklyLoadHours: 40,
     },
   });
 
@@ -55,7 +42,6 @@ export const ProfileSettingsSection = () => {
       name: user.name,
       surname: user.surname,
       birthday: user.birthday ?? "",
-      weeklyLoadHours: minutesToHours(user.weeklyLoadMinutes),
     });
   }, [reset, user]);
 
@@ -67,7 +53,7 @@ export const ProfileSettingsSection = () => {
         name: formState.name.trim(),
         surname: formState.surname.trim(),
         birthday: formState.birthday || null,
-        weeklyLoadMinutes: hoursToMinutes(Number(formState.weeklyLoadHours)),
+        weeklyLoadMinutes: user?.weeklyLoadMinutes ?? 40 * 60,
       });
       toast.success("Profile updated.");
     } catch (error) {
@@ -87,7 +73,7 @@ export const ProfileSettingsSection = () => {
       width="100%"
     >
       <SettingsSectionHeader
-        description="Update your personal details and weekly capacity."
+        description="Update your personal details."
         icon={<UserRound sx={{ color: "primary.main", fontSize: 20 }} />}
         title="Profile"
       />
@@ -134,34 +120,6 @@ export const ProfileSettingsSection = () => {
             InputLabelProps={{ shrink: true }}
             label="Birthday"
             type="date"
-          />
-          <TextField
-            {...register("weeklyLoadHours", {
-              required: "Weekly load is required.",
-              valueAsNumber: true,
-              min: {
-                value: 1,
-                message: "Weekly load must be at least 1 hour.",
-              },
-              max: {
-                value: 168,
-                message: "Weekly load cannot exceed 168 hours.",
-              },
-            })}
-            disabled={updateProfile.isPending}
-            error={Boolean(errors.weeklyLoadHours)}
-            helperText={
-              errors.weeklyLoadHours?.message ??
-              "Used to calculate workload on team pages."
-            }
-            inputProps={{ step: 0.5, min: 1, max: 168 }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">hours</InputAdornment>
-              ),
-            }}
-            label="Weekly load"
-            type="number"
           />
         </Box>
 

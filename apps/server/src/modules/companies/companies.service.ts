@@ -1,8 +1,13 @@
-import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
-import { UserCompany } from "@syncr/packages";
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import type { UserCompany } from "@syncr/packages";
 
 import { CompaniesRepository } from "../../repositories/companies.repository";
-import { CompanyDto, CreateCompanyDto } from "./companies.dto";
+import { CompanyDto, CreateCompanyDto, UpdateCompanyUserSettingsDto } from "./companies.dto";
 import { mapCompanyToDto, mapUserCompanyToDto } from "./companies.mapper";
 
 @Injectable()
@@ -32,6 +37,22 @@ export class CompaniesService {
       }
 
       throw error;
+    }
+  }
+
+  async updateUserCompanySettings(
+    userId: number,
+    companyId: number,
+    updateCompanyUserSettingsDto: UpdateCompanyUserSettingsDto,
+  ) {
+    const settings = await this.companyRepository.updateUserCompanySettings(
+      userId,
+      companyId,
+      updateCompanyUserSettingsDto,
+    );
+
+    if (!settings) {
+      throw new NotFoundException("Company settings not found");
     }
   }
 

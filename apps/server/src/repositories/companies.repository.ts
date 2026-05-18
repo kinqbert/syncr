@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { DbProvider } from "../db/db.provider";
 import { companies, roles, userCompanyRoles } from "../db/schema";
@@ -22,6 +22,7 @@ export class CompaniesRepository extends BaseRepository {
         id: companies.id,
         name: companies.name,
         roleName: roles.name,
+        weeklyLoadMinutes: userCompanyRoles.weeklyLoadMinutes,
       })
       .from(userCompanyRoles)
       .where(eq(userCompanyRoles.userId, userId))
@@ -39,6 +40,20 @@ export class CompaniesRepository extends BaseRepository {
       .limit(1);
 
     return company;
+  }
+
+  async updateUserCompanySettings(
+    userId: number,
+    companyId: number,
+    data: Pick<typeof userCompanyRoles.$inferInsert, "weeklyLoadMinutes">,
+  ) {
+    const [settings] = await this.db
+      .update(userCompanyRoles)
+      .set(data)
+      .where(and(eq(userCompanyRoles.userId, userId), eq(userCompanyRoles.companyId, companyId)))
+      .returning();
+
+    return settings;
   }
 
   async createUserCompany(userId: number, name: string) {
