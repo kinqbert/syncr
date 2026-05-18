@@ -73,7 +73,7 @@ export const DashboardQuickLinks = () => {
               borderBottom: { xs: 1, sm: 1 },
               borderBottomColor: "divider",
               borderColor: { xs: "transparent", sm: "divider" },
-              borderRadius: { xs: 0, sm: 1 },
+              borderRadius: { xs: 0, sm: 2 },
               color: "text.primary",
               justifyContent: "flex-start",
               minHeight: 64,
@@ -86,12 +86,8 @@ export const DashboardQuickLinks = () => {
                 borderColor: { xs: "transparent", sm: "primary.main" },
                 color: "primary.main",
               },
-              "& .MuiButton-startIcon": {
-                mt: 0.25,
-              },
               "& .MuiButton-endIcon": {
                 ml: "auto",
-                mt: 0.25,
               },
             }}
             to={link.to}
