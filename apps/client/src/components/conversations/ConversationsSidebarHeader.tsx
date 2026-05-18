@@ -28,7 +28,18 @@ export const ConversationsSidebarHeader = ({
       }}
     >
       <>
-        <Stack direction="row" alignItems="center" gap={1} minWidth={0}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          gap={open ? 1 : 0}
+          minWidth={0}
+          sx={{
+            opacity: open ? 1 : 0,
+            overflow: "hidden",
+            transition:
+              "max-width 220ms ease, opacity 160ms ease, gap 220ms ease",
+          }}
+        >
           <Typography fontWeight={800} noWrap variant="h6">
             Chats
           </Typography>
@@ -42,6 +53,9 @@ export const ConversationsSidebarHeader = ({
               minWidth={22}
               px={0.75}
               textAlign="center"
+              sx={{
+                overflow: "hidden",
+              }}
             >
               {unreadCount > 99 ? "99+" : unreadCount}
             </Typography>
