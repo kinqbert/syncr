@@ -7,11 +7,13 @@ type ConversationsSidebarHeaderProps = {
   open: boolean;
   unreadCount: number;
   toggleSidebar: () => void;
+  toggleSidebar: () => void;
 };
 
 export const ConversationsSidebarHeader = ({
   open,
   unreadCount,
+  toggleSidebar,
   toggleSidebar,
 }: ConversationsSidebarHeaderProps) => {
   return (
