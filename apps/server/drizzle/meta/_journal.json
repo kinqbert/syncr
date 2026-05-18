@@ -169,6 +169,13 @@
       "when": 1778755046270,
       "tag": "0023_hot_mikhail_rasputin",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1779122400008,
+      "tag": "0024_confused_sabra",
+      "breakpoints": true
     }
   ]
 }

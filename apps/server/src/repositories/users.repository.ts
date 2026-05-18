@@ -32,16 +32,19 @@ export class UsersRepository extends BaseRepository {
     const companyUsers = await this.db
       .select({
         user: users,
+        userCompanyRole: userCompanyRoles,
         role: roles,
-        assignedTasks: count(tasks.id),
+        assignedTasks: count(projects.id),
         completedTasks: sql<number>`
-        count(*) filter (where ${tasks.status} = ${TaskStatus.Done})`,
-        assignedTasksWorkloadMinutes: sql<number>`coalesce(sum(${tasks.estimateMinutes}), 0)::int`,
+        count(*) filter (where ${tasks.status} = ${TaskStatus.Done} and ${projects.id} is not null)`,
+        assignedTasksWorkloadMinutes: sql<number>`
+        coalesce(sum(${tasks.estimateMinutes}) filter (where ${projects.id} is not null), 0)::int`,
       })
       .from(userCompanyRoles)
       .innerJoin(users, eq(users.id, userCompanyRoles.userId))
       .innerJoin(roles, eq(roles.id, userCompanyRoles.roleId))
       .leftJoin(tasks, eq(tasks.assigneeId, userCompanyRoles.userId))
+      .leftJoin(projects, and(eq(projects.id, tasks.projectId), eq(projects.companyId, companyId)))
       .where(eq(userCompanyRoles.companyId, companyId))
       .groupBy(
         users.id,
@@ -49,6 +52,7 @@ export class UsersRepository extends BaseRepository {
         userCompanyRoles.userId,
         userCompanyRoles.companyId,
         userCompanyRoles.roleId,
+        userCompanyRoles.weeklyLoadMinutes,
       );
 
     return companyUsers;

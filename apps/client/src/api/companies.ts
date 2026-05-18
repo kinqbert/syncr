@@ -1,4 +1,9 @@
-import type { Company, CreateCompanyBody, UserCompany } from "@syncr/packages";
+import type {
+  Company,
+  CreateCompanyBody,
+  UpdateCompanyUserSettingsBody,
+  UserCompany,
+} from "@syncr/packages";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import api from "@/lib/axios";
@@ -20,6 +25,16 @@ const createCompany = async (body: CreateCompanyBody) => {
   return response.data;
 };
 
+const updateCompanyUserSettings = async ({
+  body,
+  companyId,
+}: {
+  body: UpdateCompanyUserSettingsBody;
+  companyId: number;
+}) => {
+  await api.patch(`companies/${companyId}/settings`, body);
+};
+
 export const useGetMyCompanies = () => {
   return useQuery({
     queryFn: getMyCompanies,
@@ -34,6 +49,30 @@ export const useCreateCompany = () => {
       void queryClient.invalidateQueries({
         queryKey: companiesKeys.companies,
       });
+    },
+  });
+};
+
+export const useUpdateCompanyUserSettings = () => {
+  return useMutation({
+    mutationFn: updateCompanyUserSettings,
+    onSuccess: (_, variables) => {
+      queryClient.setQueryData<UserCompany[]>(
+        companiesKeys.companies,
+        (companies) =>
+          companies?.map((company) =>
+            company.id === variables.companyId
+              ? {
+                  ...company,
+                  weeklyLoadMinutes: variables.body.weeklyLoadMinutes,
+                }
+              : company,
+          ),
+      );
+      void queryClient.invalidateQueries({
+        queryKey: companiesKeys.companies,
+      });
+      void queryClient.invalidateQueries({ queryKey: ["team"] });
     },
   });
 };

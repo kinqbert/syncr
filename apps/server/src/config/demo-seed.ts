@@ -9,7 +9,7 @@ import {
   TaskPriority,
   TaskStatus,
 } from "@syncr/packages";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 import { DEMO_USER_EMAIL } from "../common/demo";
 import { type AppDb, demoDb } from "../db/drizzle";
@@ -121,6 +121,73 @@ const DEMO_TASK_DESCRIPTIONS = [
   "Investigate the production-shaped path and record the fix in a way the whole team can follow.",
 ] as const;
 
+const DEMO_USERS = [
+  {
+    email: DEMO_USER_EMAIL,
+    name: "Jules",
+    surname: "Winnfield",
+    password: "demo",
+    birthday: "1992-05-22",
+    weeklyLoadMinutes: 40 * 60,
+  },
+  {
+    email: "mia.wallace@syncr.cc",
+    name: "Mia",
+    surname: "Wallace",
+    password: "demo",
+    birthday: "1990-06-04",
+    weeklyLoadMinutes: 36 * 60,
+  },
+  {
+    email: "vincent.vega@syncr.cc",
+    name: "Vincent",
+    surname: "Vega",
+    password: "demo",
+    birthday: "1988-06-18",
+    weeklyLoadMinutes: 38 * 60,
+  },
+  {
+    email: "django.freeman@syncr.cc",
+    name: "Django",
+    surname: "Freeman",
+    password: "demo",
+    birthday: "1995-07-02",
+    weeklyLoadMinutes: 32 * 60,
+  },
+  {
+    email: "aldo.raine@syncr.cc",
+    name: "Aldo",
+    surname: "Raine",
+    password: "demo",
+    birthday: "1991-07-12",
+    weeklyLoadMinutes: 40 * 60,
+  },
+  {
+    email: "shosanna.dreyfus@syncr.cc",
+    name: "Shosanna",
+    surname: "Dreyfus",
+    password: "demo",
+    birthday: "1993-08-08",
+    weeklyLoadMinutes: 34 * 60,
+  },
+  {
+    email: "calvin.candie@syncr.cc",
+    name: "Calvin",
+    surname: "Candie",
+    password: "demo",
+    birthday: "1987-09-16",
+    weeklyLoadMinutes: 30 * 60,
+  },
+  {
+    email: "mr.pink@syncr.cc",
+    name: "Mr.",
+    surname: "Pink",
+    password: "demo",
+    birthday: "1989-11-03",
+    weeklyLoadMinutes: 36 * 60,
+  },
+];
+
 const DEMO_LABELS = [
   "bug",
   "feature",
@@ -197,6 +264,42 @@ const updateExistingDemoUserNames = async () => {
       .set({ email: "aldo.raine@syncr.cc", name: "Aldo", surname: "Raine" })
       .where(eq(users.email, "beatrix.kiddo@syncr.cc")),
   ]);
+
+  await Promise.all(
+    DEMO_USERS.map((user) =>
+      demoDb!
+        .update(users)
+        .set({
+          name: user.name,
+          surname: user.surname,
+          birthday: user.birthday,
+          weeklyLoadMinutes: user.weeklyLoadMinutes,
+        })
+        .where(eq(users.email, user.email)),
+    ),
+  );
+
+  const existingDemoUsers = await demoDb
+    .select({
+      id: users.id,
+      weeklyLoadMinutes: users.weeklyLoadMinutes,
+    })
+    .from(users)
+    .where(
+      inArray(
+        users.email,
+        DEMO_USERS.map((user) => user.email),
+      ),
+    );
+
+  await Promise.all(
+    existingDemoUsers.map((user) =>
+      demoDb!
+        .update(userCompanyRoles)
+        .set({ weeklyLoadMinutes: user.weeklyLoadMinutes })
+        .where(eq(userCompanyRoles.userId, user.id)),
+    ),
+  );
 };
 
 export const seedDemoData = async (seedRoles: SeedRoles) => {
@@ -233,75 +336,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
       .where(eq(roles.key, RoleKey.Developer))
       .limit(1);
 
-    const seededUsers = await tx
-      .insert(users)
-      .values([
-        {
-          email: DEMO_USER_EMAIL,
-          name: "Jules",
-          surname: "Winnfield",
-          password: "demo",
-          birthday: "1992-05-22",
-          weeklyLoadMinutes: 40 * 60,
-        },
-        {
-          email: "mia.wallace@syncr.cc",
-          name: "Mia",
-          surname: "Wallace",
-          password: "demo",
-          birthday: "1990-06-04",
-          weeklyLoadMinutes: 36 * 60,
-        },
-        {
-          email: "vincent.vega@syncr.cc",
-          name: "Vincent",
-          surname: "Vega",
-          password: "demo",
-          birthday: "1988-06-18",
-          weeklyLoadMinutes: 38 * 60,
-        },
-        {
-          email: "django.freeman@syncr.cc",
-          name: "Django",
-          surname: "Freeman",
-          password: "demo",
-          birthday: "1995-07-02",
-          weeklyLoadMinutes: 32 * 60,
-        },
-        {
-          email: "aldo.raine@syncr.cc",
-          name: "Aldo",
-          surname: "Raine",
-          password: "demo",
-          birthday: "1991-07-12",
-          weeklyLoadMinutes: 40 * 60,
-        },
-        {
-          email: "shosanna.dreyfus@syncr.cc",
-          name: "Shosanna",
-          surname: "Dreyfus",
-          password: "demo",
-          birthday: "1993-08-08",
-          weeklyLoadMinutes: 34 * 60,
-        },
-        {
-          email: "calvin.candie@syncr.cc",
-          name: "Calvin",
-          surname: "Candie",
-          password: "demo",
-          birthday: "1987-09-16",
-          weeklyLoadMinutes: 30 * 60,
-        },
-        {
-          email: "mr.pink@syncr.cc",
-          name: "Mr.",
-          surname: "Pink",
-          password: "demo",
-          birthday: "1989-11-03",
-          weeklyLoadMinutes: 36 * 60,
-        },
-      ])
-      .returning();
+    const seededUsers = await tx.insert(users).values(DEMO_USERS).returning();
 
     const [company] = await tx
       .insert(companies)
@@ -313,6 +348,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
         userId: user.id,
         companyId: company.id,
         roleId: index === 0 ? ownerRole.id : index <= 3 ? managerRole.id : developerRole.id,
+        weeklyLoadMinutes: user.weeklyLoadMinutes,
       })),
     );
 

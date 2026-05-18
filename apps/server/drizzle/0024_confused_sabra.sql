@@ -1,0 +1,1 @@
+ALTER TABLE "user_company_roles" ADD COLUMN "weekly_load_minutes" integer DEFAULT 2400 NOT NULL;

@@ -1,10 +1,11 @@
 import { InvitationStatus } from "@syncr/packages";
-import { invitations, roles, users } from "src/db/schema";
+import { invitations, roles, userCompanyRoles, users } from "src/db/schema";
 
 import { TeamInvitationDto, TeamMemberDto, TeamResponseDto, TeamUserDto } from "./team.dto";
 
 type DbTeamUserQueryData = {
   user: typeof users.$inferSelect;
+  userCompanyRole: typeof userCompanyRoles.$inferSelect;
   role: typeof roles.$inferSelect;
   assignedTasks: number;
   completedTasks: number;
@@ -35,7 +36,10 @@ export const mapToTeamDataResponseDto = (
     roleName: user.role.name,
     assignedTasks: user.assignedTasks,
     completedTasks: user.completedTasks,
-    workload: Math.min(1, user.assignedTasksWorkloadMinutes / user.user.weeklyLoadMinutes),
+    workload: Math.min(
+      1,
+      user.assignedTasksWorkloadMinutes / user.userCompanyRole.weeklyLoadMinutes,
+    ),
   }));
 
   const workloadsSum = members.reduce((acc, member) => acc + member.workload, 0);

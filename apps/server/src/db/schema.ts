@@ -140,6 +140,9 @@ export const userCompanyRoles = pgTable(
     roleId: integer()
       .notNull()
       .references(() => roles.id, { onDelete: "cascade" }),
+    weeklyLoadMinutes: integer()
+      .notNull()
+      .default(40 * 60),
   },
   (table) => [
     unique().on(table.userId, table.companyId),
