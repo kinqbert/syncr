@@ -7,11 +7,13 @@ type ConversationsSidebarHeaderProps = {
   open: boolean;
   unreadCount: number;
   toggleSidebar: () => void;
+  toggleSidebar: () => void;
 };
 
 export const ConversationsSidebarHeader = ({
   open,
   unreadCount,
+  toggleSidebar,
   toggleSidebar,
 }: ConversationsSidebarHeaderProps) => {
   return (
@@ -80,12 +82,34 @@ export const ConversationsSidebarHeader = ({
             }}
           >
             {open ? (
+        <Tooltip title="Collapse chats">
+          <IconButton
+            aria-label="Collapse chats"
+            onClick={toggleSidebar}
+            size="small"
+            sx={{
+              justifySelf: "end",
+              color: "text.secondary",
+              height: 34,
+              ml: "auto",
+              width: 34,
+              "&:hover": {
+                bgcolor: "action.hover",
+                color: "text.primary",
+              },
+            }}
+          >
+            {open ? (
               <PanelLeftClose fontSize="small" />
+            ) : (
+              <PanelLeftOpen fontSize="small" />
+            )}
             ) : (
               <PanelLeftOpen fontSize="small" />
             )}
           </IconButton>
         </Tooltip>
+      </>
       </>
     </Stack>
   );
