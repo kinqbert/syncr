@@ -106,6 +106,7 @@ export const HeaderLogo = ({
       <Typography
         variant="h6"
         color="primary"
+        fontWeight={600}
         noWrap
         sx={{
           maxWidth: open ? 80 : 0,
