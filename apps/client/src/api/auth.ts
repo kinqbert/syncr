@@ -52,7 +52,6 @@ export const useMe = () => {
   return useQuery({
     queryFn: me,
     queryKey: authKeys.me,
-    retry: false,
   });
 };
 
