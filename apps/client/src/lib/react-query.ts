@@ -1,11 +1,32 @@
 import { QueryClient } from "@tanstack/react-query";
+import axios from "axios";
 
-const MAX_QUERY_RETRIES = 5;
+export const MAX_QUERY_RETRIES = 5;
+
+const retryQuery = (failureCount: number, error: unknown) => {
+  if (failureCount >= MAX_QUERY_RETRIES) {
+    return false;
+  }
+
+  if (!axios.isAxiosError(error)) {
+    return true;
+  }
+
+  const status = error.response?.status;
+
+  if (!status) {
+    return true;
+  }
+
+  return status === 408 || status === 429 || status >= 500;
+};
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: (failureCount) => failureCount < MAX_QUERY_RETRIES,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      retry: retryQuery,
     },
   },
 });

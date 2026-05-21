@@ -1,8 +1,10 @@
 import { CircularProgress, Stack } from "@mui/material";
+import axios from "axios";
 import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router";
 
 import { useMe } from "@/api";
+import { ErrorState } from "@/components/ErrorState";
 import { useAuthStore } from "@/store/useAuthStore";
 import { buildStoreUserFromMe } from "@/utils/buildStoreUserFromMe";
 
@@ -13,7 +15,8 @@ export const AuthenticatedLayout = ({
 }) => {
   const location = useLocation();
   const setUser = useAuthStore((state) => state.setUser);
-  const { data: user, isFetching, isPending, isSuccess } = useMe();
+  const { data: user, error, isError, isFetching, isPending, isSuccess } =
+    useMe();
 
   useEffect(() => {
     if (!isSuccess || !user) {
@@ -31,6 +34,22 @@ export const AuthenticatedLayout = ({
         <CircularProgress />
       </Stack>
     );
+  }
+
+  if (isError) {
+    const status = axios.isAxiosError(error) ? error.response?.status : null;
+
+    if (status !== 401 && status !== 403) {
+      return (
+        <Stack minHeight="100vh" alignItems="center" justifyContent="center">
+          <ErrorState
+            error={error}
+            fallback="Could not connect to the server."
+            title="Could not verify your session."
+          />
+        </Stack>
+      );
+    }
   }
 
   if (!user) {
