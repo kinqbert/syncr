@@ -1,4 +1,6 @@
-import { AppBar, Stack, Toolbar } from "@mui/material";
+import { AppBar, Link, Stack, Toolbar, Typography } from "@mui/material";
+
+import { getRealWebsiteUrl, isDemoView } from "@/lib/demo";
 
 import { CompanySwitcher } from "./CompanySwitcher";
 import { HeaderLogo } from "./HeaderLogo";
@@ -7,6 +9,8 @@ import { UserMenu } from "./UserMenu";
 export const HEADER_HEIGHT = 64;
 
 export const Header = () => {
+  const isDemo = isDemoView();
+
   return (
     <AppBar
       color="default"
@@ -41,7 +45,29 @@ export const Header = () => {
           px={2}
         >
           <CompanySwitcher />
-          <UserMenu />
+          <Stack direction="row" alignItems="center" gap={1.5} minWidth={0}>
+            {isDemo && (
+              <Typography
+                color="text.secondary"
+                fontSize={12}
+                noWrap
+                sx={{ display: { xs: "none", sm: "block" } }}
+              >
+                This is a demo.{" "}
+                <Link
+                  color="primary"
+                  href={getRealWebsiteUrl()}
+                  rel="noreferrer"
+                  target="_blank"
+                  underline="hover"
+                >
+                  Visit the real website
+                </Link>
+                .
+              </Typography>
+            )}
+            <UserMenu />
+          </Stack>
         </Stack>
       </Toolbar>
     </AppBar>
