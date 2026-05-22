@@ -66,7 +66,7 @@ export const Header = () => {
                 This is a demo.{" "}
                 <Link
                   color="primary"
-                  href={realWebsiteUrl}
+                  href={getRealWebsiteUrl()}
                   rel="noreferrer"
                   target="_blank"
                   underline="hover"
