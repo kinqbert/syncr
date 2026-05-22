@@ -6,34 +6,39 @@ import {
   MessageCircle,
   Users,
 } from "lucide-mui";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { Link } from "react-router";
 
 const QUICK_LINKS: {
+  id: number;
   description: string;
   icon: ReactNode;
   label: string;
   to: string;
 }[] = [
   {
+    id: 0,
     description: "Open workspace projects",
     icon: <Folders />,
     label: "Projects",
     to: "/projects",
   },
   {
+    id: 1,
     description: "Review assigned deadlines",
     icon: <CalendarDays />,
     label: "Calendar",
     to: "/calendar",
   },
   {
+    id: 2,
     description: "Jump into team messages",
     icon: <MessageCircle />,
     label: "Conversations",
     to: "/conversations",
   },
   {
+    id: 3,
     description: "Check teammates and roles",
     icon: <Users />,
     label: "Team",
@@ -60,9 +65,8 @@ export const DashboardQuickLinks = () => {
       }}
     >
       {QUICK_LINKS.map((link, index) => (
-        <>
+        <Fragment key={link.id}>
           <Button
-            key={link.to}
             component={Link}
             endIcon={<ExternalLink />}
             startIcon={link.icon}
@@ -115,7 +119,7 @@ export const DashboardQuickLinks = () => {
           {index !== QUICK_LINKS.length - 1 && (
             <Divider sx={{ display: { sm: "none" } }} />
           )}
-        </>
+        </Fragment>
       ))}
     </Box>
   );

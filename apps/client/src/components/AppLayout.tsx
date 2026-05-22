@@ -4,18 +4,20 @@ import { Toaster } from "sonner";
 
 import { useGetMyCompanies } from "@/api/companies";
 import { SocketProvider } from "@/context/SocketContext/SocketProvider";
+import { isDemoView } from "@/lib/demo";
 import { AuthenticatedLayout } from "@/providers/auth";
 import { useCompanyStore } from "@/store/useCompanyStore";
 
 import { CompanyRequiredPlaceholder } from "./CompanyRequiredPlaceholder";
 import { ConversationEventsListener } from "./ConversationEventsListener";
 import { ErrorState } from "./ErrorState";
-import { Header, HEADER_HEIGHT } from "./Header";
+import { Header, HEADER_HEIGHT, MOBILE_DEMO_HEADER_HEIGHT } from "./Header";
 import { NotificationsListener } from "./NotificationsListener";
 import { Sidebar } from "./Sidebar";
 
 const CompanyContent = () => {
   const selectedCompanyId = useCompanyStore((state) => state.selectedCompanyId);
+  const isDemo = isDemoView();
   const {
     data: companies = [],
     error,
@@ -25,7 +27,12 @@ const CompanyContent = () => {
 
   return (
     <Box
-      height={`calc(100vh - ${HEADER_HEIGHT}px)`}
+      height={{
+        xs: `calc(100vh - ${
+          isDemo ? MOBILE_DEMO_HEADER_HEIGHT : HEADER_HEIGHT
+        }px)`,
+        sm: `calc(100vh - ${HEADER_HEIGHT}px)`,
+      }}
       minWidth={0}
       sx={{
         flex: 1,
