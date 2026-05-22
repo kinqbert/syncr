@@ -1,5 +1,6 @@
 import { AppBar, Link, Stack, Toolbar, Typography } from "@mui/material";
 
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { getRealWebsiteUrl, isDemoView } from "@/lib/demo";
 
 import { CompanySwitcher } from "./CompanySwitcher";
@@ -7,9 +8,12 @@ import { HeaderLogo } from "./HeaderLogo";
 import { UserMenu } from "./UserMenu";
 
 export const HEADER_HEIGHT = 64;
+export const MOBILE_DEMO_HEADER_HEIGHT = 92;
 
 export const Header = () => {
   const isDemo = isDemoView();
+  const isMobile = useIsMobile();
+  const realWebsiteUrl = getRealWebsiteUrl();
 
   return (
     <AppBar
@@ -17,7 +21,10 @@ export const Header = () => {
       elevation={0}
       position="sticky"
       sx={{
-        height: HEADER_HEIGHT,
+        height: {
+          xs: isDemo ? MOBILE_DEMO_HEADER_HEIGHT : HEADER_HEIGHT,
+          sm: HEADER_HEIGHT,
+        },
         backgroundColor: "background.paper",
         p: 0,
 
@@ -35,7 +42,10 @@ export const Header = () => {
           },
         }}
       >
-        <HeaderLogo alwaysCollapsedOnMobile hasBottomBorder />
+        <HeaderLogo
+          alwaysCollapsedOnMobile
+          hasBottomBorder={!isDemo || !isMobile}
+        />
         <Stack
           direction="row"
           alignItems="center"
@@ -56,7 +66,7 @@ export const Header = () => {
                 This is a demo.{" "}
                 <Link
                   color="primary"
-                  href={getRealWebsiteUrl()}
+                  href={realWebsiteUrl}
                   rel="noreferrer"
                   target="_blank"
                   underline="hover"
@@ -70,6 +80,34 @@ export const Header = () => {
           </Stack>
         </Stack>
       </Toolbar>
+      {isDemo && (
+        <Typography
+          color="text.secondary"
+          fontSize={12}
+          noWrap
+          sx={{
+            alignItems: "center",
+            borderTop: 1,
+            borderColor: "divider",
+            display: { xs: "flex", sm: "none" },
+            height: MOBILE_DEMO_HEADER_HEIGHT - HEADER_HEIGHT,
+            justifyContent: "center",
+            px: 1.5,
+          }}
+        >
+          This is a demo.{" "}
+          <Link
+            color="primary"
+            href={realWebsiteUrl}
+            rel="noreferrer"
+            target="_blank"
+            underline="hover"
+          >
+            Visit the real website
+          </Link>
+          .
+        </Typography>
+      )}
     </AppBar>
   );
 };

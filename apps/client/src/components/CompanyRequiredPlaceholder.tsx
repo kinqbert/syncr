@@ -18,7 +18,6 @@ import { useCompanyStore } from "@/store/useCompanyStore";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { CompanyInvitationCard } from "./CompanyInvitationCard";
-import { HEADER_HEIGHT } from "./Header";
 
 export const CompanyRequiredPlaceholder = () => {
   const setSelectedCompanyId = useCompanyStore(
@@ -56,7 +55,7 @@ export const CompanyRequiredPlaceholder = () => {
       component="main"
       gap={1}
       justifyContent="center"
-      minHeight={`calc(100vh - ${HEADER_HEIGHT}px)`}
+      minHeight="100%"
       sx={{ width: "100%", p: 3, textAlign: "center" }}
     >
       {areInvitationsError ? (
