@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ProjectStatus, TaskActivityAction, TaskStatus } from "@syncr/packages";
-import { and, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, isNull, ne, or, sql } from "drizzle-orm";
 
 import { DbProvider } from "../db/db.provider";
 import {
@@ -78,7 +78,13 @@ export class DashboardRepository extends BaseRepository {
           value: sql<number>`count(${notifications.id})::int`.mapWith(Number),
         })
         .from(notifications)
-        .where(and(eq(notifications.recipientId, userId), eq(notifications.isRead, false))),
+        .where(
+          and(
+            eq(notifications.recipientId, userId),
+            eq(notifications.isRead, false),
+            or(eq(notifications.companyId, companyId), isNull(notifications.companyId)),
+          ),
+        ),
     ]);
 
     return {

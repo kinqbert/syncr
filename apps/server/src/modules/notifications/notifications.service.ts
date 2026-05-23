@@ -21,16 +21,20 @@ export class NotificationsService {
     private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
-  async getUserNotifications(userId: number) {
-    const notifications = await this.notificationsRepository.getUserNotifications(userId);
+  async getUserNotifications(userId: number, companyId: number) {
+    const notifications = await this.notificationsRepository.getUserNotifications(
+      userId,
+      this.getNotificationCompanyId(companyId),
+    );
 
     return notifications.map(mapNotificationToPayload);
   }
 
-  async markNotificationAsRead(userId: number, notificationId: number) {
+  async markNotificationAsRead(userId: number, notificationId: number, companyId: number) {
     const notification = await this.notificationsRepository.markNotificationAsRead(
       userId,
       notificationId,
+      this.getNotificationCompanyId(companyId),
     );
 
     if (!notification) {
@@ -40,64 +44,82 @@ export class NotificationsService {
     return mapNotificationToPayload(notification);
   }
 
-  async markAllUserNotificationsRead(userId: number) {
-    const notifications = await this.notificationsRepository.markAllUserNotificationsRead(userId);
+  async markAllUserNotificationsRead(userId: number, companyId: number) {
+    const notifications = await this.notificationsRepository.markAllUserNotificationsRead(
+      userId,
+      this.getNotificationCompanyId(companyId),
+    );
 
     return notifications.map(mapNotificationToPayload);
   }
 
   async notifyTaskAssigned(recipientId: number, actorId: number, taskId: number) {
+    const metadata = await this.getTaskMetadata(taskId);
+
     await this.createAndSendNotification({
       recipientId,
+      companyId: metadata.companyId,
       actorId,
       type: NotificationType.TaskAssigned,
       entityType: NotificationEntityType.Task,
       entityId: taskId,
-      metadata: await this.getTaskMetadata(taskId),
+      metadata,
     });
   }
 
   async notifyTaskCommented(recipientId: number, actorId: number, taskId: number) {
+    const metadata = await this.getTaskMetadata(taskId);
+
     await this.createAndSendNotification({
       recipientId,
+      companyId: metadata.companyId,
       actorId,
       type: NotificationType.TaskCommented,
       entityType: NotificationEntityType.Task,
       entityId: taskId,
-      metadata: await this.getTaskMetadata(taskId),
+      metadata,
     });
   }
 
   async notifyTaskStatusChanged(recipientId: number, actorId: number, taskId: number) {
+    const metadata = await this.getTaskMetadata(taskId);
+
     await this.createAndSendNotification({
       recipientId,
+      companyId: metadata.companyId,
       actorId,
       type: NotificationType.TaskStatusChanged,
       entityType: NotificationEntityType.Task,
       entityId: taskId,
-      metadata: await this.getTaskMetadata(taskId),
+      metadata,
     });
   }
 
   async notifyTaskDeadlineChanged(recipientId: number, actorId: number, taskId: number) {
+    const metadata = await this.getTaskMetadata(taskId);
+
     await this.createAndSendNotification({
       recipientId,
+      companyId: metadata.companyId,
       actorId,
       type: NotificationType.TaskDeadlineChanged,
       entityType: NotificationEntityType.Task,
       entityId: taskId,
-      metadata: await this.getTaskMetadata(taskId),
+      metadata,
     });
   }
 
   async notifyTaskAcceptanceCriterionAdded(recipientId: number, actorId: number, taskId: number) {
+    const metadata = await this.getTaskMetadata(taskId);
+
     await this.createAndSendNotification({
       recipientId,
+      companyId: metadata.companyId,
       actorId,
       type: NotificationType.TaskAcceptanceCriterionAdded,
       entityType: NotificationEntityType.Task,
       entityId: taskId,
-      metadata: await this.getTaskMetadata(taskId),
+      metadata,
     });
   }
 
@@ -110,11 +132,13 @@ export class NotificationsService {
 
     await this.createAndSendNotification({
       recipientId,
+      companyId: project.companyId,
       actorId,
       type: NotificationType.ProjectAdded,
       entityType: NotificationEntityType.Project,
       entityId: projectId,
       metadata: {
+        companyId: project.companyId,
         projectId,
         projectName: project.name,
       },
@@ -129,9 +153,14 @@ export class NotificationsService {
     }
 
     return {
+      companyId: task.project.companyId,
       projectId: task.projectId,
       taskName: task.name,
     };
+  }
+
+  private getNotificationCompanyId(companyId: number) {
+    return Number.isInteger(companyId) && companyId > 0 ? companyId : null;
   }
 
   private async createAndSendNotification(values: typeof notifications.$inferInsert) {

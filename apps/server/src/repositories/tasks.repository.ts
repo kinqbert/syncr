@@ -14,6 +14,7 @@ const taskWithAssigneeColumns = {
   project: {
     id: projects.id,
     name: projects.name,
+    companyId: projects.companyId,
   },
   assignee: {
     id: users.id,

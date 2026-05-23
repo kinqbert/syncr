@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { type NotificationMetadata, NotificationType } from "@syncr/packages";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull, or } from "drizzle-orm";
 
 import { DbProvider } from "../db/db.provider";
 import { notifications } from "../db/schema";
@@ -14,11 +14,11 @@ export class NotificationsRepository extends BaseRepository {
     super(dbProvider);
   }
 
-  async getUserNotifications(userId: number) {
+  async getUserNotifications(userId: number, companyId: number | null) {
     return await this.db
       .select()
       .from(notifications)
-      .where(eq(notifications.recipientId, userId))
+      .where(and(eq(notifications.recipientId, userId), this.companyScope(companyId)))
       .orderBy(desc(notifications.createdAt), desc(notifications.id));
   }
 
@@ -32,21 +32,27 @@ export class NotificationsRepository extends BaseRepository {
     return await this.db.insert(notifications).values(values).returning();
   }
 
-  async markNotificationAsRead(userId: number, notificationId: number) {
+  async markNotificationAsRead(userId: number, notificationId: number, companyId: number | null) {
     const [notification] = await this.db
       .update(notifications)
       .set({ isRead: true })
-      .where(and(eq(notifications.id, notificationId), eq(notifications.recipientId, userId)))
+      .where(
+        and(
+          eq(notifications.id, notificationId),
+          eq(notifications.recipientId, userId),
+          this.companyScope(companyId),
+        ),
+      )
       .returning();
 
     return notification;
   }
 
-  async markAllUserNotificationsRead(userId: number) {
+  async markAllUserNotificationsRead(userId: number, companyId: number | null) {
     return await this.db
       .update(notifications)
       .set({ isRead: true })
-      .where(eq(notifications.recipientId, userId))
+      .where(and(eq(notifications.recipientId, userId), this.companyScope(companyId)))
       .returning();
   }
 
@@ -68,5 +74,13 @@ export class NotificationsRepository extends BaseRepository {
       .returning();
 
     return notification;
+  }
+
+  private companyScope(companyId: number | null) {
+    if (companyId === null) {
+      return isNull(notifications.companyId);
+    }
+
+    return or(eq(notifications.companyId, companyId), isNull(notifications.companyId));
   }
 }

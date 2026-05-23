@@ -7,6 +7,7 @@ export const mapNotificationToPayload = (
   return {
     id: notification.id,
     recipientId: notification.recipientId,
+    companyId: notification.companyId,
     actorId: notification.actorId,
     type: notification.type,
     entityType: notification.entityType,

@@ -358,6 +358,7 @@ export const notifications = pgTable(
     recipientId: integer()
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    companyId: integer().references(() => companies.id, { onDelete: "cascade" }),
     actorId: integer()
       .notNull()
       .references(() => users.id, { onDelete: "set null" }),
@@ -371,10 +372,11 @@ export const notifications = pgTable(
   (table) => [
     index("notifications_recipient_created_idx").on(
       table.recipientId,
+      table.companyId,
       table.createdAt.desc(),
       table.id.desc(),
     ),
-    index("notifications_recipient_read_idx").on(table.recipientId, table.isRead),
+    index("notifications_recipient_read_idx").on(table.recipientId, table.companyId, table.isRead),
     index("notifications_recipient_type_entity_idx").on(
       table.recipientId,
       table.type,
