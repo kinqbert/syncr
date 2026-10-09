@@ -1,4 +1,9 @@
-import { Box, CircularProgress, Stack } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Stack,
+  useColorScheme,
+} from "@mui/material";
 import { Outlet } from "react-router";
 import { Toaster } from "sonner";
 
@@ -37,31 +42,6 @@ const CompanyContent = () => {
       sx={{
         flex: 1,
         overflow: "auto",
-        scrollbarColor: "#c0c0c0 transparent",
-        scrollbarGutter: "stable",
-        scrollbarWidth: "thin",
-        "&::-webkit-scrollbar": {
-          height: 8,
-          width: 8,
-        },
-        "&::-webkit-scrollbar-button": {
-          display: "none",
-          height: 0,
-          width: 0,
-        },
-        "&::-webkit-scrollbar-corner": {
-          background: "transparent",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#9aa0a7",
-          borderRadius: 999,
-        },
-        "&::-webkit-scrollbar-thumb:hover": {
-          backgroundColor: "#94A3B8",
-        },
-        "&::-webkit-scrollbar-track": {
-          background: "transparent",
-        },
       }}
     >
       {isError ? (
@@ -90,6 +70,7 @@ const CompanyContent = () => {
 
 export const AppLayout = () => {
   const selectedCompanyId = useCompanyStore((state) => state.selectedCompanyId);
+  const { mode } = useColorScheme();
 
   return (
     <AuthenticatedLayout>
@@ -97,6 +78,7 @@ export const AppLayout = () => {
         <>
           <Toaster
             richColors
+            theme={mode ?? "system"}
             toastOptions={{
               classNames: {
                 error: "sonner-error-toast",

@@ -39,24 +39,24 @@ const PROJECT_STATUS_CHIP_COLORS: Record<
   { bgcolor: string; borderColor: string; color: string }
 > = {
   [ProjectStatus.Active]: {
-    bgcolor: "#ECFDF5",
-    borderColor: "#A7F3D0",
-    color: "#047857",
+    bgcolor: "tint.green.bg",
+    borderColor: "transparent",
+    color: "tint.green.fg",
   },
   [ProjectStatus.Paused]: {
-    bgcolor: "#FFFBEB",
-    borderColor: "#FDE68A",
-    color: "#B45309",
+    bgcolor: "tint.amber.bg",
+    borderColor: "transparent",
+    color: "tint.amber.fg",
   },
   [ProjectStatus.Completed]: {
-    bgcolor: "#EFF6FF",
-    borderColor: "#BFDBFE",
-    color: "#1D4ED8",
+    bgcolor: "tint.indigo.bg",
+    borderColor: "transparent",
+    color: "tint.indigo.fg",
   },
   [ProjectStatus.Archived]: {
-    bgcolor: "#F8FAFC",
-    borderColor: "#CBD5E1",
-    color: "#475569",
+    bgcolor: "tint.gray.bg",
+    borderColor: "transparent",
+    color: "tint.gray.fg",
   },
 };
 
@@ -80,7 +80,7 @@ export const ProjectCard = ({
       sx={{
         borderColor: "divider",
         borderRadius: 1.5,
-        boxShadow: "0 8px 24px rgba(15, 23, 42, 0.04)",
+        boxShadow: "var(--mui-palette-elevation-popover)",
         display: "flex",
         flexDirection: "column",
         minHeight: { xs: "auto", sm: 248 },
@@ -88,8 +88,8 @@ export const ProjectCard = ({
         transition:
           "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
         "&:hover": {
-          borderColor: "#C7D2FE",
-          boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
+          borderColor: "line.strong",
+          boxShadow: "var(--mui-palette-elevation-popover)",
         },
       }}
     >
@@ -209,11 +209,11 @@ export const ProjectCard = ({
               value={completionProgress}
               variant="determinate"
               sx={{
-                bgcolor: "#EEF2FF",
+                bgcolor: "accent.soft",
                 borderRadius: 999,
                 height: 8,
                 ".MuiLinearProgress-bar": {
-                  backgroundColor: "#4F46E5",
+                  backgroundColor: "primary.main",
                   borderRadius: 999,
                 },
               }}

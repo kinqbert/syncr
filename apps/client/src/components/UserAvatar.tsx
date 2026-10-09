@@ -27,7 +27,7 @@ export const UserAvatar = ({
     name || surname ? getUserInitials(name ?? "", surname ?? "") : null;
   const mergedSx: SxProps<Theme> = [
     {
-      bgcolor: "#EEF2FF",
+      bgcolor: "accent.soft",
       color: "primary.main",
       fontSize: Math.max(11, Math.round(size * 0.38)),
       fontWeight: 700,

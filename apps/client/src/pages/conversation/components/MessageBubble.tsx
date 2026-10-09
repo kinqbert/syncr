@@ -124,7 +124,7 @@ export const MessageBubble = ({
             onClick={() => onReplyClick(replyTo.id)}
             type="button"
             sx={{
-              bgcolor: isOwn ? "rgba(255,255,255,0.14)" : "#EEF2FF",
+              bgcolor: isOwn ? "action.hover" : "accent.soft",
               border: 0,
               borderLeft: "3px solid",
               borderColor: isOwn ? "primary.contrastText" : "primary.main",
@@ -184,7 +184,7 @@ export const MessageBubble = ({
           paper: {
             sx: {
               borderRadius: 2,
-              boxShadow: "0 14px 40px rgba(15, 23, 42, 0.18)",
+              boxShadow: "var(--mui-palette-elevation-popover)",
             },
           },
         }}

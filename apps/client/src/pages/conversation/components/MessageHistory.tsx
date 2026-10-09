@@ -314,7 +314,7 @@ export const MessageHistory = ({
           border: "1px solid",
           borderColor: "divider",
           bottom: 16,
-          boxShadow: "0 8px 24px rgba(17, 24, 39, 0.16)",
+          boxShadow: "var(--mui-palette-elevation-popover)",
           color: "primary.main",
           height: 40,
           left: "50%",
@@ -324,7 +324,7 @@ export const MessageHistory = ({
           opacity: isAtBottom ? 0 : 1,
           transition: "opacity 0.1s",
           "&:hover": {
-            bgcolor: "#EEF2FF",
+            bgcolor: "accent.soft",
           },
         }}
       >

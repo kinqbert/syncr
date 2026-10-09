@@ -4,9 +4,20 @@ import {
   Menu,
   MenuItem,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
+  useColorScheme,
 } from "@mui/material";
-import { Info, LogOut, Settings, UserRound } from "lucide-mui";
+import {
+  Info,
+  LogOut,
+  Monitor,
+  Moon,
+  Settings,
+  Sun,
+  UserRound,
+} from "lucide-mui";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -19,6 +30,14 @@ import { getUserFullName } from "@/utils/getUserFullName";
 
 import { UserAvatar } from "./UserAvatar";
 
+const COLOR_MODES = [
+  { value: "light", label: "Light", icon: <Sun /> },
+  { value: "dark", label: "Dark", icon: <Moon /> },
+  { value: "system", label: "System", icon: <Monitor /> },
+] as const;
+
+type ColorMode = (typeof COLOR_MODES)[number]["value"];
+
 export const UserMenu = () => {
   const navigate = useNavigate();
   const logout = useLogout();
@@ -29,6 +48,7 @@ export const UserMenu = () => {
   );
   const { data: user } = useMe();
   const { data: companies = [] } = useGetMyCompanies();
+  const { mode, setMode } = useColorScheme();
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
   const isMenuOpen = Boolean(menuAnchorEl);
 
@@ -98,16 +118,7 @@ export const UserMenu = () => {
         open={isMenuOpen}
         slotProps={{
           paper: {
-            elevation: 3,
-            sx: {
-              border: 1,
-              borderColor: "divider",
-              borderRadius: 1.25,
-              boxShadow: "0 10px 24px rgba(17, 24, 39, 0.14)",
-              mt: 0.75,
-              overflow: "hidden",
-              width: 200,
-            },
+            sx: { width: 220 },
           },
           list: {
             "aria-label": "User menu",
@@ -137,6 +148,55 @@ export const UserMenu = () => {
               {selectedCompany.roleName}
             </Typography>
           )}
+        </Stack>
+
+        <Divider sx={{ m: 0 }} />
+        <Stack
+          alignItems="center"
+          direction="row"
+          justifyContent="space-between"
+          sx={{ px: 1.75, py: 1 }}
+        >
+          <Typography color="text.secondary" variant="body2">
+            Theme
+          </Typography>
+          <ToggleButtonGroup
+            exclusive
+            aria-label="Color theme"
+            onChange={(_, value: ColorMode | null) => {
+              if (value) setMode(value);
+            }}
+            size="small"
+            value={mode ?? "system"}
+            sx={{
+              bgcolor: "surface.subtle",
+              borderRadius: 1,
+              p: 0.25,
+              "& .MuiToggleButton-root": {
+                border: 0,
+                borderRadius: 0.75,
+                color: "text.secondary",
+                p: 0.5,
+                "& .MuiSvgIcon-root": { fontSize: 15 },
+              },
+              "& .MuiToggleButton-root.Mui-selected": {
+                bgcolor: "surface.active",
+                boxShadow: "var(--mui-palette-elevation-card)",
+                color: "text.primary",
+              },
+            }}
+          >
+            {COLOR_MODES.map((item) => (
+              <ToggleButton
+                aria-label={item.label}
+                key={item.value}
+                title={item.label}
+                value={item.value}
+              >
+                {item.icon}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
         </Stack>
 
         <Divider sx={{ m: 0 }} />

@@ -30,16 +30,16 @@ const priorityColorByValue: Record<
   { bgcolor: string; color: string }
 > = {
   low: {
-    bgcolor: "#d9fbe7",
-    color: "#15803d",
+    bgcolor: "tint.gray.bg",
+    color: "tint.gray.fg",
   },
   medium: {
-    bgcolor: "#fef3c7",
-    color: "#b45309",
+    bgcolor: "tint.amber.bg",
+    color: "tint.amber.fg",
   },
   high: {
-    bgcolor: "#fee2e2",
-    color: "#b91c1c",
+    bgcolor: "tint.red.bg",
+    color: "tint.red.fg",
   },
 };
 
@@ -90,7 +90,7 @@ export const TaskCard = ({
         sx={{
           borderColor: "divider",
           borderRadius: 1.5,
-          boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
+          boxShadow: "var(--mui-palette-elevation-popover)",
           maxWidth: "100%",
           minWidth: 0,
           p: { xs: 1.5, sm: 2 },

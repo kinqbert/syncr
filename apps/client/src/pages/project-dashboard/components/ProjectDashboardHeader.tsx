@@ -180,13 +180,12 @@ export const ProjectDashboardHeader = ({
                 value={completionProgress}
                 variant="determinate"
                 sx={{
-                  bgcolor: "#E5E7EB",
+                  bgcolor: "surface.active",
                   borderRadius: 999,
                   flex: 1,
                   height: 8,
                   ".MuiLinearProgress-bar": {
-                    background:
-                      "linear-gradient(90deg, #4F46E5 0%, #2563EB 100%)",
+                    bgcolor: "primary.main",
                     borderRadius: 999,
                   },
                 }}

@@ -110,7 +110,7 @@ export const KanbanColumn = ({
       <Box
         sx={{
           p: `${PADDING}px`,
-          backgroundColor: isDragOver ? "kanban.bgActive" : "kanban.bg",
+          backgroundColor: isDragOver ? "accent.soft" : "surface.subtle",
           borderRadius: 2,
           boxSizing: "border-box",
           minHeight: { xs: 480, sm: 560, lg: 600 },

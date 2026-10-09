@@ -98,17 +98,17 @@ const getIconColors = (notification: NotificationPayload) => {
   switch (notification.type) {
     case NotificationType.TaskAssigned:
     case NotificationType.TaskStatusChanged:
-      return { bgcolor: "#DCFCE7", color: "#16A34A" };
+      return { bgcolor: "tint.green.bg", color: "tint.green.fg" };
     case NotificationType.TaskCommented:
-      return { bgcolor: "#DBEAFE", color: "#2563EB" };
+      return { bgcolor: "tint.blue.bg", color: "tint.blue.fg" };
     case NotificationType.TaskDeadlineChanged:
-      return { bgcolor: "#FFEDD5", color: "#EA580C" };
+      return { bgcolor: "tint.orange.bg", color: "tint.orange.fg" };
     case NotificationType.TaskAcceptanceCriterionAdded:
-      return { bgcolor: "#F3E8FF", color: "#9333EA" };
+      return { bgcolor: "tint.violet.bg", color: "tint.violet.fg" };
     case NotificationType.ProjectAdded:
-      return { bgcolor: "#E0E7FF", color: "#4F46E5" };
+      return { bgcolor: "tint.indigo.bg", color: "tint.indigo.fg" };
     case NotificationType.CompanyInvitation:
-      return { bgcolor: "#ECFDF5", color: "#059669" };
+      return { bgcolor: "tint.green.bg", color: "tint.green.fg" };
     default:
       return { bgcolor: "action.hover", color: "text.secondary" };
   }
@@ -302,7 +302,7 @@ export const NotificationsPage = () => {
                   sx={{
                     bgcolor: notification.isRead
                       ? "background.paper"
-                      : "grey.50",
+                      : "surface.subtle",
                     minHeight: { xs: "auto", sm: 108 },
                     px: { xs: 2, sm: 2.75 },
                     py: { xs: 2, sm: 2.5 },

@@ -28,7 +28,7 @@ export const ConversationEmptyPage = () => {
     >
       <Avatar
         sx={{
-          bgcolor: "#EEF2FF",
+          bgcolor: "accent.soft",
           color: "primary.main",
           height: 56,
           width: 56,

@@ -56,7 +56,8 @@ export const ConversationListItem = ({
             bgcolor: "action.selected",
           },
           "&.active .MuiAvatar-root": {
-            boxShadow: "0 0 0 2px rgba(79, 70, 229, 0.22)",
+            outline: "2px solid",
+            outlineColor: "accent.softHover",
           },
         }}
       >

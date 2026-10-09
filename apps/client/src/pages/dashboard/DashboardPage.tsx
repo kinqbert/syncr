@@ -80,37 +80,37 @@ export const DashboardPage = () => {
           }}
         >
           <SummaryCard
-            color="#e9ebff"
+            color="accent.soft"
             icon={<Folders />}
             label="Active Projects"
             value={data.summary.activeProjects}
           />
           <SummaryCard
-            color="#e9ebff"
+            color="accent.soft"
             icon={<CircleCheck />}
             label="Tasks Completed"
             value={data.summary.tasksCompleted}
           />
           <SummaryCard
-            color="#e9ebff"
+            color="accent.soft"
             icon={<Clock />}
             label="Tasks Due Today"
             value={data.summary.tasksDueToday}
           />
           <SummaryCard
-            color="#e9ebff"
+            color="accent.soft"
             icon={<Users />}
             label="Team Members"
             value={data.summary.teamMembers}
           />
           <SummaryCard
-            color="#e9ebff"
+            color="accent.soft"
             icon={<ListTodo />}
             label="My Assigned Tasks"
             value={data.summary.myAssignedTasks}
           />
           <SummaryCard
-            color="#e9ebff"
+            color="accent.soft"
             icon={<Bell />}
             label="Unread Notifications"
             value={data.summary.unreadNotifications}

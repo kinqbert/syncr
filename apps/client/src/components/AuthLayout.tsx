@@ -19,8 +19,7 @@ export const AuthLayout = ({
       component="main"
       sx={{
         alignItems: "center",
-        background:
-          "radial-gradient(circle at top, rgba(79, 70, 229, 0.08), transparent 34%), #F9FAFB",
+        bgcolor: "background.default",
         display: "flex",
         minHeight: "100vh",
         py: 4,
@@ -51,7 +50,7 @@ export const AuthLayout = ({
               border: 1,
               borderColor: "divider",
               borderRadius: 2,
-              boxShadow: "0 18px 48px rgba(17, 24, 39, 0.12)",
+              boxShadow: "var(--mui-palette-elevation-popover)",
               p: { xs: 3, sm: 4 },
             }}
           >

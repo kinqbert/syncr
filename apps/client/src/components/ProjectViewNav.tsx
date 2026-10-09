@@ -35,7 +35,7 @@ export const ProjectViewNav = ({ projectId }: ProjectViewNavProps) => {
   return (
     <Box
       sx={{
-        bgcolor: "#F9FAFB",
+        bgcolor: "surface.subtle",
         border: 1,
         borderColor: "divider",
         borderRadius: 2,
@@ -86,8 +86,8 @@ export const ProjectViewNav = ({ projectId }: ProjectViewNavProps) => {
                 fontSize: 17,
               },
               "&.Mui-selected": {
-                bgcolor: "#FFFFFF",
-                boxShadow: "0 1px 3px rgba(15, 23, 42, 0.08)",
+                bgcolor: "background.paper",
+                boxShadow: "var(--mui-palette-elevation-card)",
                 color: "primary.main",
               },
             }}

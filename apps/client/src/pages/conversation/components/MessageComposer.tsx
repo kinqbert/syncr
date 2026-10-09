@@ -158,11 +158,11 @@ export const MessageComposer = ({
                 direction="row"
                 gap={1}
                 sx={{
-                  bgcolor: "#EEF2FF",
+                  bgcolor: "accent.soft",
                   border: "1px solid",
                   borderColor: "divider",
                   borderRadius: 2,
-                  boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
+                  boxShadow: "var(--mui-palette-elevation-popover)",
                   px: { xs: 1.5, sm: 2 },
                   pr: { xs: 1.5, sm: 1.5 },
                   py: 1,
@@ -203,7 +203,7 @@ export const MessageComposer = ({
             borderColor: "divider",
             borderRadius: 8,
             boxSizing: "border-box",
-            boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
+            boxShadow: "var(--mui-palette-elevation-popover)",
             p: 0.75,
             pl: { xs: 1.5, sm: 2 },
             position: "relative",

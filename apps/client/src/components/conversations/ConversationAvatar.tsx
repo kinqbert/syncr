@@ -3,13 +3,9 @@ import type { ListConversation } from "@syncr/packages";
 import { ConversationType } from "@syncr/packages";
 import { Users } from "lucide-mui";
 
-const avatarColors = [
-  { bg: "#EEF2FF", color: "#4338CA" },
-  { bg: "#ECFDF5", color: "#047857" },
-  { bg: "#FFF7ED", color: "#C2410C" },
-  { bg: "#EFF6FF", color: "#1D4ED8" },
-  { bg: "#FDF2F8", color: "#BE185D" },
-];
+import type { TintName } from "@/lib/theme";
+
+const avatarTints: TintName[] = ["indigo", "green", "orange", "blue", "pink"];
 
 const getNameInitials = (value: string) => {
   const parts = value.trim().split(/\s+/).filter(Boolean);
@@ -28,7 +24,7 @@ const getAvatarColor = (value: string) => {
     .split("")
     .reduce((sum, char) => sum + char.charCodeAt(0), 0);
 
-  return avatarColors[seed % avatarColors.length];
+  return avatarTints[seed % avatarTints.length];
 };
 
 type ConversationAvatarProps = {
@@ -42,13 +38,13 @@ export const ConversationAvatar = ({
   title,
   type,
 }: ConversationAvatarProps) => {
-  const colors = getAvatarColor(title);
+  const tint = getAvatarColor(title);
 
   return (
     <Avatar
       sx={{
-        bgcolor: colors.bg,
-        color: colors.color,
+        bgcolor: `tint.${tint}.bg`,
+        color: `tint.${tint}.fg`,
         flex: "0 0 auto",
         fontSize: Math.max(12, Math.round(size * 0.35)),
         fontWeight: 800,

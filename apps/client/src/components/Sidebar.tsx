@@ -153,11 +153,11 @@ export const Sidebar = () => {
                     color: "primary.main",
                   },
                   "&.active .MuiListItemButton-root": {
-                    bgcolor: "#EEF2FF",
+                    bgcolor: "accent.soft",
                     color: "primary.main",
                   },
                   "&.active .MuiListItemButton-root:hover": {
-                    bgcolor: "#EEF2FF",
+                    bgcolor: "accent.soft",
                   },
                 }}
               >

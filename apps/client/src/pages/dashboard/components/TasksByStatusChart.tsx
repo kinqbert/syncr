@@ -1,7 +1,7 @@
 import { Box, Paper, Stack, Typography } from "@mui/material";
 import {
-  TASK_STATUS_LABEL,
   type DashboardTaskStatusPoint,
+  TASK_STATUS_LABEL,
 } from "@syncr/packages";
 
 type TasksByStatusChartProps = {
@@ -50,7 +50,7 @@ export const TasksByStatusChart = ({ data }: TasksByStatusChartProps) => {
                 </Stack>
                 <Box
                   sx={{
-                    bgcolor: "grey.100",
+                    bgcolor: "surface.active",
                     borderRadius: 999,
                     height: 12,
                     overflow: "hidden",

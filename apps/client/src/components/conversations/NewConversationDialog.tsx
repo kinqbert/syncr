@@ -151,7 +151,7 @@ export const NewConversationDialog = ({
               },
               "& .Mui-selected": {
                 bgcolor: "background.paper",
-                boxShadow: "0 1px 3px rgba(17, 24, 39, 0.1)",
+                boxShadow: "var(--mui-palette-elevation-card)",
                 color: "primary.main",
               },
             }}

@@ -50,19 +50,19 @@ const boardColumns = [
   {
     label: "Backlog",
     count: 4,
-    color: "#2563EB",
+    color: "status.backlog",
     tasks: ["Shape onboarding copy", "Invite design review"],
   },
   {
     label: "In progress",
     count: 3,
-    color: "#EA580C",
+    color: "status.in_progress",
     tasks: ["Build project board", "Tune team permissions"],
   },
   {
     label: "Done",
     count: 7,
-    color: "#10B981",
+    color: "status.done",
     tasks: ["Launch comment thread", "Sync notification badges"],
   },
 ];
@@ -99,8 +99,7 @@ export const AboutPage = () => {
     <Box
       component="main"
       sx={{
-        background:
-          "linear-gradient(180deg, #F9FAFB 0%, #FFFFFF 48%, #F8FAFC 100%)",
+        bgcolor: "background.default",
         minHeight: "100vh",
       }}
     >
@@ -155,7 +154,7 @@ export const AboutPage = () => {
                   label="Team project management"
                   sx={{
                     alignSelf: "flex-start",
-                    bgcolor: "#EEF2FF",
+                    bgcolor: "accent.soft",
                     color: "primary.dark",
                     fontWeight: 700,
                   }}
@@ -224,7 +223,7 @@ export const AboutPage = () => {
                 border: 1,
                 borderColor: "divider",
                 borderRadius: 3,
-                boxShadow: "0 24px 70px rgba(17, 24, 39, 0.14)",
+                boxShadow: "var(--mui-palette-elevation-popover)",
                 overflow: "hidden",
               }}
             >
@@ -232,13 +231,13 @@ export const AboutPage = () => {
                 alignItems="center"
                 direction="row"
                 justifyContent="space-between"
-                sx={{ bgcolor: "#111827", color: "#FFFFFF", px: 2.5, py: 2 }}
+                sx={{ bgcolor: "inverse.bg", color: "inverse.fg", px: 2.5, py: 2 }}
               >
                 <Stack gap={0.5}>
                   <Typography fontSize={14} fontWeight={800}>
                     Product launch
                   </Typography>
-                  <Typography color="#CBD5E1" fontSize={12}>
+                  <Typography color="inverse.muted" fontSize={12}>
                     14 active tasks across 6 teammates
                   </Typography>
                 </Stack>
@@ -247,10 +246,10 @@ export const AboutPage = () => {
                   label="This week"
                   size="small"
                   sx={{
-                    bgcolor: "rgba(255,255,255,0.12)",
-                    color: "#FFFFFF",
+                    bgcolor: "inverse.overlay",
+                    color: "inverse.fg",
                     fontWeight: 700,
-                    ".MuiChip-icon": { color: "#FFFFFF" },
+                    ".MuiChip-icon": { color: "inverse.fg" },
                   }}
                 />
               </Stack>
@@ -258,14 +257,14 @@ export const AboutPage = () => {
               <Grid
                 container
                 spacing={1.5}
-                sx={{ bgcolor: "#F8FAFC", p: { xs: 1.5, sm: 2 } }}
+                sx={{ bgcolor: "surface.subtle", p: { xs: 1.5, sm: 2 } }}
               >
                 {boardColumns.map((column) => (
                   <Grid key={column.label} size={{ xs: 12, sm: 4 }}>
                     <Stack
                       gap={1.25}
                       sx={{
-                        bgcolor: "#FFFFFF",
+                        bgcolor: "background.paper",
                         border: 1,
                         borderColor: "divider",
                         borderRadius: 2,
@@ -285,7 +284,7 @@ export const AboutPage = () => {
                           label={column.count}
                           size="small"
                           sx={{
-                            bgcolor: `${column.color}14`,
+                            bgcolor: "surface.subtle",
                             color: column.color,
                             fontWeight: 800,
                             height: 24,
@@ -316,7 +315,7 @@ export const AboutPage = () => {
                             >
                               <Box
                                 sx={{
-                                  bgcolor: index === 0 ? "#EEF2FF" : "#ECFDF5",
+                                  bgcolor: index === 0 ? "tint.indigo.bg" : "tint.green.bg",
                                   borderRadius: 999,
                                   height: 8,
                                   width: index === 0 ? "68%" : "46%",
@@ -340,7 +339,7 @@ export const AboutPage = () => {
 
       <Box
         component="section"
-        sx={{ bgcolor: "#FFFFFF", py: { xs: 7, md: 9 } }}
+        sx={{ bgcolor: "background.paper", py: { xs: 7, md: 9 } }}
       >
         <Container maxWidth="lg">
           <Stack gap={4}>
@@ -375,7 +374,7 @@ export const AboutPage = () => {
                         <Box
                           sx={{
                             alignItems: "center",
-                            bgcolor: "#EEF2FF",
+                            bgcolor: "accent.soft",
                             borderRadius: 2,
                             color: "primary.main",
                             display: "flex",
@@ -449,9 +448,9 @@ export const AboutPage = () => {
                       <Box
                         sx={{
                           alignItems: "center",
-                          bgcolor: "#111827",
+                          bgcolor: "inverse.bg",
                           borderRadius: 2,
-                          color: "#FFFFFF",
+                          color: "inverse.fg",
                           display: "flex",
                           flexShrink: 0,
                           fontSize: 13,
@@ -486,15 +485,15 @@ export const AboutPage = () => {
 
       <Box
         component="section"
-        sx={{ bgcolor: "#FFFFFF", py: { xs: 7, md: 9 } }}
+        sx={{ bgcolor: "background.paper", py: { xs: 7, md: 9 } }}
       >
         <Container maxWidth="lg">
           <Paper
             elevation={0}
             sx={{
-              bgcolor: "#111827",
+              bgcolor: "inverse.bg",
               borderRadius: 3,
-              color: "#FFFFFF",
+              color: "inverse.fg",
               overflow: "hidden",
               p: { xs: 3, sm: 4, md: 5 },
             }}
@@ -505,7 +504,7 @@ export const AboutPage = () => {
                   <Typography component="h2" fontSize={34} fontWeight={800}>
                     Bring the whole workspace into focus.
                   </Typography>
-                  <Typography color="#CBD5E1" fontSize={17} lineHeight={1.7}>
+                  <Typography color="inverse.muted" fontSize={17} lineHeight={1.7}>
                     Start with one project, invite your team, and give everyone
                     a cleaner place to understand what is moving, what is
                     blocked, and what changed since they last checked in.
@@ -541,7 +540,7 @@ export const AboutPage = () => {
       <Box
         component="footer"
         sx={{
-          bgcolor: "#FFFFFF",
+          bgcolor: "background.paper",
           borderTop: 1,
           borderColor: "divider",
           py: 3,
