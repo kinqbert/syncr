@@ -67,14 +67,14 @@ jobs:
           cache-from: type=gha,scope=server
           cache-to: type=gha,mode=max,scope=server
 
-      - name: Copy compose file to server
+      - name: Copy compose file and Caddyfile to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HETZNER_HOST }}
           username: ${{ secrets.HETZNER_USER }}
           key: ${{ secrets.HETZNER_SSH_KEY }}
           port: ${{ secrets.HETZNER_SSH_PORT || 22 }}
-          source: deploy/docker-compose.yml
+          source: deploy/docker-compose.yml,deploy/Caddyfile
           target: ${{ secrets.HETZNER_APP_DIR }}
           strip_components: 1
 
@@ -113,7 +113,6 @@ jobs:
             GOOGLE_CALENDAR_CLIENT_SECRET=${{ secrets.GOOGLE_CALENDAR_CLIENT_SECRET }}
             GOOGLE_CALENDAR_REDIRECT_URI=${{ secrets.GOOGLE_CALENDAR_REDIRECT_URI }}
             CALENDAR_TOKEN_SECRET=${{ secrets.CALENDAR_TOKEN_SECRET }}
-            CLOUDFLARE_TUNNEL_TOKEN=${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
             EOF
             echo "$GHCR_TOKEN" | docker login "$REGISTRY" -u "$GHCR_USERNAME" --password-stdin
             CLIENT_IMAGE="$CLIENT_IMAGE" SERVER_IMAGE="$SERVER_IMAGE" docker compose pull

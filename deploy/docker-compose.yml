@@ -21,16 +21,21 @@ services:
       demo-postgres:
         condition: service_healthy
 
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: syncr-cloudflared
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: syncr-caddy
     restart: unless-stopped
-    command: ["tunnel", "--no-autoupdate", "run"]
-    environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
     depends_on:
       - client
       - server
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
 
   migrate:
     image: ${SERVER_IMAGE}
@@ -90,3 +95,5 @@ services:
 volumes:
   syncr-postgres-data:
   syncr-demo-postgres-data:
+  caddy-data:
+  caddy-config:
