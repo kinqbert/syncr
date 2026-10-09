@@ -5,8 +5,6 @@ services:
     restart: unless-stopped
     depends_on:
       - server
-    ports:
-      - "${CLIENT_PORT:-5173}:80"
 
   server:
     image: ${SERVER_IMAGE}
@@ -22,8 +20,17 @@ services:
         condition: service_healthy
       demo-postgres:
         condition: service_healthy
-    ports:
-      - "${SERVER_PORT:-3000}:3000"
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: syncr-cloudflared
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - client
+      - server
 
   migrate:
     image: ${SERVER_IMAGE}
@@ -48,8 +55,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-syncr-db}
-    ports:
-      - "5432:5432"
     volumes:
       - syncr-postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -70,8 +75,6 @@ services:
       POSTGRES_USER: ${DEMO_POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${DEMO_POSTGRES_PASSWORD}
       POSTGRES_DB: ${DEMO_POSTGRES_DB:-syncr-demo-db}
-    ports:
-      - "5433:5432"
     volumes:
       - syncr-demo-postgres-data:/var/lib/postgresql/data
     healthcheck:

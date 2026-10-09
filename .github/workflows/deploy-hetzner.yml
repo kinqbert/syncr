@@ -1,4 +1,4 @@
-name: Deploy to DigitalOcean
+name: Deploy to Hetzner
 
 on:
   push:
@@ -67,18 +67,18 @@ jobs:
           cache-from: type=gha,scope=server
           cache-to: type=gha,mode=max,scope=server
 
-      - name: Copy compose file to Droplet
+      - name: Copy compose file to server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.DO_HOST }}
-          username: ${{ secrets.DO_USER }}
-          key: ${{ secrets.DO_SSH_KEY }}
-          port: ${{ secrets.DO_SSH_PORT || 22 }}
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          port: ${{ secrets.HETZNER_SSH_PORT || 22 }}
           source: deploy/docker-compose.yml
-          target: ${{ secrets.DO_APP_DIR }}
+          target: ${{ secrets.HETZNER_APP_DIR }}
           strip_components: 1
 
-      - name: Deploy on Droplet
+      - name: Deploy on server
         uses: appleboy/ssh-action@v1.2.0
         env:
           CLIENT_IMAGE: ${{ steps.images.outputs.client }}
@@ -87,20 +87,18 @@ jobs:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REGISTRY: ${{ env.REGISTRY }}
         with:
-          host: ${{ secrets.DO_HOST }}
-          username: ${{ secrets.DO_USER }}
-          key: ${{ secrets.DO_SSH_KEY }}
-          port: ${{ secrets.DO_SSH_PORT || 22 }}
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          port: ${{ secrets.HETZNER_SSH_PORT || 22 }}
           envs: CLIENT_IMAGE,SERVER_IMAGE,GHCR_USERNAME,GHCR_TOKEN,REGISTRY
           script: |
             set -euo pipefail
-            mkdir -p "${{ secrets.DO_APP_DIR }}"
-            cd "${{ secrets.DO_APP_DIR }}"
+            mkdir -p "${{ secrets.HETZNER_APP_DIR }}"
+            cd "${{ secrets.HETZNER_APP_DIR }}"
             umask 077
             cat > .env <<'EOF'
             CLIENT_URL=${{ secrets.CLIENT_URL }}
-            CLIENT_PORT=${{ secrets.CLIENT_PORT }}
-            SERVER_PORT=${{ secrets.SERVER_PORT }}
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             DEMO_DATABASE_URL=${{ secrets.DEMO_DATABASE_URL }}
             POSTGRES_USER=${{ secrets.POSTGRES_USER }}
@@ -115,6 +113,7 @@ jobs:
             GOOGLE_CALENDAR_CLIENT_SECRET=${{ secrets.GOOGLE_CALENDAR_CLIENT_SECRET }}
             GOOGLE_CALENDAR_REDIRECT_URI=${{ secrets.GOOGLE_CALENDAR_REDIRECT_URI }}
             CALENDAR_TOKEN_SECRET=${{ secrets.CALENDAR_TOKEN_SECRET }}
+            CLOUDFLARE_TUNNEL_TOKEN=${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
             EOF
             echo "$GHCR_TOKEN" | docker login "$REGISTRY" -u "$GHCR_USERNAME" --password-stdin
             CLIENT_IMAGE="$CLIENT_IMAGE" SERVER_IMAGE="$SERVER_IMAGE" docker compose pull
