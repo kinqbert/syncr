@@ -1,57 +1,66 @@
 import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import type { ListConversation } from "@syncr/packages";
+import { ConversationType } from "@syncr/packages";
 import { PanelLeftOpen } from "lucide-mui";
 
-import { CONVERSATIONS_SIDEBAR_HEADER_HEIGHT } from "@/components/conversations";
+import {
+  CONVERSATIONS_SIDEBAR_HEADER_HEIGHT,
+} from "@/components/conversations";
+import { ConversationAvatar } from "@/components/conversations/ConversationAvatar";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useConversationsSidebarStore } from "@/store/useConversationsSidebarStore";
 
 type ConversationHeaderProps = {
-  title?: string;
+  conversation?: ListConversation;
 };
 
-export const ConversationHeader = ({ title }: ConversationHeaderProps) => {
+export const ConversationHeader = ({ conversation }: ConversationHeaderProps) => {
   const isMobile = useIsMobile();
   const openSidebar = useConversationsSidebarStore(
     (state) => state.openSidebar,
   );
+  const title = conversation?.title || "Conversation";
 
   return (
     <Stack
+      alignItems="center"
+      direction="row"
+      gap={1.25}
       sx={{
-        minHeight: CONVERSATIONS_SIDEBAR_HEADER_HEIGHT,
-        maxHeight: CONVERSATIONS_SIDEBAR_HEADER_HEIGHT,
-        px: 2,
-        gap: 1,
-        flexDirection: "row",
-        alignItems: "center",
         bgcolor: "background.paper",
         borderBottom: 1,
         borderColor: "divider",
+        flexShrink: 0,
+        minHeight: CONVERSATIONS_SIDEBAR_HEADER_HEIGHT,
+        px: 2,
       }}
     >
       {isMobile ? (
         <Tooltip title="Open chats">
-          <IconButton
-            aria-label="Open chats"
-            onClick={openSidebar}
-            size="small"
-            sx={{
-              color: "text.secondary",
-              height: 34,
-              width: 34,
-              "&:hover": {
-                bgcolor: "action.hover",
-                color: "text.primary",
-              },
-            }}
-          >
-            <PanelLeftOpen fontSize="small" />
+          <IconButton aria-label="Open chats" onClick={openSidebar} size="small">
+            <PanelLeftOpen />
           </IconButton>
         </Tooltip>
       ) : null}
-      <Typography fontWeight={800} noWrap variant="h6">
-        {title || "Conversation"}
-      </Typography>
+      {conversation && (
+        <ConversationAvatar
+          size={28}
+          title={conversation.title}
+          type={conversation.type}
+        />
+      )}
+      <Stack minWidth={0}>
+        <Typography component="h1" fontWeight={600} noWrap>
+          {title}
+        </Typography>
+        {conversation && (
+          <Typography color="text.secondary" noWrap variant="body2">
+            {conversation.type === ConversationType.Direct
+              ? "Direct message"
+              : "Group conversation"}
+          </Typography>
+        )}
+      </Stack>
     </Stack>
   );
 };

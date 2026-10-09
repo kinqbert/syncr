@@ -105,7 +105,7 @@ export const ConversationPage = () => {
         overflow: "hidden",
       }}
     >
-      <ConversationHeader title={conversation?.title} />
+      <ConversationHeader conversation={conversation} />
       <MessageHistory
         key={parsedConversationId}
         conversationId={parsedConversationId}

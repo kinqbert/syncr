@@ -1,14 +1,14 @@
-import { Alert, CircularProgress, Stack } from "@mui/material";
+import { Alert, Button, Stack } from "@mui/material";
 import type { ListConversation } from "@syncr/packages";
 import { useState } from "react";
 
+import { EmptyState, RowSkeleton } from "@/components/ui";
 import { theme } from "@/lib/theme";
 import { useConversationsSidebarStore } from "@/store/useConversationsSidebarStore";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
 import { ConversationListItem } from "./ConversationListItem";
 import { ConversationsSidebarHeader } from "./ConversationsSidebarHeader";
-import { CreateConversationListItem } from "./CreateConversationListItem";
 import { NewConversationDialog } from "./NewConversationDialog";
 
 type ConversationsSidebarProps = {
@@ -40,27 +40,13 @@ export const ConversationsSidebar = ({
     0,
   );
 
-  if (loading) {
-    return (
-      <Stack
-        width="100%"
-        height="100%"
-        alignItems="center"
-        justifyContent="center"
-        sx={{ borderRight: 1, borderColor: "divider" }}
-      >
-        <CircularProgress />
-      </Stack>
-    );
-  }
-
   return (
     <>
       <Stack
         height="100%"
         width="100%"
         sx={{
-          bgcolor: "background.paper",
+          bgcolor: "background.default",
           borderRight: 1,
           borderColor: "divider",
           overflow: "hidden",
@@ -71,27 +57,36 @@ export const ConversationsSidebar = ({
         }}
       >
         <ConversationsSidebarHeader
+          onCreate={() => setDialogOpen(true)}
           open={visibleOpen}
+          toggleSidebar={forceOpen ? undefined : toggleSidebar}
           unreadCount={unreadCount}
-          toggleSidebar={toggleSidebar}
         />
 
         <Stack
           flex={1}
           minHeight={0}
+          gap={0.25}
           p={1}
-          sx={{
-            overflowY: "auto",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": {
-              display: "none",
-            },
-          }}
+          sx={{ overflowY: "auto" }}
         >
-          <CreateConversationListItem
-            open={visibleOpen}
-            onClick={() => setDialogOpen(true)}
-          />
+          {loading ? <RowSkeleton count={4} /> : null}
+
+          {!loading && !hasError && conversations.length === 0 && visibleOpen ? (
+            <EmptyState
+              action={
+                <Button
+                  onClick={() => setDialogOpen(true)}
+                  size="small"
+                  variant="outlined"
+                >
+                  New chat
+                </Button>
+              }
+              compact
+              title="No conversations yet"
+            />
+          ) : null}
 
           {hasError ? (
             <Alert severity="error" sx={{ m: visibleOpen ? 1 : 0 }}>

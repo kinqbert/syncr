@@ -24,10 +24,10 @@ type MessageBubbleProps = {
 
 const getBubbleRadius = (isOwn: boolean, isFirstInBlock: boolean) => {
   if (isOwn) {
-    return isFirstInBlock ? "16px 16px 4px 16px" : "16px 4px 4px 16px";
+    return isFirstInBlock ? "12px 12px 4px 12px" : "12px 4px 4px 12px";
   }
 
-  return isFirstInBlock ? "16px 16px 16px 4px" : "4px 16px 16px 4px";
+  return isFirstInBlock ? "12px 12px 12px 4px" : "4px 12px 12px 4px";
 };
 
 export const MessageBubble = ({
@@ -124,7 +124,7 @@ export const MessageBubble = ({
             onClick={() => onReplyClick(replyTo.id)}
             type="button"
             sx={{
-              bgcolor: isOwn ? "action.hover" : "accent.soft",
+              bgcolor: isOwn ? "inverse.overlay" : "surface.subtle",
               border: 0,
               borderLeft: "3px solid",
               borderColor: isOwn ? "primary.contrastText" : "primary.main",
@@ -140,7 +140,7 @@ export const MessageBubble = ({
               width: "100%",
             }}
           >
-            <Typography fontSize={12} fontWeight={800} noWrap>
+            <Typography fontSize={12} fontWeight={600} noWrap>
               {replyTo.author
                 ? `${replyTo.author.name} ${replyTo.author.surname}`.trim()
                 : "Deleted user"}
@@ -180,20 +180,10 @@ export const MessageBubble = ({
         anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
         onClose={() => setMenuAnchor(null)}
-        slotProps={{
-          paper: {
-            sx: {
-              borderRadius: 2,
-              boxShadow: "var(--mui-palette-elevation-popover)",
-            },
-          },
-        }}
       >
         <MenuItem onClick={handleReplyFromMenu}>
-          <Reply fontSize="small" />
-          <Typography fontSize={14} fontWeight={700} ml={1}>
-            Reply
-          </Typography>
+          <Reply />
+          Reply
         </MenuItem>
       </Menu>
     </Stack>
