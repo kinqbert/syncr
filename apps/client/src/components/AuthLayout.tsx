@@ -1,4 +1,5 @@
-import { Box, Container, Paper, Stack, Typography } from "@mui/material";
+import { Box, Container, Stack, Typography } from "@mui/material";
+import { FolderKanban } from "lucide-mui";
 import type { ReactNode } from "react";
 
 interface AuthLayoutProps {
@@ -21,41 +22,50 @@ export const AuthLayout = ({
         alignItems: "center",
         bgcolor: "background.default",
         display: "flex",
-        minHeight: "100vh",
-        py: 4,
+        minHeight: "100dvh",
+        py: 6,
       }}
     >
-      <Container maxWidth="xs">
-        <Stack gap={3.5}>
-          <Stack gap={1.25} textAlign="center">
-            <Typography
-              variant="h3"
+      <Container maxWidth={false} sx={{ maxWidth: 400 }}>
+        <Stack gap={3}>
+          <Stack alignItems="center" gap={2} textAlign="center">
+            <Box
+              aria-hidden
               sx={{
-                fontSize: { xs: 38, sm: 48 },
-                fontWeight: 700,
-                letterSpacing: 0,
-                lineHeight: 1.08,
+                alignItems: "center",
+                bgcolor: "primary.main",
+                borderRadius: 2,
+                color: "primary.contrastText",
+                display: "flex",
+                height: 40,
+                justifyContent: "center",
+                width: 40,
               }}
             >
-              {title}
-            </Typography>
-            <Typography color="text.secondary" sx={{ fontSize: 16 }}>
-              {subtitle}
-            </Typography>
+              <FolderKanban sx={{ fontSize: 22 }} />
+            </Box>
+            <Stack gap={0.5}>
+              <Typography component="h1" variant="h2">
+                {title}
+              </Typography>
+              <Typography color="text.secondary" variant="subtitle1">
+                {subtitle}
+              </Typography>
+            </Stack>
           </Stack>
 
-          <Paper
-            elevation={0}
+          <Box
             sx={{
+              bgcolor: "background.paper",
               border: 1,
               borderColor: "divider",
-              borderRadius: 2,
-              boxShadow: "var(--mui-palette-elevation-popover)",
-              p: { xs: 3, sm: 4 },
+              borderRadius: 3,
+              boxShadow: "var(--mui-palette-elevation-card)",
+              p: { xs: 2.5, sm: 3 },
             }}
           >
             {children}
-          </Paper>
+          </Box>
 
           {footer}
         </Stack>

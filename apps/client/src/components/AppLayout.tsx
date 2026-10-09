@@ -1,9 +1,4 @@
-import {
-  Box,
-  CircularProgress,
-  Stack,
-  useColorScheme,
-} from "@mui/material";
+import { Box, Stack, useColorScheme } from "@mui/material";
 import { Outlet } from "react-router";
 import { Toaster } from "sonner";
 
@@ -21,6 +16,7 @@ import { ConversationEventsListener } from "./ConversationEventsListener";
 import { ErrorState } from "./ErrorState";
 import { NotificationsListener } from "./NotificationsListener";
 import { Sidebar } from "./Sidebar";
+import { PageSkeleton } from "./ui";
 
 const CompanyContent = () => {
   useSyncSelectedCompany();
@@ -49,14 +45,7 @@ const CompanyContent = () => {
           title="Could not load workspace."
         />
       ) : isPending ? (
-        <Stack
-          alignItems="center"
-          component="main"
-          py={6}
-          sx={{ width: "100%" }}
-        >
-          <CircularProgress />
-        </Stack>
+        <PageSkeleton />
       ) : !selectedCompanyId || companies.length === 0 ? (
         <CompanyRequiredPlaceholder />
       ) : (
