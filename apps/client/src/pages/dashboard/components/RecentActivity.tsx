@@ -1,6 +1,8 @@
-import { Paper, Stack, Typography } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import type { DashboardActivity } from "@syncr/packages";
+import { Activity } from "lucide-mui";
 
+import { EmptyState, ListRow, Section } from "@/components/ui";
 import { UserAvatar } from "@/components/UserAvatar";
 import { TASK_ACTIVITY_LABEL } from "@/constants/taskActivityLabels";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
@@ -18,51 +20,38 @@ const getActivityActorName = (activity: DashboardActivity) => {
 
 export const RecentActivity = ({ activities }: RecentActivityProps) => {
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        border: 1,
-        borderColor: "divider",
-        borderRadius: 2,
-        p: { xs: 2, sm: 3 },
-      }}
-    >
-      <Stack gap={2.5}>
-        <Typography fontSize={18} fontWeight={800}>
-          Recent Activity
-        </Typography>
-
-        {activities.length === 0 ? (
-          <Typography color="text.secondary">No recent activity yet.</Typography>
-        ) : null}
-
-        {activities.map((activity) => (
-          <Stack
-            key={activity.id}
-            alignItems="flex-start"
-            direction="row"
-            gap={1.5}
-            minWidth={0}
-          >
-            <UserAvatar
-              name={activity.actor?.name}
-              size={34}
-              surname={activity.actor?.surname}
+    <Section icon={<Activity />} padding="none" title="Recent activity">
+      {activities.length === 0 ? (
+        <EmptyState compact title="No recent activity yet" />
+      ) : (
+        <Stack sx={{ maxHeight: 360, overflowY: "auto", p: 1 }}>
+          {activities.map((activity) => (
+            <ListRow
+              key={activity.id}
+              leading={
+                <UserAvatar
+                  name={activity.actor?.name}
+                  size={22}
+                  surname={activity.actor?.surname}
+                />
+              }
+              subtitle={formatRelativeDate(activity.createdAt)}
+              title={
+                <>
+                  <Box component="span" sx={{ fontWeight: 600 }}>
+                    {getActivityActorName(activity)}
+                  </Box>{" "}
+                  <Box component="span" sx={{ color: "text.secondary" }}>
+                    {TASK_ACTIVITY_LABEL[activity.action]}
+                  </Box>{" "}
+                  {activity.task.name}
+                </>
+              }
+              wrap
             />
-            <Stack minWidth={0}>
-              <Typography fontSize={14}>
-                <Typography component="span" fontSize="inherit" fontWeight={650}>
-                  {getActivityActorName(activity)}
-                </Typography>{" "}
-                {TASK_ACTIVITY_LABEL[activity.action]} {activity.task.name}
-              </Typography>
-              <Typography color="text.secondary" fontSize={12}>
-                {formatRelativeDate(activity.createdAt)}
-              </Typography>
-            </Stack>
-          </Stack>
-        ))}
-      </Stack>
-    </Paper>
+          ))}
+        </Stack>
+      )}
+    </Section>
   );
 };

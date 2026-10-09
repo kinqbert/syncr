@@ -13,31 +13,26 @@ export const SettingsSectionHeader = ({
   title,
 }: SettingsSectionHeaderProps) => {
   return (
-    <Stack
-      direction="row"
-      gap={1.5}
-      minWidth={0}
-      px={{ xs: 2, sm: 2.25 }}
-      py={2}
-    >
+    <Stack direction="row" gap={1.25} minWidth={0} px={2} py={1.5}>
       <Box
-        alignItems="center"
-        border={1}
-        borderColor="divider"
-        borderRadius={1}
-        display="flex"
-        flexShrink={0}
-        height={40}
-        justifyContent="center"
-        width={40}
+        sx={{
+          alignItems: "center",
+          color: "text.secondary",
+          display: "flex",
+          flexShrink: 0,
+          height: 20,
+          justifyContent: "center",
+          width: 20,
+          "& .MuiSvgIcon-root": { color: "inherit", fontSize: 16 },
+        }}
       >
         {icon}
       </Box>
       <Stack gap={0.25} minWidth={0}>
-        <Typography fontSize={16} fontWeight={700}>
+        <Typography component="h2" variant="h6">
           {title}
         </Typography>
-        <Typography color="text.secondary" fontSize={13}>
+        <Typography color="text.secondary" variant="body2">
           {description}
         </Typography>
       </Stack>

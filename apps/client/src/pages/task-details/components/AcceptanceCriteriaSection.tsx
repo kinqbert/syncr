@@ -52,15 +52,30 @@ export const AcceptanceCriteriaSection = ({
   };
 
   return (
-    <Stack gap={1}>
-      <Typography variant="caption">Acceptance Criteria</Typography>
+    <Stack gap={0.5}>
+      <Stack alignItems="baseline" direction="row" gap={1} sx={{ mb: 0.5 }}>
+        <Typography component="h2" variant="h6">
+          Acceptance criteria
+        </Typography>
+        {criteria.length > 0 && (
+          <Typography color="text.secondary" variant="body2">
+            {criteria.filter((criterion) => criterion.isDone).length} of{" "}
+            {criteria.length} done
+          </Typography>
+        )}
+      </Stack>
       {criteria.map((criterion) => (
         <Stack
           alignItems="center"
           direction="row"
           gap={1}
           key={criterion.id}
-          sx={{ minHeight: 36 }}
+          sx={{
+            minHeight: 32,
+            "&:hover .criterion-remove, &:focus-within .criterion-remove": {
+              opacity: 1,
+            },
+          }}
         >
           <Checkbox
             checked={criterion.isDone}
@@ -77,6 +92,7 @@ export const AcceptanceCriteriaSection = ({
             sx={{
               flex: 1,
               minWidth: 0,
+              color: criterion.isDone ? "text.secondary" : "text.primary",
               textDecoration: criterion.isDone ? "line-through" : "none",
             }}
           >
@@ -95,7 +111,9 @@ export const AcceptanceCriteriaSection = ({
             <span>
               <IconButton
                 aria-label="Remove criterion"
+                className="criterion-remove"
                 disabled={isDeleting}
+                sx={{ opacity: { xs: 1, md: 0 } }}
                 onClick={() => void onDelete(criterion.id)}
                 size="small"
               >
@@ -117,8 +135,15 @@ export const AcceptanceCriteriaSection = ({
         <TextField
           fullWidth
           onChange={(event) => setNewCriterion(event.target.value)}
-          placeholder="Add acceptance criterion"
+          placeholder="Add a criterion and press Enter"
           size="small"
+          sx={{
+            "& .MuiOutlinedInput-root:not(.Mui-focused)": {
+              bgcolor: "transparent",
+            },
+            "& .MuiOutlinedInput-root:not(.Mui-focused):not(:hover) .MuiOutlinedInput-notchedOutline":
+              { borderStyle: "dashed" },
+          }}
           value={newCriterion}
         />
         <Tooltip title="Add criterion">

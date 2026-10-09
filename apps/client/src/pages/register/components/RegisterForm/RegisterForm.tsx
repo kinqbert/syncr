@@ -122,7 +122,7 @@ export const RegisterForm = () => {
             <Box
               aria-hidden
               sx={{
-                bgcolor: "#EEF2FF",
+                bgcolor: "accent.soft",
                 borderRadius: 999,
                 height: 6,
                 overflow: "hidden",

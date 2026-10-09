@@ -11,16 +11,11 @@ import {
   MenuItem,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import {
-  BriefcaseBusiness,
-  Building2,
-  Check,
-  ChevronDown,
-  Plus,
-} from "lucide-mui";
-import { type FormEvent, useEffect, useState } from "react";
+import { Check, ChevronDown, PanelLeft, Plus } from "lucide-mui";
+import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { useCreateCompany, useGetMyCompanies } from "@/api/companies";
@@ -28,7 +23,37 @@ import { removeCompanyScopedCache } from "@/lib/react-query";
 import { useCompanyStore } from "@/store/useCompanyStore";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
-export const CompanySwitcher = () => {
+const WorkspaceLogo = ({ name, size = 22 }: { name: string; size?: number }) => (
+  <Box
+    aria-hidden
+    sx={{
+      alignItems: "center",
+      bgcolor: "primary.main",
+      borderRadius: 1,
+      color: "primary.contrastText",
+      display: "inline-flex",
+      flexShrink: 0,
+      fontSize: Math.round(size * 0.5),
+      fontWeight: 700,
+      height: size,
+      justifyContent: "center",
+      width: size,
+    }}
+  >
+    {name.trim().charAt(0).toUpperCase() || "S"}
+  </Box>
+);
+
+type CompanySwitcherProps = {
+  /** In the collapsed sidebar the trigger expands the sidebar instead. */
+  collapsed?: boolean;
+  onExpand?: () => void;
+};
+
+export const CompanySwitcher = ({
+  collapsed = false,
+  onExpand,
+}: CompanySwitcherProps) => {
   const navigate = useNavigate();
 
   const { data: companies = [], isPending } = useGetMyCompanies();
@@ -42,33 +67,6 @@ export const CompanySwitcher = () => {
   const [companyName, setCompanyName] = useState("");
   const [createError, setCreateError] = useState<string | null>(null);
   const isMenuOpen = Boolean(menuAnchorEl);
-
-  useEffect(() => {
-    if (isPending) {
-      return;
-    }
-
-    if (companies.length === 0) {
-      if (selectedCompanyId !== null) {
-        setSelectedCompanyId(null);
-        removeCompanyScopedCache();
-      }
-
-      return;
-    }
-
-    const hasSelectedCompany = companies.some(
-      (company) => company.id === selectedCompanyId,
-    );
-
-    if (!hasSelectedCompany) {
-      setSelectedCompanyId(companies[0].id);
-
-      if (selectedCompanyId !== null) {
-        removeCompanyScopedCache();
-      }
-    }
-  }, [companies, isPending, selectedCompanyId, setSelectedCompanyId]);
 
   const handleCompanyChange = (nextCompanyId: number) => {
     if (nextCompanyId === selectedCompanyId) {
@@ -128,69 +126,94 @@ export const CompanySwitcher = () => {
   const selectedCompany = companies.find(
     (company) => company.id === selectedCompanyId,
   );
+  const workspaceName = selectedCompany?.name ?? "Select workspace";
 
   return (
     <>
-      <Button
-        aria-controls={isMenuOpen ? "company-switcher-menu" : undefined}
-        aria-expanded={isMenuOpen ? "true" : undefined}
-        aria-haspopup="menu"
-        disabled={isPending}
-        onClick={(event) => setMenuAnchorEl(event.currentTarget)}
-        sx={{
-          border: 1,
-          borderColor: isMenuOpen ? "primary.light" : "divider",
-          borderRadius: 1.25,
-          color: "text.primary",
-          height: 40,
-          justifyContent: "space-between",
-          minWidth: 220,
-          px: 1.5,
-          py: 0.75,
-          textAlign: "left",
-          "&:hover": {
-            bgcolor: "background.paper",
-            borderColor: "primary.light",
-          },
-        }}
-        variant="outlined"
-      >
-        <Stack direction="row" alignItems="center" gap={1.25} minWidth={0}>
-          <BriefcaseBusiness sx={{ color: "text.secondary", fontSize: 18 }} />
-          <Stack minWidth={0}>
-            <Typography
-              component="span"
-              noWrap
-              sx={{ fontSize: 13, fontWeight: 600, lineHeight: "17px" }}
-            >
-              {selectedCompany?.name ?? "Select workspace"}
-            </Typography>
-            <Typography
-              component="span"
-              noWrap
+      <Tooltip placement="right" title={collapsed ? "Expand sidebar" : ""}>
+        <Box
+          aria-controls={isMenuOpen ? "company-switcher-menu" : undefined}
+          aria-expanded={isMenuOpen ? "true" : undefined}
+          aria-haspopup={collapsed ? undefined : "menu"}
+          aria-label={collapsed ? "Expand sidebar" : undefined}
+          component="button"
+          disabled={isPending && !collapsed}
+          onClick={(event) =>
+            collapsed ? onExpand?.() : setMenuAnchorEl(event.currentTarget)
+          }
+          type="button"
+          sx={{
+            alignItems: "center",
+            bgcolor: isMenuOpen ? "surface.active" : "transparent",
+            border: 0,
+            borderRadius: 1,
+            color: "text.primary",
+            cursor: "pointer",
+            display: "flex",
+            font: "inherit",
+            gap: 1,
+            height: 36,
+            minWidth: 0,
+            overflow: "hidden",
+            px: "9px",
+            textAlign: "left",
+            transition: "background-color 120ms ease",
+            width: "100%",
+            "&:hover": { bgcolor: "surface.hover" },
+            "&:focus-visible": {
+              outline: "2px solid",
+              outlineColor: "primary.main",
+            },
+            // Collapsed: the logo turns into a sidebar icon on hover.
+            ...(collapsed && {
+              "&:hover .workspace-logo": { opacity: 0 },
+              "&:hover .workspace-expand": { opacity: 1 },
+            }),
+          }}
+        >
+          <Box sx={{ flexShrink: 0, height: 22, position: "relative", width: 22 }}>
+            <Box className="workspace-logo" sx={{ transition: "opacity 120ms ease" }}>
+              <WorkspaceLogo name={workspaceName} />
+            </Box>
+            <Box
+              aria-hidden
+              className="workspace-expand"
               sx={{
+                alignItems: "center",
                 color: "text.secondary",
-                fontSize: 12,
-                fontWeight: 500,
-                lineHeight: "15px",
+                display: "flex",
+                inset: 0,
+                justifyContent: "center",
+                opacity: 0,
+                position: "absolute",
+                transition: "opacity 120ms ease",
               }}
             >
-              {companies.length === 1
-                ? "1 workspace"
-                : `${companies.length} workspaces`}
-            </Typography>
-          </Stack>
-        </Stack>
-        <ChevronDown
-          sx={{
-            color: "text.secondary",
-            fontSize: 16,
-            ml: 1,
-            transform: isMenuOpen ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 160ms ease",
-          }}
-        />
-      </Button>
+              <PanelLeft sx={{ fontSize: 18 }} />
+            </Box>
+          </Box>
+          <Typography
+            noWrap
+            sx={{
+              flex: 1,
+              fontWeight: 600,
+              opacity: collapsed ? 0 : 1,
+              transition: "opacity 150ms ease",
+            }}
+          >
+            {workspaceName}
+          </Typography>
+          <ChevronDown
+            sx={{
+              color: "text.secondary",
+              flexShrink: 0,
+              fontSize: 14,
+              opacity: collapsed ? 0 : 1,
+              transition: "opacity 150ms ease",
+            }}
+          />
+        </Box>
+      </Tooltip>
 
       <Menu
         id="company-switcher-menu"
@@ -200,12 +223,7 @@ export const CompanySwitcher = () => {
         open={isMenuOpen}
         slotProps={{
           paper: {
-            elevation: 3,
-            sx: {
-              borderRadius: 1.25,
-              mt: 0.75,
-              width: 250,
-            },
+            sx: { width: 250 },
           },
           list: {
             sx: { p: 0 },
@@ -265,23 +283,7 @@ export const CompanySwitcher = () => {
                   },
                 }}
               >
-                <Box
-                  sx={{
-                    height: 32,
-                    width: 32,
-
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-
-                    borderRadius: 1.25,
-
-                    bgcolor: "secondary.main",
-                    color: "secondary.contrastText",
-                  }}
-                >
-                  <Building2 sx={{ fontSize: 17 }} />
-                </Box>
+                <WorkspaceLogo name={company.name} size={26} />
                 <Stack flex={1} minWidth={0}>
                   <Typography
                     noWrap

@@ -1,260 +1,382 @@
 import {
   Box,
+  Collapse,
   Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  type Theme,
+  IconButton,
+  Stack,
   Tooltip,
   Typography,
 } from "@mui/material";
 import {
   Bell,
   CalendarDays,
+  ChevronRight,
   Folders,
   LayoutDashboard,
   MessageCircle,
-  Settings,
+  PanelLeft,
   Users,
 } from "lucide-mui";
+import type { ReactNode } from "react";
 import { NavLink } from "react-router";
 
 import { useGetNotifications } from "@/api/notifications";
+import { useGetMyProjects } from "@/api/projects";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { useCompanyStore } from "@/store/useCompanyStore";
 import { useSidebarStore } from "@/store/useSidebarStore";
 
-import { HEADER_HEIGHT } from "./Header";
-import { HeaderLogo } from "./HeaderLogo";
+import { CompanySwitcher } from "./CompanySwitcher";
+import { UserMenu } from "./UserMenu";
 
 export const SIDEBAR_WIDTH = 240;
-export const SIDEBAR_COLLAPSED_WIDTH = 65;
+export const SIDEBAR_COLLAPSED_WIDTH = 56;
+const MAX_SIDEBAR_PROJECTS = 8;
 
-const SIDEBAR_ITEMS: {
-  id: number;
+type NavItem = {
   label: string;
   to: string;
-  icon: React.ReactNode;
-}[] = [
-  { id: 0, label: "Dashboard", to: "/", icon: <LayoutDashboard /> },
-  { id: 1, label: "Projects", to: "projects", icon: <Folders /> },
-  { id: 2, label: "Calendar", to: "calendar", icon: <CalendarDays /> },
-  {
-    id: 3,
-    label: "Conversations",
-    to: "conversations",
-    icon: <MessageCircle />,
-  },
-  {
-    id: 4,
-    label: "Team",
-    to: "team",
-    icon: <Users />,
-  },
-  {
-    id: 5,
-    label: "Notifications",
-    to: "notifications",
-    icon: <Bell />,
-  },
-  {
-    id: 6,
-    label: "Settings",
-    to: "settings",
-    icon: <Settings />,
-  },
+  icon: ReactNode;
+  end?: boolean;
+};
+
+const PRIMARY_ITEMS: NavItem[] = [
+  { label: "Dashboard", to: "/", icon: <LayoutDashboard />, end: true },
+  { label: "Notifications", to: "/notifications", icon: <Bell /> },
+  { label: "Conversations", to: "/conversations", icon: <MessageCircle /> },
+  { label: "My calendar", to: "/calendar", icon: <CalendarDays /> },
 ];
 
-export const Sidebar = () => {
-  const open = useSidebarStore((state) => state.isOpen);
-  const closeSidebar = useSidebarStore((state) => state.closeSidebar);
-  const { data: notifications = [] } = useGetNotifications();
+const WORKSPACE_ITEMS: NavItem[] = [
+  { label: "Projects", to: "/projects", icon: <Folders />, end: true },
+  { label: "Team", to: "/team", icon: <Users /> },
+];
 
-  const unreadNotificationsCount = notifications.filter(
-    (notification) => !notification.isRead,
-  ).length;
+type SidebarLinkProps = {
+  collapsed: boolean;
+  count?: number;
+  end?: boolean;
+  icon: ReactNode;
+  label: string;
+  onNavigate: () => void;
+  to: string;
+};
 
+const fade = (visible: boolean) => ({
+  opacity: visible ? 1 : 0,
+  transition: "opacity 150ms ease",
+});
+
+const SidebarLink = ({
+  collapsed,
+  count,
+  end,
+  icon,
+  label,
+  onNavigate,
+  to,
+}: SidebarLinkProps) => {
+  const hasCount = !!count && count > 0;
+
+  return (
+    <Tooltip placement="right" title={collapsed ? label : ""}>
+      <Box
+        aria-label={collapsed ? label : undefined}
+        component={NavLink}
+        end={end}
+        onClick={onNavigate}
+        to={to}
+        sx={{
+          alignItems: "center",
+          borderRadius: 1,
+          color: "text.secondary",
+          display: "flex",
+          flexShrink: 0,
+          gap: 1,
+          height: 30,
+          overflow: "hidden",
+          // Fixed padding keeps the icon in the same spot when collapsed.
+          px: "12px",
+          position: "relative",
+          transition: "background-color 120ms ease, color 120ms ease",
+          whiteSpace: "nowrap",
+          "& .MuiSvgIcon-root": { flexShrink: 0, fontSize: 16 },
+          "&:hover": { bgcolor: "surface.hover", color: "text.primary" },
+          "&.active": { bgcolor: "surface.active", color: "text.primary" },
+          "&:focus-visible": {
+            outline: "2px solid",
+            outlineColor: "primary.main",
+            outlineOffset: -2,
+          },
+        }}
+      >
+        {icon}
+        <Typography noWrap sx={{ flex: 1, fontWeight: 500, ...fade(!collapsed) }}>
+          {label}
+        </Typography>
+        {hasCount && (
+          <>
+            <Box
+              component="span"
+              sx={{
+                color: "text.secondary",
+                fontSize: 12,
+                fontVariantNumeric: "tabular-nums",
+                ...fade(!collapsed),
+              }}
+            >
+              {count > 99 ? "99+" : count}
+            </Box>
+            <Box
+              component="span"
+              sx={{
+                bgcolor: "primary.main",
+                border: "2px solid",
+                borderColor: "surface.sidebar",
+                borderRadius: "50%",
+                height: 10,
+                left: 26,
+                position: "absolute",
+                top: 4,
+                width: 10,
+                ...fade(collapsed),
+              }}
+            />
+          </>
+        )}
+      </Box>
+    </Tooltip>
+  );
+};
+
+const SidebarGroupLabel = ({
+  children,
+  collapsed,
+  onClick,
+  open,
+}: {
+  children: ReactNode;
+  collapsed: boolean;
+  onClick?: () => void;
+  open?: boolean;
+}) => (
+  <Stack
+    alignItems="center"
+    component={onClick ? "button" : "div"}
+    direction="row"
+    disabled={onClick ? collapsed : undefined}
+    gap={0.5}
+    onClick={onClick}
+    tabIndex={collapsed ? -1 : undefined}
+    type={onClick ? "button" : undefined}
+    sx={{
+      bgcolor: "transparent",
+      border: 0,
+      borderRadius: 1,
+      color: "text.secondary",
+      cursor: onClick && !collapsed ? "pointer" : "default",
+      flexShrink: 0,
+      font: "inherit",
+      height: 24,
+      mt: 1.5,
+      overflow: "hidden",
+      px: "12px",
+      textAlign: "left",
+      whiteSpace: "nowrap",
+      width: "100%",
+      ...fade(!collapsed),
+      "&:hover": onClick ? { color: "text.primary" } : undefined,
+    }}
+  >
+    <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{children}</Typography>
+    {onClick && (
+      <ChevronRight
+        sx={{
+          fontSize: 12,
+          transform: open ? "rotate(90deg)" : "none",
+          transition: "transform 120ms ease",
+        }}
+      />
+    )}
+  </Stack>
+);
+
+const SidebarProjects = ({
+  collapsed,
+  onNavigate,
+}: {
+  collapsed: boolean;
+  onNavigate: () => void;
+}) => {
+  const isProjectsOpen = useSidebarStore((state) => state.isProjectsOpen);
+  const toggleProjects = useSidebarStore((state) => state.toggleProjects);
+  const { data: projects = [] } = useGetMyProjects();
+
+  if (projects.length === 0) {
+    return null;
+  }
+
+  const visibleProjects = projects
+    .filter((project) => project.status !== "archived")
+    .slice(0, MAX_SIDEBAR_PROJECTS);
+
+  return (
+    <>
+      <SidebarGroupLabel
+        collapsed={collapsed}
+        onClick={toggleProjects}
+        open={isProjectsOpen}
+      >
+        Your projects
+      </SidebarGroupLabel>
+      <Collapse in={isProjectsOpen}>
+        <Stack gap={0.25}>
+          {visibleProjects.map((project) => (
+            <SidebarLink
+              collapsed={collapsed}
+              icon={
+                <Box
+                  sx={{
+                    bgcolor: `projectStatus.${project.status}`,
+                    borderRadius: 0.5,
+                    flexShrink: 0,
+                    height: 8,
+                    mx: "4px",
+                    width: 8,
+                  }}
+                />
+              }
+              key={project.id}
+              label={project.name}
+              onNavigate={onNavigate}
+              to={`/projects/${project.id}`}
+            />
+          ))}
+        </Stack>
+      </Collapse>
+    </>
+  );
+};
+
+const SidebarContent = ({ collapsed }: { collapsed: boolean }) => {
   const isMobile = useIsMobile();
+  const openSidebar = useSidebarStore((state) => state.openSidebar);
+  const closeSidebar = useSidebarStore((state) => state.closeSidebar);
+  const setMobileOpen = useSidebarStore((state) => state.setMobileOpen);
+  const hasCompany = useCompanyStore((state) => state.selectedCompanyId !== null);
+  const { data: notifications = [] } = useGetNotifications();
+  const unreadCount = notifications.filter((item) => !item.isRead).length;
 
-  const handleListItemClick = () => {
+  const handleNavigate = () => {
     if (isMobile) {
-      closeSidebar();
+      setMobileOpen(false);
     }
   };
 
   return (
-    <Box position="relative">
-      <Drawer
-        variant={isMobile ? "temporary" : "permanent"}
-        open={isMobile ? open : true}
-        onClose={closeSidebar}
-        sx={(theme: Theme) => ({
-          width: isMobile
-            ? SIDEBAR_WIDTH
-            : open
-              ? SIDEBAR_WIDTH
-              : SIDEBAR_COLLAPSED_WIDTH,
-          flexShrink: 0,
-
-          transition: theme.transitions.create("width", {
-            duration: theme.transitions.duration.enteringScreen,
-            easing: theme.transitions.easing.sharp,
-          }),
-          "& .MuiDrawer-paper": {
-            width: isMobile
-              ? SIDEBAR_WIDTH
-              : open
-                ? SIDEBAR_WIDTH
-                : SIDEBAR_COLLAPSED_WIDTH,
-            display: "flex",
-            flexDirection: "column",
-            overflowX: "hidden",
-            top: isMobile ? 0 : HEADER_HEIGHT,
-            height: {
-              xs: "100dvh",
-              sm: `calc(100vh - ${HEADER_HEIGHT}px)`,
-            },
-            borderRightColor: "divider",
-            transition: theme.transitions.create("width", {
-              duration: theme.transitions.duration.enteringScreen,
-              easing: theme.transitions.easing.sharp,
-            }),
-          },
-        })}
-      >
-        {isMobile && <HeaderLogo hasBottomBorder />}
-        <List
-          disablePadding
-          sx={{
-            flex: 1,
-            px: 1.75,
-            pt: 1.5,
-          }}
-        >
-          {SIDEBAR_ITEMS.map((item) => (
-            <Tooltip
-              key={item.id}
-              title={open ? "" : item.label}
-              placement="right"
+    <Stack height="100%" minHeight={0}>
+      <Box sx={{ p: 1, pb: 0.5, position: "relative" }}>
+        <Box sx={{ pr: collapsed || isMobile ? 0 : 4 }}>
+          <CompanySwitcher collapsed={collapsed} onExpand={openSidebar} />
+        </Box>
+        {!isMobile && (
+          <Tooltip title="Collapse sidebar">
+            <IconButton
+              aria-hidden={collapsed}
+              aria-label="Collapse sidebar"
+              onClick={closeSidebar}
+              size="small"
+              tabIndex={collapsed ? -1 : undefined}
+              sx={{
+                pointerEvents: collapsed ? "none" : "auto",
+                position: "absolute",
+                right: 8,
+                top: 12,
+                ...fade(!collapsed),
+              }}
             >
-              <ListItem
-                disablePadding
-                component={NavLink}
-                onClick={handleListItemClick}
-                to={item.to}
-                sx={{
-                  mb: 0.75,
-                  overflowX: "hidden",
-                  "&.active": {
-                    color: "primary.main",
-                  },
-                  "&.active .MuiListItemIcon-root": {
-                    color: "primary.main",
-                  },
-                  "&.active .MuiListItemButton-root": {
-                    bgcolor: "#EEF2FF",
-                    color: "primary.main",
-                  },
-                  "&.active .MuiListItemButton-root:hover": {
-                    bgcolor: "#EEF2FF",
-                  },
-                }}
-              >
-                <ListItemButton
-                  sx={{
-                    borderRadius: 1,
-                    color: "text.secondary",
-                    gap: open ? 1.25 : 0,
-                    minHeight: 32,
-                    justifyContent: "initial",
-                    p: 1,
-                    transition:
-                      "background-color 160ms ease, color 160ms ease, gap 220ms ease",
-                    "&:hover": {
-                      bgcolor: "action.hover",
-                    },
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      flexShrink: 0,
-                      color: "text.secondary",
-                      justifyContent: "center",
-                      minWidth: 0,
-                      "& .MuiSvgIcon-root": {
-                        fontSize: 20,
-                      },
-                    }}
-                  >
-                    {item.icon}
-                  </ListItemIcon>
-                  <>
-                    <ListItemText
-                      primary={item.label}
-                      primaryTypographyProps={{
-                        fontSize: 14,
-                        fontWeight: 500,
-                        lineHeight: "20px",
-                        noWrap: true,
-                      }}
-                      sx={{
-                        flex: open ? "1 1 auto" : "0 1 auto",
-                        m: 0,
-                        maxWidth: open ? 150 : 0,
-                        opacity: open ? 1 : 0,
-                        overflow: "hidden",
-                        transition:
-                          "max-width 220ms ease, opacity 180ms ease, flex-basis 220ms ease",
-                        whiteSpace: "nowrap",
-                      }}
-                    />
-                    {item.label === "Notifications" &&
-                      unreadNotificationsCount > 0 && (
-                        <Box
-                          component="span"
-                          sx={{
-                            alignItems: "center",
-                            bgcolor: "primary.main",
-                            borderRadius: 999,
-                            color: "primary.contrastText",
-                            display: "inline-flex",
-                            flex: "0 0 auto",
-                            height: 18,
-                            justifyContent: "center",
-                            maxWidth: open ? 40 : 0,
-                            minWidth: open ? 18 : 0,
-                            opacity: open ? 1 : 0,
-                            overflow: "hidden",
-                            pointerEvents: open ? "auto" : "none",
-                            px: open ? 0.5 : 0,
-                            transform: open ? "scale(1)" : "scale(0.8)",
-                            transformOrigin: "right center",
-                            transition:
-                              "max-width 220ms ease, opacity 180ms ease, transform 180ms ease",
-                          }}
-                        >
-                          <Typography
-                            component="span"
-                            sx={{
-                              fontSize: 12,
-                              fontWeight: 700,
-                              lineHeight: 1,
-                            }}
-                          >
-                            {unreadNotificationsCount > 99
-                              ? "99+"
-                              : unreadNotificationsCount}
-                          </Typography>
-                        </Box>
-                      )}
-                  </>
-                </ListItemButton>
-              </ListItem>
-            </Tooltip>
-          ))}
-        </List>
+              <PanelLeft />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
+
+      <Stack
+        component="nav"
+        aria-label="Main"
+        gap={0.25}
+        sx={{ flex: 1, minHeight: 0, overflowY: "auto", px: 1, py: 0.5 }}
+      >
+        {hasCompany && (
+          <>
+            {PRIMARY_ITEMS.map((item) => (
+              <SidebarLink
+                {...item}
+                collapsed={collapsed}
+                count={item.to === "/notifications" ? unreadCount : undefined}
+                key={item.to}
+                onNavigate={handleNavigate}
+              />
+            ))}
+
+            <SidebarGroupLabel collapsed={collapsed}>Workspace</SidebarGroupLabel>
+            {WORKSPACE_ITEMS.map((item) => (
+              <SidebarLink
+                {...item}
+                collapsed={collapsed}
+                key={item.to}
+                onNavigate={handleNavigate}
+              />
+            ))}
+
+            <SidebarProjects collapsed={collapsed} onNavigate={handleNavigate} />
+          </>
+        )}
+      </Stack>
+
+      <Box sx={{ borderTop: 1, borderColor: "divider", p: 1 }}>
+        <UserMenu collapsed={collapsed} />
+      </Box>
+    </Stack>
+  );
+};
+
+export const Sidebar = () => {
+  const isOpen = useSidebarStore((state) => state.isOpen);
+  const isMobileOpen = useSidebarStore((state) => state.isMobileOpen);
+  const setMobileOpen = useSidebarStore((state) => state.setMobileOpen);
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <Drawer
+        onClose={() => setMobileOpen(false)}
+        open={isMobileOpen}
+        variant="temporary"
+        slotProps={{ paper: { sx: { width: SIDEBAR_WIDTH } } }}
+      >
+        <SidebarContent collapsed={false} />
       </Drawer>
+    );
+  }
+
+  const width = isOpen ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH;
+
+  return (
+    <Box
+      component="aside"
+      sx={{
+        bgcolor: "surface.sidebar",
+        borderRight: 1,
+        borderColor: "divider",
+        flexShrink: 0,
+        height: "100%",
+        overflow: "hidden",
+        transition: "width 200ms cubic-bezier(0.2, 0, 0, 1)",
+        width,
+      }}
+    >
+      <SidebarContent collapsed={!isOpen} />
     </Box>
   );
 };

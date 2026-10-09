@@ -54,7 +54,9 @@ export const PasswordSettingsSection = () => {
       borderRadius={2}
       component="form"
       divider={<Divider />}
-      maxWidth={760}
+      bgcolor="background.paper"
+      id="password"
+      sx={{ scrollMarginTop: 24 }}
       onSubmit={handleSubmit(handleSavePassword)}
       width="100%"
     >

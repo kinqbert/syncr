@@ -1,16 +1,14 @@
-import {
-  Box,
-  CircularProgress,
-  Link as MuiLink,
-  Stack,
-  Typography,
-} from "@mui/material";
-import { ArrowLeft } from "lucide-mui";
+import { Box, Button, Stack } from "@mui/material";
 import { Link, useParams } from "react-router";
 
-import { useGetProjectAssignees, useGetProjectLabels } from "@/api/projects";
+import {
+  useGetProject,
+  useGetProjectAssignees,
+  useGetProjectLabels,
+} from "@/api/projects";
 import { useGetProjectTasks } from "@/api/tasks";
 import { ErrorState } from "@/components/ErrorState";
+import { EmptyState, Page, PageHeader, PageSkeleton } from "@/components/ui";
 
 import { TaskActivityPanel } from "./components/TaskActivityPanel";
 import { TaskCommentsPanel } from "./components/TaskCommentsPanel";
@@ -39,6 +37,7 @@ export const TaskDetailsPage = () => {
     isError: areLabelsError,
     isPending: areLabelsPending,
   } = useGetProjectLabels(numericProjectId, Boolean(projectId));
+  const { data: project } = useGetProject(numericProjectId, Boolean(projectId));
   const task = tasks.find((item) => item.id === numericTaskId);
 
   if (!projectId || !taskId) {
@@ -55,62 +54,65 @@ export const TaskDetailsPage = () => {
     );
   }
 
+  const breadcrumbs = [
+    { label: "Projects", to: "/projects" },
+    { label: project?.name ?? "Project", to: `/projects/${projectId}` },
+    { label: "Board", to: `/projects/${projectId}/tasks` },
+  ];
+
   if (isPending) {
-    return (
-      <Stack alignItems="center" justifyContent="center" minHeight="100%">
-        <CircularProgress />
-      </Stack>
-    );
+    return <PageSkeleton />;
   }
 
   if (!task) {
     return (
-      <Stack gap={2} p={3}>
-        <MuiLink component={Link} to={`/projects/${projectId}/tasks`}>
-          Back to Task Board
-        </MuiLink>
-        <Typography variant="h5">Task could not be found</Typography>
-      </Stack>
+      <Page maxWidth={1240}>
+        <PageHeader breadcrumbs={breadcrumbs} title="Task not found" />
+        <EmptyState
+          action={
+            <Button
+              component={Link}
+              to={`/projects/${projectId}/tasks`}
+              variant="outlined"
+            >
+              Back to board
+            </Button>
+          }
+          description="It may have been deleted or moved to another project."
+          title="This task doesn't exist"
+        />
+      </Page>
     );
   }
 
   return (
-    <Stack
-      gap={3}
-      p={3}
-      sx={{
-        bgcolor: "background.default",
-        height: "100%",
-      }}
-    >
-      <MuiLink
-        component={Link}
-        to={`/projects/${projectId}/tasks`}
-        underline="none"
-        sx={{ alignItems: "center", display: "inline-flex", gap: 0.75 }}
-      >
-        <ArrowLeft fontSize="small" />
-        Back to Task Board
-      </MuiLink>
+    <Page maxWidth={1240}>
+      <PageHeader breadcrumbs={[...breadcrumbs, { label: `#${task.id}` }]} />
 
       <Box
         sx={{
           alignItems: "flex-start",
           display: "grid",
-          gap: 2.25,
+          gap: { xs: 2.5, lg: 4 },
           gridTemplateColumns: {
-            xs: "1fr",
-            lg: "minmax(0, 1fr) 420px",
+            xs: "minmax(0, 1fr)",
+            lg: "minmax(0, 1fr) 320px",
           },
         }}
       >
-        <Stack gap={2.25} minWidth={0}>
+        <Stack gap={3} minWidth={0} sx={{ order: { xs: 2, lg: 1 } }}>
           <TaskOverviewPanel task={task} />
-
           <TaskCommentsPanel taskId={task.id} />
+          <TaskActivityPanel taskId={task.id} />
         </Stack>
 
-        <Stack gap={2.25} minWidth={0}>
+        <Box
+          sx={{
+            order: { xs: 1, lg: 2 },
+            position: { lg: "sticky" },
+            top: { lg: 24 },
+          }}
+        >
           <TaskDetailsPanel
             isAssigneesPending={areAssigneesPending}
             isLabelsPending={areLabelsPending}
@@ -118,10 +120,8 @@ export const TaskDetailsPage = () => {
             projectLabels={projectLabels}
             task={task}
           />
-
-          <TaskActivityPanel taskId={task.id} />
-        </Stack>
+        </Box>
       </Box>
-    </Stack>
+    </Page>
   );
 };

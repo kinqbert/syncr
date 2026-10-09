@@ -1,5 +1,3 @@
 export * from "./BirthdaysPanel";
-export * from "./DashboardQuickLinks";
+export * from "./MyTasksPanel";
 export * from "./RecentActivity";
-export * from "./SummaryCard";
-export * from "./TasksByStatusChart";

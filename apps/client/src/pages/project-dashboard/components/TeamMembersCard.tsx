@@ -1,14 +1,6 @@
-import {
-  Alert,
-  CircularProgress,
-  IconButton,
-  Paper,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Stack } from "@mui/material";
 import type { Task } from "@syncr/packages";
-import { UserPlus } from "lucide-mui";
+import { UserPlus, Users } from "lucide-mui";
 import { useState } from "react";
 
 import {
@@ -18,6 +10,7 @@ import {
   useGetProjectMemberCandidates,
   useRemoveProjectMember,
 } from "@/api/projects";
+import { EmptyState, ListRow, RowSkeleton, Section } from "@/components/ui";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ProjectMembersDialog } from "@/pages/tasks/components/ProjectMembersDialog";
 import { getErrorMessage } from "@/utils/getErrorMessage";
@@ -65,92 +58,59 @@ export const TeamMembersCard = ({
 
   return (
     <>
-      <Paper
-        elevation={0}
-        sx={{
-          border: 1,
-          borderColor: "divider",
-          borderRadius: 2,
-          height: "100%",
-          minWidth: 0,
-          p: { xs: 2, sm: 2.5 },
-        }}
-      >
-        <Stack gap={2} minWidth={0}>
-          <Stack
-            alignItems="center"
-            direction="row"
-            justifyContent="space-between"
+      <Section
+        actions={
+          <Button
+            onClick={() => setIsMembersDialogOpen(true)}
+            size="small"
+            startIcon={<UserPlus />}
           >
-            <Typography fontSize={17} fontWeight={800}>
-              Team Members
-            </Typography>
-            <Tooltip title="Manage project members">
-              <IconButton
-                aria-label="Manage project members"
-                onClick={() => setIsMembersDialogOpen(true)}
-                size="small"
-                sx={{
-                  color: "text.secondary",
-                  "&:hover": {
-                    bgcolor: "action.selected",
-                    color: "primary.main",
-                  },
-                }}
-              >
-                <UserPlus fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-          <Stack gap={1.75}>
-            {areMembersLoading ? (
-              <Stack alignItems="center" py={1}>
-                <CircularProgress size={24} />
-              </Stack>
-            ) : null}
+            Manage
+          </Button>
+        }
+        icon={<Users />}
+        padding="none"
+        title={members.length > 0 ? `Team · ${members.length}` : "Team"}
+      >
+        <Box sx={{ p: 1 }}>
+          {areMembersLoading ? <RowSkeleton count={4} /> : null}
 
-            {areMembersError ? (
-              <Alert severity="error">
-                {getErrorMessage(membersError, "Could not load members.")}
-              </Alert>
-            ) : null}
+          {areMembersError ? (
+            <Alert severity="error">
+              {getErrorMessage(membersError, "Could not load members.")}
+            </Alert>
+          ) : null}
 
-            {!areMembersLoading && !areMembersError && members.length === 0 ? (
-              <Typography color="text.secondary" fontSize={14}>
-                No members assigned yet.
-              </Typography>
-            ) : null}
+          {!areMembersLoading && !areMembersError && members.length === 0 ? (
+            <EmptyState
+              compact
+              description="Add people so tasks can be assigned to them."
+              title="No members yet"
+            />
+          ) : null}
 
-            {!areMembersError && members.slice(0, 5).map((member) => (
-              <Stack
+          {!areMembersError &&
+            members.map((member) => (
+              <ListRow
                 key={member.id}
-                alignItems="center"
-                direction="row"
-                gap={1.25}
-              >
-                <UserAvatar
-                  name={member.name}
-                  size={34}
-                  surname={member.surname}
-                />
-                <Stack minWidth={0} sx={{ flex: 1 }}>
-                  <Typography noWrap fontSize={14} fontWeight={700}>
-                    {getUserFullName(member.name, member.surname)}
-                  </Typography>
-                  <Typography color="text.secondary" fontSize={12}>
-                    {member.id === project?.managerId
-                      ? "Project Manager"
-                      : "Member"}
-                  </Typography>
-                </Stack>
-                <Typography color="text.secondary" flexShrink={0} fontSize={13}>
-                  {getAssignedTaskCount(tasks, member.id)} tasks
-                </Typography>
-              </Stack>
+                leading={
+                  <UserAvatar name={member.name} size={22} surname={member.surname} />
+                }
+                title={getUserFullName(member.name, member.surname)}
+                trailing={
+                  <Stack component="span" direction="row" gap={1}>
+                    {member.id === project?.managerId && (
+                      <Box component="span" sx={{ color: "accent.text" }}>
+                        Manager
+                      </Box>
+                    )}
+                    <span>{getAssignedTaskCount(tasks, member.id)} tasks</span>
+                  </Stack>
+                }
+              />
             ))}
-          </Stack>
-        </Stack>
-      </Paper>
+        </Box>
+      </Section>
 
       <ProjectMembersDialog
         candidates={memberCandidates}

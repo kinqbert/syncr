@@ -1,12 +1,14 @@
 import { useDroppable } from "@dnd-kit/core";
-import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import type {
   CreateTaskBody,
   ProjectAssignee,
   TaskStatus,
 } from "@syncr/packages";
-import { Plus, X } from "lucide-mui";
+import { Plus } from "lucide-mui";
 import { useState } from "react";
+
+import { StatusIcon } from "@/components/ui";
 
 import { TASK_CARD_WIDTH } from "./TaskCard";
 import { TaskCreateForm } from "./TaskCreateForm";
@@ -16,6 +18,7 @@ export type KanbanColumn = { status: TaskStatus; label: string };
 type KanbanColumnProps = {
   children: React.ReactNode;
   column: KanbanColumn;
+  count: number;
   isCreating?: boolean;
   isDragOver?: boolean;
   isLoading?: boolean;
@@ -23,11 +26,13 @@ type KanbanColumnProps = {
   projectAssignees: ProjectAssignee[];
 };
 
-const PADDING = 8;
+const COLUMN_PADDING = 6;
+const COLUMN_WIDTH = TASK_CARD_WIDTH + COLUMN_PADDING * 2;
 
 export const KanbanColumn = ({
   children,
   column,
+  count,
   isCreating = false,
   isDragOver = false,
   isLoading = false,
@@ -36,10 +41,6 @@ export const KanbanColumn = ({
 }: KanbanColumnProps) => {
   const { setNodeRef } = useDroppable({ id: column.status });
   const [isFormOpen, setIsFormOpen] = useState(false);
-
-  const handleOpenForm = () => {
-    setIsFormOpen(true);
-  };
 
   const handleCloseForm = () => {
     if (isCreating) {
@@ -50,75 +51,87 @@ export const KanbanColumn = ({
   };
 
   return (
-    <Box
-      ref={setNodeRef}
+    <Stack
       sx={{
-        borderRadius: 2,
         flex: "0 0 auto",
-        maxWidth: {
-          xs: `calc(min(82vw, ${TASK_CARD_WIDTH}px) + ${PADDING * 2}px)`,
-          sm: TASK_CARD_WIDTH + PADDING * 2,
-        },
-        minWidth: {
-          xs: `calc(min(82vw, ${TASK_CARD_WIDTH}px) + ${PADDING * 2}px)`,
-          sm: TASK_CARD_WIDTH + PADDING * 2,
-        },
-        position: "relative",
-        transition: "background-color 160ms ease",
+        height: "100%",
+        minHeight: 0,
+        width: { xs: `min(84vw, ${COLUMN_WIDTH}px)`, sm: COLUMN_WIDTH },
       }}
     >
       <Stack
-        direction="row"
         alignItems="center"
-        justifyContent="space-between"
-        px={`${PADDING}px`}
+        direction="row"
+        gap={1}
+        sx={{ height: 36, px: 1 }}
       >
-        <Typography noWrap variant="subtitle1" fontWeight={600}>
+        <StatusIcon status={column.status} />
+        <Typography fontWeight={600} noWrap>
           {column.label}
         </Typography>
-        <Tooltip title={isFormOpen ? "Close form" : "Create task"}>
+        <Typography
+          color="text.secondary"
+          sx={{ fontVariantNumeric: "tabular-nums" }}
+        >
+          {count}
+        </Typography>
+        <Tooltip title="Add task">
           <IconButton
-            aria-label={isFormOpen ? "Close task form" : "Create task"}
+            aria-label={`Add task to ${column.label}`}
             disabled={isCreating || isLoading}
-            onClick={isFormOpen ? handleCloseForm : handleOpenForm}
+            onClick={() => setIsFormOpen(true)}
+            size="small"
+            sx={{ ml: "auto" }}
           >
-            {isFormOpen ? <X /> : <Plus />}
+            <Plus />
           </IconButton>
         </Tooltip>
       </Stack>
 
-      {isFormOpen && (
-        <Box
-          sx={{
-            left: 0,
-            position: "absolute",
-            right: 0,
-            top: 40,
-            zIndex: 2,
-          }}
-        >
-          <TaskCreateForm
-            isCreating={isCreating}
-            onClose={handleCloseForm}
-            onCreateTask={onCreateTask}
-            projectAssignees={projectAssignees}
-            status={column.status}
-          />
-        </Box>
-      )}
-
       <Box
+        ref={setNodeRef}
         sx={{
-          p: `${PADDING}px`,
-          backgroundColor: isDragOver ? "kanban.bgActive" : "kanban.bg",
+          bgcolor: isDragOver ? "accent.soft" : "surface.subtle",
           borderRadius: 2,
-          boxSizing: "border-box",
-          minHeight: { xs: 480, sm: 560, lg: 600 },
-          transition: "border-color 160ms ease",
+          flex: 1,
+          minHeight: 120,
+          outline: isDragOver ? "1px dashed" : "none",
+          outlineColor: "primary.main",
+          overflowY: "auto",
+          p: `${COLUMN_PADDING}px`,
+          transition: "background-color 120ms ease",
         }}
       >
         {children}
+
+        {isFormOpen ? (
+          <Box sx={{ mt: 0.75 }}>
+            <TaskCreateForm
+              isCreating={isCreating}
+              onClose={handleCloseForm}
+              onCreateTask={onCreateTask}
+              projectAssignees={projectAssignees}
+              status={column.status}
+            />
+          </Box>
+        ) : (
+          <Button
+            color="inherit"
+            disabled={isCreating || isLoading}
+            fullWidth
+            onClick={() => setIsFormOpen(true)}
+            size="small"
+            startIcon={<Plus />}
+            sx={{
+              color: "text.secondary",
+              justifyContent: "flex-start",
+              mt: count > 0 ? 0.75 : 0,
+            }}
+          >
+            Add task
+          </Button>
+        )}
       </Box>
-    </Box>
+    </Stack>
   );
 };

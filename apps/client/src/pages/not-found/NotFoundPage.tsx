@@ -1,22 +1,27 @@
-import { Stack, Typography } from "@mui/material";
+import { Button, Stack } from "@mui/material";
+import { Compass } from "lucide-mui";
 import { Link } from "react-router";
+
+import { EmptyState } from "@/components/ui";
 
 export const NotFoundPage = () => {
   return (
     <Stack
-      width="100%"
-      height="100vh"
       alignItems="center"
+      component="main"
       justifyContent="center"
-      gap={2}
+      sx={{ bgcolor: "background.default", minHeight: "100dvh" }}
     >
-      <Typography variant="h3">Whoops! This page does not exist</Typography>
-      <Typography color="text.secondary">
-        Consider returning to the{" "}
-        <Link style={{ color: "blue", textDecoration: "underline" }} to="/">
-          home page.
-        </Link>
-      </Typography>
+      <EmptyState
+        action={
+          <Button component={Link} to="/" variant="contained">
+            Back to dashboard
+          </Button>
+        }
+        description="The page you're looking for doesn't exist or has moved."
+        icon={<Compass />}
+        title="Page not found"
+      />
     </Stack>
   );
 };

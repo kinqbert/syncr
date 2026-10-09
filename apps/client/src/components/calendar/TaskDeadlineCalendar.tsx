@@ -6,8 +6,8 @@ import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import {
   Box,
-  CircularProgress,
   Paper,
+  Skeleton,
   Stack,
   Typography,
   useMediaQuery,
@@ -119,9 +119,7 @@ export const TaskDeadlineCalendar = ({
       }}
     >
       {isLoading ? (
-        <Stack alignItems="center" height="100%" justifyContent="center">
-          <CircularProgress size={28} />
-        </Stack>
+        <Skeleton height="100%" sx={{ minHeight: 480 }} variant="rectangular" />
       ) : (
         <Box
           ref={calendarContainerRef}

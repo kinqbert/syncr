@@ -25,17 +25,26 @@ type ConversationMessageNotificationProps = {
   onClick?: () => void;
 };
 
-const linkStyle = { color: "blue", textDecoration: "underline" };
-
 const NotificationLink = ({ children, to }: NotificationLinkProps) => {
   if (!to) {
     return children;
   }
 
   return (
-    <Link style={linkStyle} to={to}>
+    <Box
+      component={Link}
+      to={to}
+      sx={{
+        color: "text.primary",
+        fontWeight: 500,
+        textDecoration: "underline",
+        textDecorationColor: "var(--mui-palette-line-strong)",
+        textUnderlineOffset: "2px",
+        "&:hover": { textDecorationColor: "currentColor" },
+      }}
+    >
       {children}
-    </Link>
+    </Box>
   );
 };
 

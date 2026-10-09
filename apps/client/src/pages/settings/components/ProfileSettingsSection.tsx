@@ -68,7 +68,9 @@ export const ProfileSettingsSection = () => {
       borderRadius={2}
       component="form"
       divider={<Divider />}
-      maxWidth={760}
+      bgcolor="background.paper"
+      id="profile"
+      sx={{ scrollMarginTop: 24 }}
       onSubmit={handleSubmit(handleSaveProfile)}
       width="100%"
     >

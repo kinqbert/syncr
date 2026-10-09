@@ -104,7 +104,7 @@ export const CompanyRequiredPlaceholder = () => {
         <>
           <Typography variant="h5">Please select a company</Typography>
           <Typography color="text.secondary">
-            Choose a company from the header to continue.
+            Choose a company from the sidebar to continue.
           </Typography>
         </>
       )}

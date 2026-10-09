@@ -158,22 +158,19 @@ export const MessageComposer = ({
                 direction="row"
                 gap={1}
                 sx={{
-                  bgcolor: "#EEF2FF",
+                  bgcolor: "surface.subtle",
                   border: "1px solid",
                   borderColor: "divider",
-                  borderRadius: 2,
-                  boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
+                  borderLeft: "3px solid",
+                  borderLeftColor: "primary.main",
+                  borderRadius: 1.5,
                   px: { xs: 1.5, sm: 2 },
                   pr: { xs: 1.5, sm: 1.5 },
                   py: 1,
                 }}
               >
                 <Stack minWidth={0} flex={1}>
-                  <Typography
-                    color="primary.main"
-                    fontSize={12}
-                    fontWeight={800}
-                  >
+                  <Typography color="accent.text" fontSize={12} fontWeight={600}>
                     Replying to {getReplyAuthorName(displayedReply)}
                   </Typography>
                   <Typography color="text.secondary" fontSize={12} noWrap>
@@ -201,11 +198,12 @@ export const MessageComposer = ({
             bgcolor: "background.paper",
             border: "1px solid",
             borderColor: "divider",
-            borderRadius: 8,
+            borderRadius: 2,
             boxSizing: "border-box",
-            boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
             p: 0.75,
-            pl: { xs: 1.5, sm: 2 },
+            pl: 1.5,
+            transition: "border-color 120ms ease",
+            "&:focus-within": { borderColor: "primary.main" },
             position: "relative",
             zIndex: 1,
           }}
@@ -233,9 +231,9 @@ export const MessageComposer = ({
                 disableUnderline: true,
                 sx: {
                   alignItems: "center",
-                  fontSize: 14,
+                  fontSize: 13,
                   lineHeight: "20px",
-                  py: 0.75,
+                  py: 0.5,
                 },
               },
             }}
@@ -248,10 +246,10 @@ export const MessageComposer = ({
               alignSelf: "end",
               bgcolor: "primary.main",
               color: "primary.contrastText",
-              borderRadius: 6,
+              borderRadius: 1.5,
               flexShrink: 0,
-              height: 40,
-              width: 40,
+              height: 32,
+              width: 32,
               "&:hover": {
                 bgcolor: "primary.dark",
               },

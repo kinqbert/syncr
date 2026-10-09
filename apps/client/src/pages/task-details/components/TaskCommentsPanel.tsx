@@ -1,8 +1,7 @@
 import {
   Alert,
+  Box,
   Button,
-  CircularProgress,
-  Divider,
   Stack,
   TextField,
   Typography,
@@ -12,12 +11,11 @@ import { MessageCircle } from "lucide-mui";
 import { useState } from "react";
 
 import { useCreateTaskComment, useGetTaskComments } from "@/api/tasks";
+import { RowSkeleton, Section } from "@/components/ui";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useProject } from "@/hooks";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-
-import { Panel } from "../../../components/Panel";
 
 type TaskCommentsPanelProps = {
   taskId: number;
@@ -63,13 +61,11 @@ export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
   };
 
   return (
-    <Panel>
+    <Section
+      icon={<MessageCircle />}
+      title={comments.length > 0 ? `Comments · ${comments.length}` : "Comments"}
+    >
       <Stack gap={2}>
-        <Stack alignItems="center" direction="row" gap={1}>
-          <MessageCircle fontSize="small" />
-          <Typography variant="subtitle1">Comments</Typography>
-        </Stack>
-
         {error ? <Alert severity="error">{error}</Alert> : null}
 
         {areCommentsError ? (
@@ -78,80 +74,95 @@ export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
           </Alert>
         ) : null}
 
-        {isPending ? (
-          <Stack alignItems="center" py={1}>
-            <CircularProgress size={24} />
-          </Stack>
-        ) : null}
+        {isPending ? <RowSkeleton count={2} /> : null}
 
-        {!isPending && !areCommentsError && comments.length === 0 ? (
-          <Typography color="text.secondary" variant="body2">
-            No comments yet.
-          </Typography>
-        ) : null}
-
-        {!areCommentsError && comments.map((item) => (
-          <Stack
-            alignItems="flex-start"
-            direction="row"
-            gap={1.25}
-            key={item.id}
-          >
-            <UserAvatar
-              name={item.author?.name}
-              size={24}
-              surname={item.author?.surname}
-            />
-            <Stack minWidth={0} gap={0.75}>
-              <Stack
-                alignItems="center"
-                direction="row"
-                flexWrap="wrap"
-                gap={0.75}
-              >
-                <Typography variant="caption" fontWeight={500}>
-                  {getAuthorName(item.author)}
-                </Typography>
-                <Typography color="text.secondary" variant="caption">
-                  {formatRelativeDate(item.createdAt)}
+        {!areCommentsError &&
+          comments.map((item) => (
+            <Stack
+              alignItems="flex-start"
+              direction="row"
+              gap={1.25}
+              key={item.id}
+            >
+              <UserAvatar
+                name={item.author?.name}
+                size={22}
+                surname={item.author?.surname}
+              />
+              <Stack gap={0.25} minWidth={0}>
+                <Stack alignItems="baseline" direction="row" gap={0.75}>
+                  <Typography fontWeight={600}>
+                    {getAuthorName(item.author)}
+                  </Typography>
+                  <Typography color="text.secondary" variant="body2">
+                    {formatRelativeDate(item.createdAt)}
+                  </Typography>
+                </Stack>
+                <Typography sx={{ overflowWrap: "anywhere", whiteSpace: "pre-wrap" }}>
+                  {item.content}
                 </Typography>
               </Stack>
-              <Typography sx={{ whiteSpace: "pre-wrap" }} variant="body2">
-                {item.content}
-              </Typography>
             </Stack>
-          </Stack>
-        ))}
+          ))}
 
-        <Divider />
-        <Stack
+        <Box
           component="form"
-          direction="row"
-          gap={1.25}
           onSubmit={(event) => {
             event.preventDefault();
             void createComment();
+          }}
+          sx={{
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1.5,
+            "&:focus-within": { borderColor: "primary.main" },
           }}
         >
           <TextField
             disabled={createTaskComment.isPending}
             fullWidth
             minRows={2}
+            multiline
             onChange={(event) => setComment(event.target.value)}
-            placeholder="Add a comment..."
-            size="small"
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                event.preventDefault();
+                void createComment();
+              }
+            }}
+            placeholder={
+              comments.length === 0 ? "Start the discussion…" : "Leave a comment…"
+            }
+            sx={{
+              "& .MuiOutlinedInput-root": { bgcolor: "transparent" },
+              "& .MuiOutlinedInput-notchedOutline": { border: 0 },
+              "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                boxShadow: "none",
+              },
+            }}
             value={comment}
           />
-          <Button
-            disabled={createTaskComment.isPending || !comment.trim()}
-            sx={{ alignSelf: "flex-start", whiteSpace: "nowrap" }}
-            type="submit"
-            variant="contained"
+          <Stack
+            alignItems="center"
+            direction="row"
+            justifyContent="flex-end"
+            gap={1}
+            sx={{ px: 1, pb: 1 }}
           >
-            Post
-          </Button>
-        </Stack>
+            <Typography color="text.disabled" variant="body2">
+              ⌘ Enter to send
+            </Typography>
+            <Button
+              disabled={createTaskComment.isPending || !comment.trim()}
+              size="small"
+              type="submit"
+              variant="contained"
+            >
+              Comment
+            </Button>
+          </Stack>
+        </Box>
       </Stack>
-    </Panel>
+    </Section>
   );
 };

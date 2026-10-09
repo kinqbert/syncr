@@ -4,7 +4,9 @@ import { Box } from "@mui/material";
 import type { Task } from "@syncr/packages";
 import { useState } from "react";
 
+import { useGetProject } from "@/api/projects";
 import { useProject } from "@/hooks";
+import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 
 import { TaskCard } from "./TaskCard";
 
@@ -14,7 +16,8 @@ type SortableTaskCardProps = {
 
 export const SortableTaskCard = ({ task }: SortableTaskCardProps) => {
   const { projectId } = useProject();
-
+  const { data: project } = useGetProject(projectId);
+  const isTouchDevice = useIsTouchDevice();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const { attributes, isDragging, listeners, setNodeRef, transform } =
@@ -24,25 +27,33 @@ export const SortableTaskCard = ({ task }: SortableTaskCardProps) => {
       disabled: isMenuOpen,
     });
 
+  const dragProps = { ...attributes, ...listeners };
+
+  // Desktop: the whole card is the drag source (a small activation distance
+  // keeps clicks working). Touch: only the grip, so the column can scroll.
   return (
     <Box
       ref={setNodeRef}
+      {...(isTouchDevice ? {} : dragProps)}
       sx={{
-        cursor: isDragging ? "grabbing" : "grab",
+        borderRadius: 1.5,
+        cursor: isDragging ? "grabbing" : isTouchDevice ? "auto" : "grab",
         transform: CSS.Transform.toString(transform),
         transition: "none",
-        touchAction: "auto",
         visibility: isDragging ? "hidden" : "visible",
+        "&:focus-visible": {
+          outline: "2px solid",
+          outlineColor: "primary.main",
+          outlineOffset: 2,
+        },
       }}
     >
       <TaskCard
-        task={task}
         detailsPath={`/projects/${projectId}/tasks/${task.id}`}
+        dragHandleProps={isTouchDevice ? dragProps : undefined}
         onMenuOpenChange={setIsMenuOpen}
-        dragHandleProps={{
-          ...attributes,
-          ...listeners,
-        }}
+        projectName={project?.name}
+        task={task}
       />
     </Box>
   );

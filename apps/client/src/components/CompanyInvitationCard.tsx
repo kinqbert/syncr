@@ -31,9 +31,9 @@ export const CompanyInvitationCard = ({
         alignItems="center"
         justifyContent="center"
         sx={{
-          bgcolor: "#ECFDF5",
+          bgcolor: "tint.green.bg",
           borderRadius: 2,
-          color: "#059669",
+          color: "tint.green.fg",
           flex: "0 0 auto",
           height: 48,
           width: 48,
