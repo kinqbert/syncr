@@ -15,7 +15,6 @@ import {
   LayoutDashboard,
   MessageCircle,
   PanelLeft,
-  Settings,
   Users,
 } from "lucide-mui";
 import type { ReactNode } from "react";
@@ -63,6 +62,11 @@ type SidebarLinkProps = {
   to: string;
 };
 
+const fade = (visible: boolean) => ({
+  opacity: visible ? 1 : 0,
+  transition: "opacity 150ms ease",
+});
+
 const SidebarLink = ({
   collapsed,
   count,
@@ -71,70 +75,79 @@ const SidebarLink = ({
   label,
   onNavigate,
   to,
-}: SidebarLinkProps) => (
-  <Tooltip placement="right" title={collapsed ? label : ""}>
-    <Box
-      aria-label={collapsed ? label : undefined}
-      component={NavLink}
-      end={end}
-      onClick={onNavigate}
-      to={to}
-      sx={{
-        alignItems: "center",
-        borderRadius: 1,
-        color: "text.secondary",
-        display: "flex",
-        gap: 1,
-        height: 30,
-        justifyContent: collapsed ? "center" : "flex-start",
-        px: collapsed ? 0 : 1,
-        position: "relative",
-        transition: "background-color 120ms ease, color 120ms ease",
-        "& .MuiSvgIcon-root": { flexShrink: 0, fontSize: 16 },
-        "&:hover": { bgcolor: "surface.hover", color: "text.primary" },
-        "&.active": { bgcolor: "surface.active", color: "text.primary" },
-        "&:focus-visible": {
-          outline: "2px solid",
-          outlineColor: "primary.main",
-          outlineOffset: -2,
-        },
-      }}
-    >
-      {icon}
-      {!collapsed && (
-        <Typography noWrap sx={{ flex: 1, fontWeight: 500 }}>
+}: SidebarLinkProps) => {
+  const hasCount = !!count && count > 0;
+
+  return (
+    <Tooltip placement="right" title={collapsed ? label : ""}>
+      <Box
+        aria-label={collapsed ? label : undefined}
+        component={NavLink}
+        end={end}
+        onClick={onNavigate}
+        to={to}
+        sx={{
+          alignItems: "center",
+          borderRadius: 1,
+          color: "text.secondary",
+          display: "flex",
+          flexShrink: 0,
+          gap: 1,
+          height: 30,
+          overflow: "hidden",
+          // Fixed padding keeps the icon in the same spot when collapsed.
+          px: "12px",
+          position: "relative",
+          transition: "background-color 120ms ease, color 120ms ease",
+          whiteSpace: "nowrap",
+          "& .MuiSvgIcon-root": { flexShrink: 0, fontSize: 16 },
+          "&:hover": { bgcolor: "surface.hover", color: "text.primary" },
+          "&.active": { bgcolor: "surface.active", color: "text.primary" },
+          "&:focus-visible": {
+            outline: "2px solid",
+            outlineColor: "primary.main",
+            outlineOffset: -2,
+          },
+        }}
+      >
+        {icon}
+        <Typography noWrap sx={{ flex: 1, fontWeight: 500, ...fade(!collapsed) }}>
           {label}
         </Typography>
-      )}
-      {!!count && count > 0 && (
-        <Box
-          component="span"
-          sx={
-            collapsed
-              ? {
-                  bgcolor: "primary.main",
-                  border: "2px solid",
-                  borderColor: "surface.sidebar",
-                  borderRadius: "50%",
-                  height: 10,
-                  position: "absolute",
-                  right: 8,
-                  top: 5,
-                  width: 10,
-                }
-              : {
-                  color: "text.secondary",
-                  fontSize: 12,
-                  fontVariantNumeric: "tabular-nums",
-                }
-          }
-        >
-          {!collapsed && (count > 99 ? "99+" : count)}
-        </Box>
-      )}
-    </Box>
-  </Tooltip>
-);
+        {hasCount && (
+          <>
+            <Box
+              component="span"
+              sx={{
+                color: "text.secondary",
+                fontSize: 12,
+                fontVariantNumeric: "tabular-nums",
+                ...fade(!collapsed),
+              }}
+            >
+              {count > 99 ? "99+" : count}
+            </Box>
+            <Box
+              component="span"
+              sx={{
+                bgcolor: "primary.main",
+                border: "2px solid",
+                borderColor: "surface.sidebar",
+                borderRadius: "50%",
+                height: 10,
+                left: 26,
+                position: "absolute",
+                top: 4,
+                width: 10,
+                ...fade(collapsed),
+              }}
+            />
+          </>
+        )}
+      </Box>
+    </Tooltip>
+  );
+};
 
 const SidebarGroupLabel = ({
   children,
@@ -146,45 +159,47 @@ const SidebarGroupLabel = ({
   collapsed: boolean;
   onClick?: () => void;
   open?: boolean;
-}) =>
-  collapsed ? (
-    <Box sx={{ borderTop: 1, borderColor: "divider", mx: 1, my: 1 }} />
-  ) : (
-    <Stack
-      alignItems="center"
-      component={onClick ? "button" : "div"}
-      direction="row"
-      gap={0.5}
-      onClick={onClick}
-      type={onClick ? "button" : undefined}
-      sx={{
-        bgcolor: "transparent",
-        border: 0,
-        borderRadius: 1,
-        color: "text.secondary",
-        cursor: onClick ? "pointer" : "default",
-        font: "inherit",
-        mt: 1.5,
-        mb: 0.25,
-        px: 1,
-        py: 0.25,
-        textAlign: "left",
-        width: "100%",
-        "&:hover": onClick ? { color: "text.primary" } : undefined,
-      }}
-    >
-      <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{children}</Typography>
-      {onClick && (
-        <ChevronRight
-          sx={{
-            fontSize: 12,
-            transform: open ? "rotate(90deg)" : "none",
-            transition: "transform 120ms ease",
-          }}
-        />
-      )}
-    </Stack>
-  );
+}) => (
+  <Stack
+    alignItems="center"
+    component={onClick ? "button" : "div"}
+    direction="row"
+    disabled={onClick ? collapsed : undefined}
+    gap={0.5}
+    onClick={onClick}
+    tabIndex={collapsed ? -1 : undefined}
+    type={onClick ? "button" : undefined}
+    sx={{
+      bgcolor: "transparent",
+      border: 0,
+      borderRadius: 1,
+      color: "text.secondary",
+      cursor: onClick && !collapsed ? "pointer" : "default",
+      flexShrink: 0,
+      font: "inherit",
+      height: 24,
+      mt: 1.5,
+      overflow: "hidden",
+      px: "12px",
+      textAlign: "left",
+      whiteSpace: "nowrap",
+      width: "100%",
+      ...fade(!collapsed),
+      "&:hover": onClick ? { color: "text.primary" } : undefined,
+    }}
+  >
+    <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{children}</Typography>
+    {onClick && (
+      <ChevronRight
+        sx={{
+          fontSize: 12,
+          transform: open ? "rotate(90deg)" : "none",
+          transition: "transform 120ms ease",
+        }}
+      />
+    )}
+  </Stack>
+);
 
 const SidebarProjects = ({
   collapsed,
@@ -197,7 +212,7 @@ const SidebarProjects = ({
   const toggleProjects = useSidebarStore((state) => state.toggleProjects);
   const { data: projects = [] } = useGetMyProjects();
 
-  if (collapsed || projects.length === 0) {
+  if (projects.length === 0) {
     return null;
   }
 
@@ -218,7 +233,7 @@ const SidebarProjects = ({
         <Stack gap={0.25}>
           {visibleProjects.map((project) => (
             <SidebarLink
-              collapsed={false}
+              collapsed={collapsed}
               icon={
                 <Box
                   sx={{
@@ -245,7 +260,8 @@ const SidebarProjects = ({
 
 const SidebarContent = ({ collapsed }: { collapsed: boolean }) => {
   const isMobile = useIsMobile();
-  const toggleSidebar = useSidebarStore((state) => state.toggleSidebar);
+  const openSidebar = useSidebarStore((state) => state.openSidebar);
+  const closeSidebar = useSidebarStore((state) => state.closeSidebar);
   const setMobileOpen = useSidebarStore((state) => state.setMobileOpen);
   const hasCompany = useCompanyStore((state) => state.selectedCompanyId !== null);
   const { data: notifications = [] } = useGetNotifications();
@@ -259,30 +275,31 @@ const SidebarContent = ({ collapsed }: { collapsed: boolean }) => {
 
   return (
     <Stack height="100%" minHeight={0}>
-      <Stack
-        alignItems="center"
-        direction={collapsed ? "column" : "row"}
-        gap={0.5}
-        sx={{ p: 1, pb: 0.5 }}
-      >
-        <Box flex={collapsed ? "none" : 1} minWidth={0}>
-          <CompanySwitcher collapsed={collapsed} />
+      <Box sx={{ p: 1, pb: 0.5, position: "relative" }}>
+        <Box sx={{ pr: collapsed || isMobile ? 0 : 4 }}>
+          <CompanySwitcher collapsed={collapsed} onExpand={openSidebar} />
         </Box>
         {!isMobile && (
-          <Tooltip
-            placement="right"
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
+          <Tooltip title="Collapse sidebar">
             <IconButton
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              onClick={toggleSidebar}
+              aria-hidden={collapsed}
+              aria-label="Collapse sidebar"
+              onClick={closeSidebar}
               size="small"
+              tabIndex={collapsed ? -1 : undefined}
+              sx={{
+                pointerEvents: collapsed ? "none" : "auto",
+                position: "absolute",
+                right: 8,
+                top: 12,
+                ...fade(!collapsed),
+              }}
             >
               <PanelLeft />
             </IconButton>
           </Tooltip>
         )}
-      </Stack>
+      </Box>
 
       <Stack
         component="nav"
@@ -317,18 +334,9 @@ const SidebarContent = ({ collapsed }: { collapsed: boolean }) => {
         )}
       </Stack>
 
-      <Stack gap={0.25} sx={{ borderTop: 1, borderColor: "divider", p: 1 }}>
-        {hasCompany && (
-          <SidebarLink
-            collapsed={collapsed}
-            icon={<Settings />}
-            label="Settings"
-            onNavigate={handleNavigate}
-            to="/settings"
-          />
-        )}
+      <Box sx={{ borderTop: 1, borderColor: "divider", p: 1 }}>
         <UserMenu collapsed={collapsed} />
-      </Stack>
+      </Box>
     </Stack>
   );
 };
@@ -364,7 +372,7 @@ export const Sidebar = () => {
         flexShrink: 0,
         height: "100%",
         overflow: "hidden",
-        transition: "width 180ms ease",
+        transition: "width 200ms cubic-bezier(0.2, 0, 0, 1)",
         width,
       }}
     >

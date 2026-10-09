@@ -14,7 +14,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { Check, ChevronDown, Plus } from "lucide-mui";
+import { Check, ChevronDown, PanelLeft, Plus } from "lucide-mui";
 import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -45,11 +45,15 @@ const WorkspaceLogo = ({ name, size = 22 }: { name: string; size?: number }) => 
 );
 
 type CompanySwitcherProps = {
-  /** Icon-only trigger for the collapsed sidebar. */
+  /** In the collapsed sidebar the trigger expands the sidebar instead. */
   collapsed?: boolean;
+  onExpand?: () => void;
 };
 
-export const CompanySwitcher = ({ collapsed = false }: CompanySwitcherProps) => {
+export const CompanySwitcher = ({
+  collapsed = false,
+  onExpand,
+}: CompanySwitcherProps) => {
   const navigate = useNavigate();
 
   const { data: companies = [], isPending } = useGetMyCompanies();
@@ -126,15 +130,17 @@ export const CompanySwitcher = ({ collapsed = false }: CompanySwitcherProps) => 
 
   return (
     <>
-      <Tooltip placement="right" title={collapsed ? workspaceName : ""}>
+      <Tooltip placement="right" title={collapsed ? "Expand sidebar" : ""}>
         <Box
           aria-controls={isMenuOpen ? "company-switcher-menu" : undefined}
           aria-expanded={isMenuOpen ? "true" : undefined}
-          aria-haspopup="menu"
-          aria-label={collapsed ? `Switch workspace (${workspaceName})` : undefined}
+          aria-haspopup={collapsed ? undefined : "menu"}
+          aria-label={collapsed ? "Expand sidebar" : undefined}
           component="button"
-          disabled={isPending}
-          onClick={(event) => setMenuAnchorEl(event.currentTarget)}
+          disabled={isPending && !collapsed}
+          onClick={(event) =>
+            collapsed ? onExpand?.() : setMenuAnchorEl(event.currentTarget)
+          }
           type="button"
           sx={{
             alignItems: "center",
@@ -147,9 +153,9 @@ export const CompanySwitcher = ({ collapsed = false }: CompanySwitcherProps) => 
             font: "inherit",
             gap: 1,
             height: 36,
-            justifyContent: collapsed ? "center" : "flex-start",
             minWidth: 0,
-            px: collapsed ? 0.5 : 0.75,
+            overflow: "hidden",
+            px: "9px",
             textAlign: "left",
             transition: "background-color 120ms ease",
             width: "100%",
@@ -158,17 +164,54 @@ export const CompanySwitcher = ({ collapsed = false }: CompanySwitcherProps) => 
               outline: "2px solid",
               outlineColor: "primary.main",
             },
+            // Collapsed: the logo turns into a sidebar icon on hover.
+            ...(collapsed && {
+              "&:hover .workspace-logo": { opacity: 0 },
+              "&:hover .workspace-expand": { opacity: 1 },
+            }),
           }}
         >
-          <WorkspaceLogo name={workspaceName} />
-          {!collapsed && (
-            <>
-              <Typography noWrap sx={{ flex: 1, fontWeight: 600 }}>
-                {workspaceName}
-              </Typography>
-              <ChevronDown sx={{ color: "text.secondary", fontSize: 14 }} />
-            </>
-          )}
+          <Box sx={{ flexShrink: 0, height: 22, position: "relative", width: 22 }}>
+            <Box className="workspace-logo" sx={{ transition: "opacity 120ms ease" }}>
+              <WorkspaceLogo name={workspaceName} />
+            </Box>
+            <Box
+              aria-hidden
+              className="workspace-expand"
+              sx={{
+                alignItems: "center",
+                color: "text.secondary",
+                display: "flex",
+                inset: 0,
+                justifyContent: "center",
+                opacity: 0,
+                position: "absolute",
+                transition: "opacity 120ms ease",
+              }}
+            >
+              <PanelLeft sx={{ fontSize: 18 }} />
+            </Box>
+          </Box>
+          <Typography
+            noWrap
+            sx={{
+              flex: 1,
+              fontWeight: 600,
+              opacity: collapsed ? 0 : 1,
+              transition: "opacity 150ms ease",
+            }}
+          >
+            {workspaceName}
+          </Typography>
+          <ChevronDown
+            sx={{
+              color: "text.secondary",
+              flexShrink: 0,
+              fontSize: 14,
+              opacity: collapsed ? 0 : 1,
+              transition: "opacity 150ms ease",
+            }}
+          />
         </Box>
       </Tooltip>
 

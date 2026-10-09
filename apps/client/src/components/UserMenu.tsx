@@ -47,7 +47,7 @@ type UserMenuProps = {
 };
 
 export const UserMenu = ({ collapsed = false, variant = "row" }: UserMenuProps) => {
-  const iconOnly = collapsed || variant === "icon";
+  const iconOnly = variant === "icon";
   const navigate = useNavigate();
   const logout = useLogout();
   const clearUser = useAuthStore((state) => state.clearUser);
@@ -115,7 +115,8 @@ export const UserMenu = ({ collapsed = false, variant = "row" }: UserMenuProps) 
             height: iconOnly ? 32 : 36,
             justifyContent: iconOnly ? "center" : "flex-start",
             minWidth: 0,
-            px: iconOnly ? 0.5 : 0.75,
+            overflow: "hidden",
+            px: iconOnly ? 0.5 : "9px",
             textAlign: "left",
             transition: "background-color 120ms ease",
             width: iconOnly ? "auto" : "100%",
@@ -133,11 +134,17 @@ export const UserMenu = ({ collapsed = false, variant = "row" }: UserMenuProps) 
             surname={user?.surname}
           />
           {!iconOnly && (
-            <Stack flex={1} minWidth={0}>
-              <Typography noWrap sx={{ fontWeight: 500, lineHeight: 1.3 }}>
-                {fullName}
-              </Typography>
-            </Stack>
+            <Typography
+              noWrap
+              sx={{
+                flex: 1,
+                fontWeight: 500,
+                opacity: collapsed ? 0 : 1,
+                transition: "opacity 150ms ease",
+              }}
+            >
+              {fullName}
+            </Typography>
           )}
         </Box>
       </Tooltip>
