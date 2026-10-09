@@ -1,284 +1,88 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  IconButton,
-  LinearProgress,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import {
-  type Project,
-  ProjectStatus,
-  type ProjectStatus as ProjectStatusType,
-} from "@syncr/packages";
-import {
-  CalendarDays,
-  LayoutDashboard,
-  Pencil,
-  SquareCheckBig,
-  UserRound,
-  Users,
-} from "lucide-mui";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import type { Project } from "@syncr/packages";
+import { CalendarDays, Pencil, SquareCheckBig, Users } from "lucide-mui";
 import { Link } from "react-router";
 
-import { formatDate } from "@/utils/formatDate";
+import { formatDateShort } from "@/utils/formatDate";
+
+import { ProjectProgress, ProjectStatusBadge } from "./ProjectStatusBadge";
 
 type ProjectCardProps = {
   managerName: string;
   onEdit: (project: Project) => void;
-  onOpenTasks: (project: Project) => void;
   project: Project;
 };
 
-const PROJECT_STATUS_CHIP_COLORS: Record<
-  ProjectStatusType,
-  { bgcolor: string; borderColor: string; color: string }
-> = {
-  [ProjectStatus.Active]: {
-    bgcolor: "tint.green.bg",
-    borderColor: "transparent",
-    color: "tint.green.fg",
-  },
-  [ProjectStatus.Paused]: {
-    bgcolor: "tint.amber.bg",
-    borderColor: "transparent",
-    color: "tint.amber.fg",
-  },
-  [ProjectStatus.Completed]: {
-    bgcolor: "tint.indigo.bg",
-    borderColor: "transparent",
-    color: "tint.indigo.fg",
-  },
-  [ProjectStatus.Archived]: {
-    bgcolor: "tint.gray.bg",
-    borderColor: "transparent",
-    color: "tint.gray.fg",
-  },
-};
+const Meta = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
+  <Stack
+    alignItems="center"
+    direction="row"
+    gap={0.5}
+    sx={{ color: "text.secondary", "& .MuiSvgIcon-root": { fontSize: 14 } }}
+  >
+    {icon}
+    <Typography noWrap variant="body2">
+      {text}
+    </Typography>
+  </Stack>
+);
 
-export const ProjectCard = ({
-  managerName,
-  onEdit,
-  onOpenTasks,
-  project,
-}: ProjectCardProps) => {
-  const completionProgress =
-    project.totalTasksCount > 0
-      ? Math.round(
-          (project.completedTasksCount / project.totalTasksCount) * 100,
-        )
-      : 0;
-  const statusChipColors = PROJECT_STATUS_CHIP_COLORS[project.status];
-
-  return (
-    <Card
-      variant="outlined"
-      sx={{
-        borderColor: "divider",
-        borderRadius: 1.5,
-        boxShadow: "var(--mui-palette-elevation-popover)",
-        display: "flex",
-        flexDirection: "column",
-        minHeight: { xs: "auto", sm: 248 },
-        overflow: "hidden",
-        transition:
-          "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
-        "&:hover": {
-          borderColor: "line.strong",
-          boxShadow: "var(--mui-palette-elevation-popover)",
-        },
-      }}
+export const ProjectCard = ({ managerName, onEdit, project }: ProjectCardProps) => (
+  <Box
+    sx={{
+      bgcolor: "background.paper",
+      border: 1,
+      borderColor: "divider",
+      borderRadius: 2,
+      position: "relative",
+      transition: "border-color 120ms ease",
+      "&:hover": { borderColor: "line.strong" },
+      "&:hover .project-edit, &:focus-within .project-edit": { opacity: 1 },
+    }}
+  >
+    <Stack
+      component={Link}
+      gap={1.5}
+      to={`/projects/${project.id}`}
+      sx={{ color: "inherit", p: 2 }}
     >
-      <CardContent sx={{ display: "flex", flex: 1, p: { xs: 2, sm: 2.5 } }}>
-        <Stack gap={{ xs: 2, sm: 2.25 }} minWidth={0} width="100%">
-          <Stack
-            alignItems="flex-start"
-            direction="row"
-            gap={1}
-            justifyContent="space-between"
-          >
-            <Stack minWidth={0}>
-              <Typography
-                noWrap
-                sx={{
-                  color: "text.primary",
-                  fontSize: { xs: 18, sm: 20 },
-                  fontWeight: 800,
-                  lineHeight: { xs: "24px", sm: "28px" },
-                }}
-              >
-                {project.name}
-              </Typography>
-              <Typography color="text.secondary" fontSize={13}>
-                {project.completedTasksCount}/{project.totalTasksCount} tasks
-                completed
-              </Typography>
-            </Stack>
-
-            <Stack alignItems="center" direction="row" flexShrink={0} gap={0.5}>
-              <Chip
-                label={project.status}
-                size="small"
-                sx={{
-                  bgcolor: statusChipColors.bgcolor,
-                  borderColor: statusChipColors.borderColor,
-                  color: statusChipColors.color,
-                  flexShrink: 0,
-                  fontWeight: 700,
-                  textTransform: "capitalize",
-                }}
-                variant="outlined"
-              />
-              <Tooltip title="Edit project">
-                <IconButton
-                  aria-label="Edit project"
-                  onClick={() => onEdit(project)}
-                  size="small"
-                  sx={{
-                    borderRadius: 1,
-                    color: "text.secondary",
-                    height: 32,
-                    width: 32,
-                    "&:hover": {
-                      bgcolor: "action.hover",
-                      color: "primary.main",
-                    },
-                  }}
-                >
-                  <Pencil fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          </Stack>
-
-          <Stack gap={1.25}>
-            <Stack alignItems="center" direction="row" gap={1} minWidth={0}>
-              <UserRound
-                sx={{
-                  color: "text.secondary",
-                  flexShrink: 0,
-                  fontSize: 18,
-                }}
-              />
-              <Typography color="text.secondary" fontSize={13}>
-                Manager
-              </Typography>
-              <Typography noWrap fontSize={13} fontWeight={700} minWidth={0}>
-                {managerName}
-              </Typography>
-            </Stack>
-
-            <Stack alignItems="center" direction="row" gap={1} minWidth={0}>
-              <CalendarDays
-                sx={{
-                  color: "text.secondary",
-                  flexShrink: 0,
-                  fontSize: 18,
-                }}
-              />
-              <Typography color="text.secondary" fontSize={13}>
-                Timeline
-              </Typography>
-              <Typography noWrap fontSize={13} fontWeight={700} minWidth={0}>
-                {formatDate(project.startDate)} -{" "}
-                {project.endDate ? formatDate(project.endDate) : "No deadline"}
-              </Typography>
-            </Stack>
-          </Stack>
-
-          <Stack gap={1.25}>
-            <Stack
-              alignItems="baseline"
-              direction="row"
-              justifyContent="space-between"
-            >
-              <Typography color="text.secondary" fontSize={13} fontWeight={700}>
-                Progress
-              </Typography>
-              <Typography fontSize={20} fontWeight={800}>
-                {completionProgress}%
-              </Typography>
-            </Stack>
-
-            <LinearProgress
-              aria-label={`${project.name} completion progress`}
-              value={completionProgress}
-              variant="determinate"
-              sx={{
-                bgcolor: "accent.soft",
-                borderRadius: 999,
-                height: 8,
-                ".MuiLinearProgress-bar": {
-                  backgroundColor: "primary.main",
-                  borderRadius: 999,
-                },
-              }}
-            />
-
-            <Stack direction="row" gap={2.5} flexWrap="wrap">
-              <Stack alignItems="center" direction="row" gap={0.75}>
-                <Users sx={{ color: "text.secondary", fontSize: 16 }} />
-                <Typography color="text.secondary" fontSize={13}>
-                  {project.assignedPeopleCount}{" "}
-                  {project.assignedPeopleCount === 1 ? "person" : "people"}
-                </Typography>
-              </Stack>
-              <Stack alignItems="center" direction="row" gap={0.75}>
-                <SquareCheckBig
-                  sx={{ color: "text.secondary", fontSize: 16 }}
-                />
-                <Typography color="text.secondary" fontSize={13}>
-                  {project.completedTasksCount} done
-                </Typography>
-              </Stack>
-            </Stack>
-          </Stack>
-
-          <Box
-            sx={{
-              display: "grid",
-              gap: 1,
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(3, minmax(0, 1fr))",
-              },
-              mt: "auto",
-              pt: 0.5,
-            }}
-          >
-            <Button
-              component={Link}
-              startIcon={<LayoutDashboard />}
-              sx={{ borderRadius: 1, minWidth: 0 }}
-              to={`/projects/${project.id}`}
-              variant="contained"
-            >
-              Dashboard
-            </Button>
-            <Button
-              onClick={() => onOpenTasks(project)}
-              startIcon={<SquareCheckBig />}
-              sx={{ borderRadius: 1, minWidth: 0 }}
-              variant="outlined"
-            >
-              Tasks
-            </Button>
-            <Button
-              component={Link}
-              startIcon={<CalendarDays />}
-              sx={{ borderRadius: 1, minWidth: 0 }}
-              to={`/projects/${project.id}/calendar`}
-              variant="outlined"
-            >
-              Calendar
-            </Button>
-          </Box>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-};
+      <Stack gap={0.5} minWidth={0} pr={4}>
+        <Typography fontWeight={600} noWrap variant="subtitle1">
+          {project.name}
+        </Typography>
+        <Typography color="text.secondary" noWrap variant="body2">
+          {managerName}
+        </Typography>
+      </Stack>
+      <ProjectStatusBadge status={project.status} />
+      <ProjectProgress project={project} />
+      <Stack direction="row" flexWrap="wrap" gap={1.5}>
+        <Meta
+          icon={<SquareCheckBig />}
+          text={`${project.completedTasksCount}/${project.totalTasksCount}`}
+        />
+        <Meta icon={<Users />} text={String(project.assignedPeopleCount)} />
+        <Meta
+          icon={<CalendarDays />}
+          text={project.endDate ? formatDateShort(project.endDate) : "No deadline"}
+        />
+      </Stack>
+    </Stack>
+    <Tooltip title="Edit project">
+      <IconButton
+        aria-label={`Edit ${project.name}`}
+        className="project-edit"
+        onClick={() => onEdit(project)}
+        size="small"
+        sx={{
+          opacity: { xs: 1, md: 0 },
+          position: "absolute",
+          right: 8,
+          top: 8,
+        }}
+      >
+        <Pencil />
+      </IconButton>
+    </Tooltip>
+  </Box>
+);
