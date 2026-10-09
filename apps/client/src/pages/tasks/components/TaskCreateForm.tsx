@@ -105,13 +105,11 @@ export const TaskCreateForm = ({
           border: "1px solid",
           borderColor: "divider",
           borderRadius: 1.5,
-          boxShadow: "var(--mui-palette-elevation-popover)",
-          mt: 1,
-          mx: 1,
-          p: { xs: 1.25, sm: 1.5 },
+          boxShadow: "var(--mui-palette-elevation-card)",
+          p: 1.25,
         }}
       >
-        <Stack gap={1.5}>
+        <Stack gap={1.25}>
           {formError && <Alert severity="error">{formError}</Alert>}
           <TextField
             {...register("name", {

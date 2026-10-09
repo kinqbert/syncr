@@ -10,6 +10,7 @@ import {
   TaskStatus,
 } from "@syncr/packages";
 
+import { useGetProject } from "@/api/projects";
 import { useCreateTask, useGetProjectTasks } from "@/api/tasks";
 import { ErrorState } from "@/components/ErrorState";
 import { useProject } from "@/hooks";
@@ -52,14 +53,9 @@ type KanbanProps = {
 type CreateTaskFormBody = CreateTaskBody;
 
 const renderTaskSkeletons = () => (
-  <Stack gap={1}>
+  <Stack gap={0.75}>
     {Array.from({ length: 3 }, (_, index) => (
-      <Skeleton
-        key={index}
-        height={112}
-        sx={{ borderRadius: 2 }}
-        variant="rectangular"
-      />
+      <Skeleton height={72} key={index} variant="rounded" />
     ))}
   </Stack>
 );
@@ -69,6 +65,7 @@ export const Kanban = ({
   projectAssignees,
 }: KanbanProps) => {
   const { projectId } = useProject();
+  const { data: project } = useGetProject(projectId);
   const {
     data: tasks,
     error: tasksError,
@@ -121,16 +118,17 @@ export const Kanban = ({
       <Stack
         alignItems="stretch"
         direction="row"
-        gap={{ xs: 1.25, sm: 1.5 }}
+        gap={1.5}
         sx={{
+          height: "100%",
           minWidth: "max-content",
-          pb: 0.5,
         }}
       >
         {columns.map((column) => (
           <KanbanColumn
             key={column.status}
             column={column}
+            count={areTasksLoading ? 0 : tasksByStatus[column.status].length}
             isDragOver={dragOverStatus === column.status}
             isCreating={isBoardBusy}
             isLoading={areTasksLoading}
@@ -144,7 +142,7 @@ export const Kanban = ({
                 items={tasksByStatus[column.status].map((task) => task.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <Stack gap={1}>
+                <Stack gap={0.75}>
                   {tasksByStatus[column.status].map((task) => (
                     <SortableTaskCard key={task.id} task={task} />
                   ))}
@@ -159,11 +157,11 @@ export const Kanban = ({
           <Box
             sx={{
               cursor: "grabbing",
-              transform: "rotate(1deg)",
-              width: { xs: "min(82vw, 360px)", sm: TASK_CARD_WIDTH },
+              transform: "rotate(2deg)",
+              width: { xs: `min(80vw, ${TASK_CARD_WIDTH}px)`, sm: TASK_CARD_WIDTH },
             }}
           >
-            <TaskCard task={activeTask} />
+            <TaskCard isOverlay projectName={project?.name} task={activeTask} />
           </Box>
         ) : null}
       </DragOverlay>
