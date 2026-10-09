@@ -1,6 +1,6 @@
-import { CircularProgress, Link, Stack } from "@mui/material";
+import { CircularProgress, Stack } from "@mui/material";
 import { useEffect } from "react";
-import { Link as RouterLink, Navigate } from "react-router";
+import { Navigate } from "react-router";
 
 import { useMe } from "@/api";
 import { isDemoView } from "@/lib/demo";
@@ -42,20 +42,6 @@ export const LoginPage = () => {
     <AuthLayout
       title="Welcome back"
       subtitle="Sign in to continue to Syncr."
-      footer={
-        <Link
-          component={RouterLink}
-          sx={{
-            alignSelf: "center",
-            color: "text.secondary",
-            fontSize: 13,
-            fontWeight: 500,
-          }}
-          to="/about"
-        >
-          About Syncr
-        </Link>
-      }
     >
       <LoginForm />
     </AuthLayout>

@@ -11,7 +11,6 @@ import {
   useColorScheme,
 } from "@mui/material";
 import {
-  Info,
   LogOut,
   Monitor,
   Moon,
@@ -71,11 +70,6 @@ export const UserMenu = ({ collapsed = false, variant = "row" }: UserMenuProps) 
   const handleOpenSettings = () => {
     closeMenu();
     navigate("/settings");
-  };
-
-  const handleOpenAbout = () => {
-    closeMenu();
-    navigate("/about");
   };
 
   const handleLogout = async () => {
@@ -247,20 +241,6 @@ export const UserMenu = ({ collapsed = false, variant = "row" }: UserMenuProps) 
         </Stack>
 
         <Divider sx={{ m: 0 }} />
-        <MenuItem
-          onClick={handleOpenAbout}
-          sx={{
-            gap: 1,
-            minHeight: 36,
-            px: 1.75,
-          }}
-        >
-          <Info sx={{ color: "text.secondary", fontSize: 16 }} />
-          <Typography sx={{ fontSize: 13, lineHeight: 0 }}>
-            About Syncr
-          </Typography>
-        </MenuItem>
-
         <MenuItem
           onClick={handleOpenSettings}
           sx={{

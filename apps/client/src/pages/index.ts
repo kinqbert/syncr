@@ -1,4 +1,3 @@
-export * from "./about";
 export * from "./conversation";
 export * from "./dashboard";
 export * from "./login";
