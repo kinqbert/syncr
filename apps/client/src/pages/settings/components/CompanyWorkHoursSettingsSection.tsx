@@ -82,7 +82,9 @@ export const CompanyWorkHoursSettingsSection = () => {
       borderColor="divider"
       borderRadius={2}
       divider={<Divider />}
-      maxWidth={760}
+      bgcolor="background.paper"
+      id="work-hours"
+      sx={{ scrollMarginTop: 24 }}
       width="100%"
     >
       <SettingsSectionHeader
