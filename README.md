@@ -6,35 +6,53 @@ Syncr is a full-stack project management and team collaboration app built around
   <a href="https://demo.syncr.cc"><strong>Open the live demo</strong></a>
 </p>
 
-> Media below uses placeholders for now.
-
 <p align="center">
-  <img src="./assets/dashboard.png" alt="Syncr dashboard screenshot placeholder" width="100%" />
+  <img src="./assets/dashboard.png" alt="Syncr dashboard" width="100%" />
 </p>
 
 ## Features
 
-- **Workspace dashboard** with active project counts, completed tasks, due-today work, assigned tasks, unread notifications, birthdays, weekly completion trends, and recent activity.
-- **Project management** with project creation, project overview pages, team member visibility, progress summaries, and project-specific navigation.
-- **Kanban task board** with Backlog, Todo, In Progress, Review, and Done columns, drag-and-drop task movement, assignees, labels, priorities, and due dates.
-- **Task details** with editable task metadata, acceptance criteria, comments, and an activity timeline for work history.
-- **Personal and project calendars** for viewing task deadlines in calendar form.
-- **Google Calendar integration** support for connecting external calendar workflows.
-- **Team management** with company membership, role-based permissions, invitation flows, and team statistics.
-- **Realtime notifications** for project, task, invitation, and collaboration events through Socket.IO.
-- **Realtime conversations** for direct or team communication, including conversation lists, message history, and live message updates.
-- **Authentication and company setup** with registration, login, JWT cookies, company selection, and protected application routes.
-- **Responsive UI** built for desktop and mobile layouts.
+- **Workspace dashboard** with your open tasks, due-today work, completed tasks, active projects, team size and unread notifications, plus tasks by status, recent activity and upcoming birthdays.
+- **Projects** in a table or grid view with status filters, progress, members and due dates, and a sidebar list for jumping straight into any project.
+- **Project overview** with a task summary, status distribution, team workload and an activity timeline.
+- **Kanban board** with Backlog, Todo, In Progress, Review and Done columns, drag and drop, inline task creation, priorities, assignees and due dates.
+- **Task details** in a two-pane layout: description, acceptance criteria, comments and activity on the left, and inline-editable properties that save as you go on the right.
+- **Personal and project calendars** for task deadlines, with optional **Google Calendar** sync.
+- **Team management** with role-based permissions, invitations and per-member workload.
+- **Notifications inbox** with filters, day grouping and mark-as-read, delivered in realtime over Socket.IO.
+- **Realtime conversations** for direct and group chats, with live messages and typing indicators.
+- **Workspace settings** including company work hours, profile, password and calendar connections.
+- **Light, dark and system themes**, switchable under Settings → Appearance.
+- **Responsive UI** with a collapsible sidebar on desktop and a drawer on mobile.
+- **Read-only demo mode** with a seeded workspace, served on the `demo.` subdomain.
 
 ## Product Preview
 
-| Dashboard                                                        | Projects                                                            | Kanban Tasks                                                     |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| <img src="./assets/dashboard.png" alt="Dashboard placeholder" /> | <img src="./assets/projects.png" alt="Projects page placeholder" /> | <img src="./assets/kanban.png" alt="Kanban board placeholder" /> |
+| Dashboard                                               | Projects                                              | Kanban board                                         |
+| ------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------- |
+| <img src="./assets/dashboard.png" alt="Dashboard" />    | <img src="./assets/projects.png" alt="Projects" />    | <img src="./assets/kanban.png" alt="Kanban board" /> |
 
-| Task Details                                                           | Calendar                                                       | Conversations                                                            |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| <img src="./assets/task-details.png" alt="Task details placeholder" /> | <img src="./assets/calendar.png" alt="Calendar placeholder" /> | <img src="./assets/conversations.png" alt="Conversations placeholder" /> |
+| Project overview                                                | Task details                                                 | Calendar                                             |
+| --------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------- |
+| <img src="./assets/project-overview.png" alt="Project overview" /> | <img src="./assets/task-details.png" alt="Task details" /> | <img src="./assets/calendar.png" alt="Calendar" />   |
+
+| Conversations                                                  | Team                                         | Notifications                                                 |
+| -------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------- |
+| <img src="./assets/conversations.png" alt="Conversations" />   | <img src="./assets/team.png" alt="Team" />   | <img src="./assets/notifications.png" alt="Notifications" />  |
+
+### Dark mode
+
+| Dashboard                                                         | Kanban board                                                    |
+| ----------------------------------------------------------------- | --------------------------------------------------------------- |
+| <img src="./assets/dashboard-dark.png" alt="Dashboard, dark" />   | <img src="./assets/kanban-dark.png" alt="Kanban board, dark" /> |
+
+### Mobile
+
+<p align="center">
+  <img src="./assets/mobile-dashboard.png" alt="Dashboard on mobile" width="260" />
+  &nbsp;&nbsp;
+  <img src="./assets/mobile-kanban.png" alt="Kanban board on mobile" width="260" />
+</p>
 
 ## Roadmap
 
@@ -49,12 +67,14 @@ Syncr is a full-stack project management and team collaboration app built around
 - [ ] Option to turn off notifications for specific projects or tasks
 - [ ] Option to create more columns on the Kanban board and customize column names
 - [ ] Company branding and theming
-- [ ] Company-specific settings like working hours
 - [ ] Forgot password flow for user accounts
 - [ ] Add actual image uploads for user avatars
 
 ### Done
 
+- [x] ~~Company-specific settings like working hours~~
+- [x] ~~Light and dark themes~~
+- [x] ~~UI/UX rework~~
 - [x] ~~Implement demonstration environment with seeded data and demo user accounts~~
 - [x] ~~Display of a person typing in conversations~~
 - [x] ~~Mobile adaptation~~
@@ -163,6 +183,10 @@ npm run dev:client
 ```
 
 The client runs at `http://localhost:5173`.
+
+### Demo Mode
+
+Open `http://demo.localhost:5173` to use the seeded demo workspace. It signs you in automatically as `demo@syncr.cc`, uses `DEMO_DATABASE_URL`, and is read-only.
 
 ## Useful Scripts
 
