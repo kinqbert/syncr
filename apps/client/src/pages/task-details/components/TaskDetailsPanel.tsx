@@ -1,32 +1,32 @@
 import {
   Autocomplete,
-  Button,
+  Box,
   Chip,
   MenuItem,
   Stack,
+  type SxProps,
   TextField,
+  type Theme,
   Typography,
 } from "@mui/material";
 import {
   type ProjectAssignee,
   type ProjectLabel,
   type Task,
-  TASK_PRIORITY_LABEL,
-  TASK_STATUS_LABEL,
   TaskPriority,
   TaskStatus,
   type UpdateTaskBody,
 } from "@syncr/packages";
-import { useMemo, useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { useUpdateTask } from "@/api/tasks";
+import { PriorityBadge, Section, StatusBadge } from "@/components/ui";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useProject } from "@/hooks";
 import { formatDuration } from "@/utils/formatDuration";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { getUserFullName } from "@/utils/getUserFullName";
 
-import { Panel } from "../../../components/Panel";
 import { toDateInputValue } from "../utils/format";
 
 type TaskDetailsPanelProps = {
@@ -37,59 +37,38 @@ type TaskDetailsPanelProps = {
   task: Task;
 };
 
-const getChangedFields = (task: Task, form: FormState): UpdateTaskBody => {
-  const estimate = Number(form.estimateMinutes);
-
-  const body: UpdateTaskBody = {};
-
-  if ((task.assignee?.id ?? null) !== form.assigneeId) {
-    body.assigneeId = form.assigneeId;
-  }
-
-  if (form.priority !== task.priority) {
-    body.priority = form.priority;
-  }
-
-  if (form.status !== task.status) {
-    body.status = form.status;
-  }
-
-  if (form.endDate !== toDateInputValue(task.endDate)) {
-    body.endDate = form.endDate || null;
-  }
-
-  if ((estimate === 0 ? null : estimate) !== task.estimateMinutes) {
-    body.estimateMinutes = estimate === 0 ? null : estimate;
-  }
-
-  const originalLabels = task.labels.map((label) => label.name).sort();
-
-  const currentLabels = [...form.labelNames].sort();
-
-  if (JSON.stringify(originalLabels) !== JSON.stringify(currentLabels)) {
-    body.labelNames = form.labelNames;
-  }
-
-  return body;
+/** Borderless control that only shows its frame on hover and focus. */
+const ghostFieldSx: SxProps<Theme> = {
+  flex: 1,
+  minWidth: 0,
+  "& .MuiOutlinedInput-root": { bgcolor: "transparent" },
+  "& .MuiOutlinedInput-root:not(.Mui-focused) .MuiOutlinedInput-notchedOutline":
+    { borderColor: "transparent" },
+  "& .MuiOutlinedInput-root:hover:not(.Mui-focused)": {
+    bgcolor: "surface.hover",
+  },
+  "& .MuiSelect-icon": { opacity: 0 },
+  "&:hover .MuiSelect-icon, & .Mui-focused .MuiSelect-icon": { opacity: 1 },
 };
 
-const createFormState = (task: Task): FormState => ({
-  assigneeId: task.assignee?.id ?? null,
-  priority: task.priority,
-  endDate: toDateInputValue(task.endDate),
-  estimateMinutes: String(task.estimateMinutes ?? 0),
-  status: task.status,
-  labelNames: task.labels.map((label) => label.name),
-});
-
-type FormState = {
-  assigneeId: number | null;
-  priority: TaskPriority;
-  endDate: string;
-  estimateMinutes: string;
-  status: TaskStatus;
-  labelNames: string[];
-};
+const PropertyRow = ({
+  children,
+  label,
+}: {
+  children: ReactNode;
+  label: string;
+}) => (
+  <Stack alignItems="center" direction="row" gap={1} minHeight={34}>
+    <Typography
+      color="text.secondary"
+      sx={{ flexShrink: 0, width: 84 }}
+      variant="body2"
+    >
+      {label}
+    </Typography>
+    {children}
+  </Stack>
+);
 
 export const TaskDetailsPanel = ({
   isAssigneesPending,
@@ -99,237 +78,263 @@ export const TaskDetailsPanel = ({
   task,
 }: TaskDetailsPanelProps) => {
   const { projectId } = useProject();
-
-  const initialState: FormState = useMemo(() => createFormState(task), [task]);
-  const [form, setForm] = useState<FormState>(initialState);
-  const [error, setError] = useState<string | null>(null);
-
   const updateTask = useUpdateTask();
+  const [error, setError] = useState<string | null>(null);
+  const [estimate, setEstimate] = useState(String(task.estimateMinutes ?? ""));
+  const [syncedEstimate, setSyncedEstimate] = useState(task.estimateMinutes);
 
-  const isDirty = JSON.stringify(form) !== JSON.stringify(initialState);
+  // Reset the draft when the saved estimate changes (e.g. from another tab).
+  if (syncedEstimate !== task.estimateMinutes) {
+    setSyncedEstimate(task.estimateMinutes);
+    setEstimate(String(task.estimateMinutes ?? ""));
+  }
 
-  const handleSave = async () => {
+  // Each property saves on its own as soon as it changes.
+  const save = async (body: UpdateTaskBody) => {
     setError(null);
 
-    const estimate = Number(form.estimateMinutes);
-
-    if (estimate && estimate % 15 !== 0) {
-      setError("Estimate must be divisible by 15 minutes.");
-      return;
-    }
-
     try {
-      const body = getChangedFields(task, form);
-
-      if (Object.keys(body).length > 0) {
-        await updateTask.mutateAsync({
-          projectId,
-          taskId: task.id,
-          body,
-        });
-      }
+      await updateTask.mutateAsync({ projectId, taskId: task.id, body });
     } catch (saveError) {
       setError(getErrorMessage(saveError, "Could not update task."));
     }
   };
 
-  return (
-    <Panel>
-      <Stack gap={2}>
-        <Typography variant="subtitle1">Details</Typography>
+  const saveEstimate = () => {
+    const minutes = Number(estimate) || 0;
 
+    if (minutes % 15 !== 0) {
+      setError("Estimate must be divisible by 15 minutes.");
+      return;
+    }
+
+    const next = minutes === 0 ? null : minutes;
+
+    if (next !== task.estimateMinutes) {
+      void save({ estimateMinutes: next });
+    }
+  };
+
+  const labelNames = task.labels.map((label) => label.name);
+
+  return (
+    <Section title="Properties">
+      <Stack gap={0.25} sx={{ mx: -0.5 }}>
         {error && (
-          <Typography color="error" variant="body2">
+          <Typography color="error" sx={{ mb: 1, px: 0.5 }} variant="body2">
             {error}
           </Typography>
         )}
 
-        <Stack gap={1}>
-          <Typography color="text.secondary" variant="caption">
-            Assigned To
-          </Typography>
-
+        <PropertyRow label="Status">
           <TextField
-            disabled={isAssigneesPending}
-            helperText={
-              projectAssignees.length === 0
-                ? "No users are assigned to this project."
-                : undefined
-            }
             onChange={(event) =>
-              setForm((prev) => ({
-                ...prev,
-                assigneeId: event.target.value
-                  ? Number(event.target.value)
-                  : null,
-              }))
+              void save({ status: event.target.value as TaskStatus })
             }
             select
             size="small"
-            value={form.assigneeId ?? ""}
+            slotProps={{
+              select: {
+                renderValue: (value) => (
+                  <StatusBadge status={value as TaskStatus} />
+                ),
+              },
+            }}
+            sx={ghostFieldSx}
+            value={task.status}
+          >
+            {(Object.values(TaskStatus) as TaskStatus[]).map((status) => (
+              <MenuItem key={status} value={status}>
+                <StatusBadge status={status} />
+              </MenuItem>
+            ))}
+          </TextField>
+        </PropertyRow>
+
+        <PropertyRow label="Priority">
+          <TextField
+            onChange={(event) =>
+              void save({ priority: event.target.value as TaskPriority })
+            }
+            select
+            size="small"
+            slotProps={{
+              select: {
+                renderValue: (value) => (
+                  <PriorityBadge priority={value as TaskPriority} />
+                ),
+              },
+            }}
+            sx={ghostFieldSx}
+            value={task.priority}
+          >
+            {(Object.values(TaskPriority) as TaskPriority[]).map((priority) => (
+              <MenuItem key={priority} value={priority}>
+                <PriorityBadge priority={priority} />
+              </MenuItem>
+            ))}
+          </TextField>
+        </PropertyRow>
+
+        <PropertyRow label="Assignee">
+          <TextField
+            disabled={isAssigneesPending}
+            onChange={(event) =>
+              void save({
+                assigneeId: event.target.value
+                  ? Number(event.target.value)
+                  : null,
+              })
+            }
+            select
+            size="small"
+            slotProps={{
+              select: {
+                displayEmpty: true,
+                renderValue: () =>
+                  task.assignee ? (
+                    <Stack alignItems="center" direction="row" gap={1}>
+                      <UserAvatar
+                        name={task.assignee.name}
+                        size={20}
+                        surname={task.assignee.surname}
+                      />
+                      <Typography noWrap variant="body2">
+                        {getUserFullName(
+                          task.assignee.name,
+                          task.assignee.surname,
+                        )}
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography color="text.disabled" variant="body2">
+                      Unassigned
+                    </Typography>
+                  ),
+              },
+            }}
+            sx={ghostFieldSx}
+            value={task.assignee?.id ?? ""}
           >
             <MenuItem divider value="">
               Unassigned
             </MenuItem>
-
             {projectAssignees.map((user) => (
               <MenuItem key={user.id} value={user.id}>
-                <Stack alignItems="center" direction="row" gap={1.25}>
-                  <UserAvatar
-                    name={user.name}
-                    size={28}
-                    surname={user.surname}
-                  />
-
-                  <Stack minWidth={0}>
-                    <Typography variant="body2">
-                      {getUserFullName(user.name, user.surname)}
-                    </Typography>
-
-                    <Typography color="text.secondary" variant="caption">
-                      {user.email}
-                    </Typography>
-                  </Stack>
+                <UserAvatar name={user.name} size={20} surname={user.surname} />
+                <Stack minWidth={0}>
+                  <Typography noWrap variant="body2">
+                    {getUserFullName(user.name, user.surname)}
+                  </Typography>
+                  <Typography color="text.secondary" noWrap variant="caption">
+                    {user.email}
+                  </Typography>
                 </Stack>
               </MenuItem>
             ))}
           </TextField>
-        </Stack>
+        </PropertyRow>
 
-        <TextField
-          label="Priority"
-          onChange={(event) =>
-            setForm((prev) => ({
-              ...prev,
-              priority: event.target.value as TaskPriority,
-            }))
-          }
-          select
-          size="small"
-          value={form.priority}
-        >
-          {(Object.values(TaskPriority) as TaskPriority[]).map((priority) => (
-            <MenuItem key={priority} value={priority}>
-              {TASK_PRIORITY_LABEL[priority]}
-            </MenuItem>
-          ))}
-        </TextField>
+        <PropertyRow label="Due date">
+          <TextField
+            onChange={(event) => void save({ endDate: event.target.value || null })}
+            size="small"
+            sx={ghostFieldSx}
+            type="date"
+            value={toDateInputValue(task.endDate)}
+          />
+        </PropertyRow>
 
-        <TextField
-          label="Deadline"
-          onChange={(event) =>
-            setForm((prev) => ({
-              ...prev,
-              endDate: event.target.value,
-            }))
-          }
-          size="small"
-          slotProps={{ inputLabel: { shrink: true } }}
-          type="date"
-          value={form.endDate}
-        />
+        <PropertyRow label="Estimate">
+          <TextField
+            onBlur={saveEstimate}
+            onChange={(event) => setEstimate(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                (event.target as HTMLInputElement).blur();
+              }
+            }}
+            placeholder="Minutes"
+            size="small"
+            slotProps={{
+              htmlInput: { min: 0, step: 15 },
+              input: {
+                endAdornment: (
+                  <Typography
+                    color="text.secondary"
+                    noWrap
+                    sx={{ flexShrink: 0, pr: 1 }}
+                    variant="body2"
+                  >
+                    {formatDuration(Number(estimate) || 0)}
+                  </Typography>
+                ),
+              },
+            }}
+            sx={[ghostFieldSx, { "& input": { minWidth: 0 } }]}
+            type="number"
+            value={estimate}
+          />
+        </PropertyRow>
 
-        <TextField
-          label="Estimate (minutes)"
-          helperText={formatDuration(Number(form.estimateMinutes) || 0)}
-          onChange={(event) =>
-            setForm((prev) => ({
-              ...prev,
-              estimateMinutes: event.target.value,
-            }))
-          }
-          size="small"
-          slotProps={{
-            htmlInput: {
-              min: 0,
-              step: 15,
-            },
-          }}
-          type="number"
-          value={form.estimateMinutes}
-        />
-
-        <TextField
-          label="Status"
-          onChange={(event) =>
-            setForm((prev) => ({
-              ...prev,
-              status: event.target.value as TaskStatus,
-            }))
-          }
-          select
-          size="small"
-          value={form.status}
-        >
-          {(Object.values(TaskStatus) as TaskStatus[]).map((status) => (
-            <MenuItem key={status} value={status}>
-              {TASK_STATUS_LABEL[status]}
-            </MenuItem>
-          ))}
-        </TextField>
-
-        <Stack gap={1}>
-          <Typography color="text.secondary" variant="caption">
+        <Stack direction="row" gap={1} sx={{ pt: 0.75 }}>
+          <Typography
+            color="text.secondary"
+            sx={{ flexShrink: 0, pt: 0.75, width: 84 }}
+            variant="body2"
+          >
             Labels
           </Typography>
+          <Box flex={1} minWidth={0}>
+            <Autocomplete<ProjectLabel, true, false, true>
+              autoSelect
+              disabled={isLabelsPending}
+              filterSelectedOptions
+              freeSolo
+              getOptionLabel={(option) =>
+                typeof option === "string" ? option : option.name
+              }
+              isOptionEqualToValue={(option, value) =>
+                typeof value !== "string" && option.id === value.id
+              }
+              multiple
+              onChange={(_, value) =>
+                void save({
+                  labelNames: value.map((option) =>
+                    typeof option === "string" ? option : option.name,
+                  ),
+                })
+              }
+              options={projectLabels}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder={labelNames.length === 0 ? "Add label" : ""}
+                  size="small"
+                  sx={ghostFieldSx}
+                />
+              )}
+              renderValue={(value, getItemProps) =>
+                value.map((option, index) => {
+                  const { key, ...itemProps } = getItemProps({ index });
 
-          <Autocomplete<ProjectLabel, true, false, true>
-            autoSelect
-            disabled={isLabelsPending}
-            filterSelectedOptions
-            freeSolo
-            getOptionLabel={(option) =>
-              typeof option === "string" ? option : option.name
-            }
-            isOptionEqualToValue={(option, value) =>
-              typeof value !== "string" && option.id === value.id
-            }
-            multiple
-            onChange={(_, value) =>
-              setForm((prev) => ({
-                ...prev,
-                labelNames: value.map((option) =>
-                  typeof option === "string" ? option : option.name,
-                ),
-              }))
-            }
-            options={projectLabels}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder={form.labelNames.length === 0 ? "Add label" : ""}
-                size="small"
-              />
-            )}
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => {
-                const { key, ...tagProps } = getTagProps({ index });
-
-                return (
-                  <Chip
-                    key={key}
-                    label={typeof option === "string" ? option : option.name}
-                    size="small"
-                    {...tagProps}
-                  />
-                );
-              })
-            }
-            size="small"
-            value={form.labelNames}
-          />
+                  return (
+                    <Chip
+                      key={key}
+                      label={typeof option === "string" ? option : option.name}
+                      size="small"
+                      variant="outlined"
+                      {...itemProps}
+                    />
+                  );
+                })
+              }
+              size="small"
+              value={labelNames}
+            />
+          </Box>
         </Stack>
-
-        {isDirty && (
-          <Button
-            disabled={updateTask.isPending}
-            onClick={() => void handleSave()}
-            variant="contained"
-          >
-            Save Changes
-          </Button>
-        )}
       </Stack>
-    </Panel>
+    </Section>
   );
 };

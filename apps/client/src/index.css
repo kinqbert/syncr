@@ -61,16 +61,69 @@ a {
   text-decoration: none;
 }
 
+html {
+  color-scheme: light;
+}
+
+html[data-dark] {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--mui-palette-background-default);
+  color: var(--mui-palette-text-primary);
+}
+
+/* Thin neutral scrollbars everywhere */
+* {
+  scrollbar-color: var(--mui-palette-line-strong) transparent;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+*::-webkit-scrollbar-button {
+  display: none;
+}
+
+*::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--mui-palette-line-strong);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--mui-palette-text-disabled);
+}
+
+/* Sonner toasts */
+[data-sonner-toaster] {
+  --normal-bg: var(--mui-palette-background-paper);
+  --normal-border: var(--mui-palette-divider);
+  --normal-text: var(--mui-palette-text-primary);
+  font-family: inherit;
+}
+
+[data-sonner-toaster] [data-sonner-toast] {
+  border-radius: 8px;
+  box-shadow: var(--mui-palette-elevation-popover);
+  font-size: 13px;
+}
+
 .sonner-error-toast {
-  background: #fef2f2 !important;
-  border-color: #fecaca !important;
-  color: #7f1d1d !important;
+  background: var(--mui-palette-tint-red-bg) !important;
+  border-color: var(--mui-palette-tint-red-bg) !important;
+  color: var(--mui-palette-tint-red-fg) !important;
 }
 
-.sonner-error-toast [data-title] {
-  color: #7f1d1d !important;
-}
-
+.sonner-error-toast [data-title],
 .sonner-error-toast [data-description] {
-  color: #991b1b !important;
+  color: var(--mui-palette-tint-red-fg) !important;
 }

@@ -1,12 +1,7 @@
-import {
-  Avatar,
-  Button,
-  Stack,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
+import { Button, Stack, useMediaQuery } from "@mui/material";
 import { MessageCircle, PanelLeftOpen } from "lucide-mui";
 
+import { EmptyState } from "@/components/ui";
 import { theme } from "@/lib/theme";
 import { useConversationsSidebarStore } from "@/store/useConversationsSidebarStore";
 
@@ -18,40 +13,27 @@ export const ConversationEmptyPage = () => {
 
   return (
     <Stack
-      width="100%"
-      height="100%"
-      p={{ xs: 2, sm: 3 }}
-      gap={1}
       alignItems="center"
+      height="100%"
       justifyContent="center"
-      sx={{ bgcolor: "background.default" }}
+      width="100%"
     >
-      <Avatar
-        sx={{
-          bgcolor: "#EEF2FF",
-          color: "primary.main",
-          height: 56,
-          width: 56,
-        }}
-      >
-        <MessageCircle />
-      </Avatar>
-      <Typography fontWeight={800} variant="h5">
-        Select a chat
-      </Typography>
-      <Typography color="text.secondary">
-        Choose a conversation or create a new one.
-      </Typography>
-      {isCompact ? (
-        <Button
-          onClick={openSidebar}
-          startIcon={<PanelLeftOpen />}
-          sx={{ mt: 1 }}
-          variant="contained"
-        >
-          Open chats
-        </Button>
-      ) : null}
+      <EmptyState
+        action={
+          isCompact ? (
+            <Button
+              onClick={openSidebar}
+              startIcon={<PanelLeftOpen />}
+              variant="outlined"
+            >
+              Open chats
+            </Button>
+          ) : undefined
+        }
+        description="Pick a conversation from the list or start a new one."
+        icon={<MessageCircle />}
+        title="No conversation selected"
+      />
     </Stack>
   );
 };

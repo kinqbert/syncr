@@ -1,23 +1,19 @@
-import {
-  Alert,
-  Button,
-  CircularProgress,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
 import type { ProjectActivity } from "@syncr/packages";
-import { ListChecks } from "lucide-mui";
+import { Activity } from "lucide-mui";
 
 import { useGetProjectActivities } from "@/api/projects";
+import { EmptyState, ListRow, RowSkeleton, Section } from "@/components/ui";
 import { UserAvatar } from "@/components/UserAvatar";
 import { TASK_ACTIVITY_LABEL } from "@/constants/taskActivityLabels";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
 import { getErrorMessage } from "@/utils/getErrorMessage";
+import { getTaskDisplayName } from "@/utils/getTaskDisplayName";
 import { getUserFullName } from "@/utils/getUserFullName";
 
 type ActivityTimelineProps = {
   projectId: number;
+  projectName?: string;
 };
 
 const ACTIVITY_PAGE_SIZE = 5;
@@ -28,11 +24,10 @@ const getActivityActorName = (activity: ProjectActivity) => {
     : "Deleted user";
 };
 
-const getActivityText = (activity: ProjectActivity) => {
-  return `${getActivityActorName(activity)} ${TASK_ACTIVITY_LABEL[activity.action]} "${activity.task.name}"`;
-};
-
-export const ActivityTimeline = ({ projectId }: ActivityTimelineProps) => {
+export const ActivityTimeline = ({
+  projectId,
+  projectName,
+}: ActivityTimelineProps) => {
   const {
     data,
     fetchNextPage,
@@ -45,28 +40,9 @@ export const ActivityTimeline = ({ projectId }: ActivityTimelineProps) => {
   const activities = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        border: 1,
-        borderColor: "divider",
-        borderRadius: 2,
-        p: { xs: 2, sm: 2.5 },
-      }}
-    >
-      <Stack gap={2.25} minWidth={0}>
-        <Stack alignItems="center" direction="row" gap={1}>
-          <ListChecks sx={{ color: "primary.main", fontSize: 19 }} />
-          <Typography fontSize={17} fontWeight={800}>
-            Activity Timeline
-          </Typography>
-        </Stack>
-
-        {isLoading ? (
-          <Stack alignItems="center" py={1}>
-            <CircularProgress size={24} />
-          </Stack>
-        ) : null}
+    <Section icon={<Activity />} padding="none" title="Activity">
+      <Box sx={{ p: 1 }}>
+        {isLoading ? <RowSkeleton count={4} /> : null}
 
         {isError ? (
           <Alert severity="error">
@@ -75,46 +51,48 @@ export const ActivityTimeline = ({ projectId }: ActivityTimelineProps) => {
         ) : null}
 
         {!isLoading && !isError && activities.length === 0 ? (
-          <Typography color="text.secondary" fontSize={14}>
-            No activity yet.
-          </Typography>
+          <EmptyState compact title="No activity yet" />
         ) : null}
 
-        {!isError && activities.map((item) => (
-          <Stack
-            key={item.id}
-            alignItems="center"
-            direction="row"
-            gap={1.5}
-            minWidth={0}
-          >
-            <UserAvatar
-              name={item.actor?.name}
-              size={32}
-              surname={item.actor?.surname}
+        {!isError &&
+          activities.map((item) => (
+            <ListRow
+              key={item.id}
+              leading={
+                <UserAvatar
+                  name={item.actor?.name}
+                  size={22}
+                  surname={item.actor?.surname}
+                />
+              }
+              title={
+                <>
+                  <Box component="span" sx={{ fontWeight: 600 }}>
+                    {getActivityActorName(item)}
+                  </Box>{" "}
+                  <Box component="span" sx={{ color: "text.secondary" }}>
+                    {TASK_ACTIVITY_LABEL[item.action]}
+                  </Box>{" "}
+                  {getTaskDisplayName(item.task.name, projectName)}
+                </>
+              }
+              to={`/projects/${projectId}/tasks/${item.task.id}`}
+              trailing={formatRelativeDate(item.createdAt)}
             />
-            <Stack minWidth={0}>
-              <Typography noWrap fontSize={14}>
-                {getActivityText(item)}
-              </Typography>
-              <Typography color="text.secondary" fontSize={12}>
-                {formatRelativeDate(item.createdAt)}
-              </Typography>
-            </Stack>
-          </Stack>
-        ))}
+          ))}
 
         {!isError && hasNextPage ? (
           <Button
+            color="inherit"
             disabled={isFetchingNextPage}
             onClick={() => void fetchNextPage()}
             size="small"
-            sx={{ alignSelf: "flex-start" }}
+            sx={{ color: "text.secondary", ml: 0.5, mt: 0.5 }}
           >
-            {isFetchingNextPage ? "Loading..." : "Load more"}
+            {isFetchingNextPage ? "Loading…" : "Show more"}
           </Button>
         ) : null}
-      </Stack>
-    </Paper>
+      </Box>
+    </Section>
   );
 };

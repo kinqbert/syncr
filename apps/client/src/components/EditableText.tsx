@@ -9,7 +9,7 @@ type EditableTextProps = {
   onSave: (value: string) => Promise<void>;
   placeholder?: string;
   value: string;
-  variant?: "h5" | "body1";
+  variant?: "h3" | "h5" | "body1";
 };
 
 export const EditableText = ({
@@ -113,12 +113,12 @@ export const EditableText = ({
         py: 0.75,
         transition: "background-color 160ms ease",
         "&:hover": {
-          bgcolor: "action.hover",
+          bgcolor: "surface.hover",
         },
       }}
     >
       <Typography
-        color={value ? "text.primary" : "text.secondary"}
+        color={value ? "text.primary" : "text.disabled"}
         sx={{ overflowWrap: "anywhere", whiteSpace: "pre-wrap" }}
         variant={variant}
       >

@@ -485,6 +485,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
           DEMO_USER_EMAIL === seededUsers[index % seededUsers.length].email
             ? seededUsers[1].id
             : seededUsers[0].id,
+        companyId: company.id,
         actorId: seededUsers[(index + 2) % seededUsers.length].id,
         type: NotificationType.TaskAssigned,
         entityType: NotificationEntityType.Task,

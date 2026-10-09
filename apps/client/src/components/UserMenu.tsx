@@ -1,12 +1,13 @@
 import {
+  Box,
   Divider,
-  IconButton,
   Menu,
   MenuItem,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import { Info, LogOut, Settings, UserRound } from "lucide-mui";
+import { LogOut, Settings, UserRound } from "lucide-mui";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -19,7 +20,15 @@ import { getUserFullName } from "@/utils/getUserFullName";
 
 import { UserAvatar } from "./UserAvatar";
 
-export const UserMenu = () => {
+type UserMenuProps = {
+  /** Avatar-only trigger for the collapsed sidebar. */
+  collapsed?: boolean;
+  /** Avatar-only trigger for compact top bars. */
+  variant?: "row" | "icon";
+};
+
+export const UserMenu = ({ collapsed = false, variant = "row" }: UserMenuProps) => {
+  const iconOnly = variant === "icon";
   const navigate = useNavigate();
   const logout = useLogout();
   const clearUser = useAuthStore((state) => state.clearUser);
@@ -44,11 +53,6 @@ export const UserMenu = () => {
     navigate("/settings");
   };
 
-  const handleOpenAbout = () => {
-    closeMenu();
-    navigate("/about");
-  };
-
   const handleLogout = async () => {
     closeMenu();
 
@@ -64,50 +68,75 @@ export const UserMenu = () => {
 
   return (
     <>
-      <IconButton
-        aria-controls={isMenuOpen ? "user-menu" : undefined}
-        aria-expanded={isMenuOpen ? "true" : undefined}
-        aria-haspopup="menu"
-        aria-label="Open user menu"
-        onClick={(event) => setMenuAnchorEl(event.currentTarget)}
-        sx={{
-          bgcolor: isMenuOpen ? "action.selected" : "transparent",
-          border: 1,
-          borderColor: isMenuOpen ? "primary.light" : "divider",
-          height: 40,
-          width: 40,
-          "&:hover": {
-            bgcolor: "action.hover",
-            borderColor: "primary.light",
-          },
-        }}
-      >
-        <UserAvatar
-          fallback={<UserRound sx={{ fontSize: 17 }} />}
-          name={user?.name}
-          size={28}
-          surname={user?.surname}
-        />
-      </IconButton>
+      <Tooltip placement="right" title={collapsed ? fullName : ""}>
+        <Box
+          aria-controls={isMenuOpen ? "user-menu" : undefined}
+          aria-expanded={isMenuOpen ? "true" : undefined}
+          aria-haspopup="menu"
+          aria-label="Open user menu"
+          component="button"
+          onClick={(event) => setMenuAnchorEl(event.currentTarget)}
+          type="button"
+          sx={{
+            alignItems: "center",
+            bgcolor: isMenuOpen ? "surface.active" : "transparent",
+            border: 0,
+            borderRadius: 1,
+            color: "text.primary",
+            cursor: "pointer",
+            display: "flex",
+            font: "inherit",
+            gap: 1,
+            height: iconOnly ? 32 : 36,
+            justifyContent: iconOnly ? "center" : "flex-start",
+            minWidth: 0,
+            overflow: "hidden",
+            px: iconOnly ? 0.5 : "9px",
+            textAlign: "left",
+            transition: "background-color 120ms ease",
+            width: iconOnly ? "auto" : "100%",
+            "&:hover": { bgcolor: "surface.hover" },
+            "&:focus-visible": {
+              outline: "2px solid",
+              outlineColor: "primary.main",
+            },
+          }}
+        >
+          <UserAvatar
+            fallback={<UserRound sx={{ fontSize: 14 }} />}
+            name={user?.name}
+            size={22}
+            surname={user?.surname}
+          />
+          {!iconOnly && (
+            <Typography
+              noWrap
+              sx={{
+                flex: 1,
+                fontWeight: 500,
+                opacity: collapsed ? 0 : 1,
+                transition: "opacity 150ms ease",
+              }}
+            >
+              {fullName}
+            </Typography>
+          )}
+        </Box>
+      </Tooltip>
 
       <Menu
         anchorEl={menuAnchorEl}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        anchorOrigin={
+          variant === "icon"
+            ? { horizontal: "right", vertical: "bottom" }
+            : { horizontal: "left", vertical: "top" }
+        }
         id="user-menu"
         onClose={closeMenu}
         open={isMenuOpen}
         slotProps={{
           paper: {
-            elevation: 3,
-            sx: {
-              border: 1,
-              borderColor: "divider",
-              borderRadius: 1.25,
-              boxShadow: "0 10px 24px rgba(17, 24, 39, 0.14)",
-              mt: 0.75,
-              overflow: "hidden",
-              width: 200,
-            },
+            sx: { width: 220 },
           },
           list: {
             "aria-label": "User menu",
@@ -120,7 +149,11 @@ export const UserMenu = () => {
             },
           },
         }}
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        transformOrigin={
+          variant === "icon"
+            ? { horizontal: "right", vertical: "top" }
+            : { horizontal: "left", vertical: "bottom" }
+        }
       >
         <Stack gap={0.25} sx={{ px: 1.75, py: 1.25 }}>
           <Typography
@@ -140,20 +173,6 @@ export const UserMenu = () => {
         </Stack>
 
         <Divider sx={{ m: 0 }} />
-        <MenuItem
-          onClick={handleOpenAbout}
-          sx={{
-            gap: 1,
-            minHeight: 36,
-            px: 1.75,
-          }}
-        >
-          <Info sx={{ color: "text.secondary", fontSize: 16 }} />
-          <Typography sx={{ fontSize: 13, lineHeight: 0 }}>
-            About Syncr
-          </Typography>
-        </MenuItem>
-
         <MenuItem
           onClick={handleOpenSettings}
           sx={{

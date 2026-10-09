@@ -4,7 +4,6 @@ import { AppLayout } from "@/components/AppLayout";
 import { ConversationsLayout } from "@/components/conversations";
 import { ProjectLayout } from "@/components/ProjectLayout";
 import {
-  AboutPage,
   ConversationEmptyPage,
   ConversationPage,
   DashboardPage,
@@ -85,10 +84,6 @@ const router = createBrowserRouter([
         ],
       },
     ],
-  },
-  {
-    path: "about",
-    element: <AboutPage />,
   },
   {
     path: "login",

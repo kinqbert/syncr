@@ -161,7 +161,8 @@ export const useKanbanDrag = ({
   const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null);
   const taskQueryKey = taskKeys.lists(projectId);
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    // A short distance lets plain clicks on links and buttons go through.
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),

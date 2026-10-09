@@ -9,7 +9,7 @@ import api from "@/lib/axios";
 import { queryClient } from "@/lib/react-query";
 
 import { companiesKeys } from "./companies";
-import { notificationKeys } from "./notifications";
+import { updateNotificationInCache } from "./notifications";
 import { teamKeys } from "./team";
 
 export const invitationKeys = {
@@ -40,18 +40,6 @@ const declineInvitation = async (invitationId: number) => {
   );
 
   return response.data;
-};
-
-const updateNotificationInCache = (updatedNotification: NotificationPayload) => {
-  queryClient.setQueryData<NotificationPayload[]>(
-    notificationKeys.all,
-    (notifications = []) =>
-      notifications.map((notification) =>
-        notification.id === updatedNotification.id
-          ? updatedNotification
-          : notification,
-      ),
-  );
 };
 
 export const useInviteTeamMembers = () => {

@@ -44,7 +44,9 @@ export const CalendarSettingsSection = () => {
       borderColor="divider"
       borderRadius={2}
       divider={<Divider />}
-      maxWidth={760}
+      bgcolor="background.paper"
+      id="calendar"
+      sx={{ scrollMarginTop: 24 }}
       width="100%"
     >
       <SettingsSectionHeader

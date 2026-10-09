@@ -38,6 +38,7 @@ export type NotificationMetadata = {
 export type NotificationPayload = {
   id: number;
   recipientId: number;
+  companyId: number | null;
   actorId: number | null;
   type: NotificationType;
   entityType: NotificationEntityType;

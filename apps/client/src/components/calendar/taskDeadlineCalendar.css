@@ -1,19 +1,21 @@
 .syncr-calendar {
-  color: #111827;
+  color: var(--mui-palette-text-primary);
   min-width: 0;
 }
 
 .syncr-calendar .fc {
-  --fc-border-color: #e5e7eb;
-  --fc-button-active-bg-color: #4338ca;
-  --fc-button-active-border-color: #4338ca;
-  --fc-button-bg-color: #4f46e5;
-  --fc-button-border-color: #4f46e5;
-  --fc-button-hover-bg-color: #4338ca;
-  --fc-button-hover-border-color: #4338ca;
-  --fc-event-text-color: #ffffff;
-  --fc-page-bg-color: #ffffff;
-  font-family: Inter, system-ui, sans-serif;
+  --fc-border-color: var(--mui-palette-divider);
+  --fc-button-active-bg-color: var(--mui-palette-primary-dark);
+  --fc-button-active-border-color: var(--mui-palette-primary-dark);
+  --fc-button-bg-color: var(--mui-palette-primary-main);
+  --fc-button-border-color: var(--mui-palette-primary-main);
+  --fc-button-hover-bg-color: var(--mui-palette-primary-dark);
+  --fc-button-hover-border-color: var(--mui-palette-primary-dark);
+  --fc-event-text-color: var(--mui-palette-text-primary);
+  --fc-page-bg-color: var(--mui-palette-background-paper);
+  --fc-neutral-bg-color: var(--mui-palette-surface-subtle);
+  --fc-today-bg-color: var(--mui-palette-accent-soft);
+  font-family: inherit;
   height: 100%;
 }
 
@@ -29,23 +31,23 @@
 }
 
 .syncr-calendar .fc .fc-toolbar-title {
-  color: #111827;
-  font-size: 20px;
-  font-weight: 800;
-  line-height: 28px;
+  color: var(--mui-palette-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
 }
 
 .syncr-calendar .fc .fc-button {
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  background: var(--mui-palette-background-paper);
+  border: 1px solid var(--mui-palette-divider);
+  border-radius: 6px;
   box-shadow: none;
-  color: #374151;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 20px;
-  min-height: 34px;
-  padding: 6px 12px;
+  color: var(--mui-palette-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  min-height: 30px;
+  padding: 5px 10px;
   text-transform: capitalize;
   transition:
     background-color 140ms ease,
@@ -54,9 +56,9 @@
 }
 
 .syncr-calendar .fc .fc-button:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-  color: #111827;
+  background: var(--mui-palette-surface-hover);
+  border-color: var(--mui-palette-line-strong);
+  color: var(--mui-palette-text-primary);
 }
 
 .syncr-calendar .fc .fc-button:focus,
@@ -66,74 +68,68 @@
 
 .syncr-calendar .fc .fc-button-primary:not(:disabled).fc-button-active,
 .syncr-calendar .fc .fc-button-primary:not(:disabled):active {
-  background: #4f46e5;
-  border-color: #4f46e5;
-  color: #ffffff;
-}
-
-.syncr-calendar .fc .fc-button-primary:not(:disabled).fc-button-active:hover,
-.syncr-calendar .fc .fc-button-primary:not(:disabled):active:hover {
-  background: #4338ca;
-  border-color: #4338ca;
+  background: var(--mui-palette-surface-active);
+  border-color: var(--mui-palette-line-strong);
+  color: var(--mui-palette-text-primary);
 }
 
 .syncr-calendar .fc .fc-prev-button,
 .syncr-calendar .fc .fc-next-button {
-  min-width: 34px;
-  padding-left: 8px;
+  min-width: 30px;
+  padding-left: 6px;
   padding-right: 8px;
 }
 
 .syncr-calendar .fc .fc-today-button {
-  background: #eef2ff;
-  border-color: #c7d2fe;
-  color: #4f46e5;
+  background: var(--mui-palette-accent-soft);
+  border-color: transparent;
+  color: var(--mui-palette-accent-text);
 }
 
 .syncr-calendar .fc .fc-today-button:hover {
-  background: #e0e7ff;
-  border-color: #a5b4fc;
-  color: #4338ca;
+  background: var(--mui-palette-accent-softHover);
+  border-color: transparent;
+  color: var(--mui-palette-accent-text);
 }
 
 .syncr-calendar .fc .fc-button:disabled {
-  background: #f3f4f6;
-  border-color: #e5e7eb;
-  color: #9ca3af;
+  background: var(--mui-palette-surface-subtle);
+  border-color: var(--mui-palette-divider);
+  color: var(--mui-palette-text-disabled);
   opacity: 1;
 }
 
 .syncr-calendar .fc .fc-col-header-cell {
-  background: #f9fafb;
+  background: var(--mui-palette-surface-subtle);
   padding: 10px 0;
 }
 
 .syncr-calendar .fc .fc-col-header-cell-cushion {
-  color: #374151;
+  color: var(--mui-palette-text-secondary);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .syncr-calendar .fc .fc-daygrid-day-number {
-  color: #374151;
+  color: var(--mui-palette-text-secondary);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   padding: 8px;
 }
 
 .syncr-calendar .fc .fc-day-today {
-  background: #eef2ff;
+  background: var(--mui-palette-accent-soft);
 }
 
 .syncr-calendar .fc .fc-daygrid-event {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-left: 3px solid var(--syncr-calendar-event-accent, #4f46e5);
+  background: var(--mui-palette-background-paper);
+  border: 1px solid var(--mui-palette-divider);
+  border-left: 3px solid var(--syncr-calendar-event-accent, var(--mui-palette-primary-main));
   border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
-  color: #111827;
+  box-shadow: none;
+  color: var(--mui-palette-text-primary);
   margin: 2px 6px;
   padding: 0;
   transition:
@@ -143,10 +139,9 @@
 }
 
 .syncr-calendar .fc .fc-daygrid-event:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
-  transform: translateY(-1px);
-}
+  border-color: var(--mui-palette-line-strong);
+  box-shadow: var(--mui-palette-elevation-card);
+  }
 
 .syncr-calendar .fc .fc-event-main {
   color: inherit;
@@ -154,24 +149,24 @@
 }
 
 .syncr-calendar .fc .syncr-calendar-event-priority-low {
-  --syncr-calendar-event-accent: #16a34a;
-  --syncr-calendar-event-accent-bg: #dcfce7;
+  --syncr-calendar-event-accent: var(--mui-palette-priority-low);
+  --syncr-calendar-event-accent-bg: var(--mui-palette-tint-gray-bg);
 }
 
 .syncr-calendar .fc .syncr-calendar-event-priority-medium {
-  --syncr-calendar-event-accent: #4f46e5;
-  --syncr-calendar-event-accent-bg: #eef2ff;
+  --syncr-calendar-event-accent: var(--mui-palette-priority-medium);
+  --syncr-calendar-event-accent-bg: var(--mui-palette-tint-amber-bg);
 }
 
 .syncr-calendar .fc .syncr-calendar-event-priority-high {
-  --syncr-calendar-event-accent: #dc2626;
-  --syncr-calendar-event-accent-bg: #fee2e2;
+  --syncr-calendar-event-accent: var(--mui-palette-priority-high);
+  --syncr-calendar-event-accent-bg: var(--mui-palette-tint-red-bg);
 }
 
 .syncr-calendar .fc .fc-daygrid-more-link {
-  color: #4f46e5;
+  color: var(--mui-palette-primary-main);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   margin: 2px 6px;
 }
 
@@ -184,8 +179,8 @@
 }
 
 .syncr-calendar-event-dot {
-  background: var(--syncr-calendar-event-accent, #4f46e5);
-  border: 2px solid var(--syncr-calendar-event-accent-bg, #eef2ff);
+  background: var(--syncr-calendar-event-accent, var(--mui-palette-primary-main));
+  border: 2px solid var(--syncr-calendar-event-accent-bg, var(--mui-palette-accent-soft));
   border-radius: 999px;
   flex: 0 0 auto;
   height: 9px;
@@ -207,14 +202,14 @@
 }
 
 .syncr-calendar-event-title {
-  color: #111827;
+  color: var(--mui-palette-text-primary);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0;
 }
 
 .syncr-calendar-event-meta {
-  color: #6b7280;
+  color: var(--mui-palette-text-secondary);
   font-size: 11px;
   font-weight: 600;
 }

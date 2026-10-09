@@ -1,90 +1,68 @@
 import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-mui";
+import { PanelLeftClose, PanelLeftOpen, SquarePen } from "lucide-mui";
 
 import { CONVERSATIONS_SIDEBAR_HEADER_HEIGHT } from "./constants";
 
 type ConversationsSidebarHeaderProps = {
   open: boolean;
   unreadCount: number;
-  toggleSidebar: () => void;
+  onCreate: () => void;
+  toggleSidebar?: () => void;
 };
 
 export const ConversationsSidebarHeader = ({
+  onCreate,
   open,
-  unreadCount,
   toggleSidebar,
-}: ConversationsSidebarHeaderProps) => {
-  return (
-    <Stack
-      sx={{
-        minHeight: CONVERSATIONS_SIDEBAR_HEADER_HEIGHT,
-        maxHeight: CONVERSATIONS_SIDEBAR_HEADER_HEIGHT,
-        px: 2,
-        borderBottom: 1,
-        borderColor: "divider",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <Stack
-        direction="row"
-        alignItems="center"
-        gap={open ? 1 : 0}
-        minWidth={0}
-        sx={{
-          opacity: open ? 1 : 0,
-          overflow: "hidden",
-          transition:
-            "max-width 220ms ease, opacity 160ms ease, gap 220ms ease",
-        }}
-      >
-        <Typography fontWeight={800} noWrap variant="h6">
-          Chats
+  unreadCount,
+}: ConversationsSidebarHeaderProps) => (
+  <Stack
+    alignItems="center"
+    direction={open ? "row" : "column"}
+    gap={0.5}
+    justifyContent="space-between"
+    sx={{
+      borderBottom: 1,
+      borderColor: "divider",
+      flexShrink: 0,
+      minHeight: CONVERSATIONS_SIDEBAR_HEADER_HEIGHT,
+      px: open ? 2 : 1,
+      py: open ? 0 : 1,
+    }}
+  >
+    {open && (
+      <Stack alignItems="baseline" direction="row" gap={1} minWidth={0}>
+        <Typography component="h1" noWrap variant="h6">
+          Conversations
         </Typography>
         {unreadCount > 0 && (
-          <Typography
-            bgcolor="primary.main"
-            borderRadius={999}
-            color="primary.contrastText"
-            fontSize={12}
-            fontWeight={800}
-            minWidth={22}
-            px={0.75}
-            textAlign="center"
-            sx={{
-              overflow: "hidden",
-            }}
-          >
-            {unreadCount > 99 ? "99+" : unreadCount}
+          <Typography color="text.secondary" variant="body2">
+            {unreadCount > 99 ? "99+" : unreadCount} unread
           </Typography>
         )}
       </Stack>
+    )}
 
-      <Tooltip title="Collapse chats">
-        <IconButton
-          aria-label="Collapse chats"
-          onClick={toggleSidebar}
-          size="small"
-          sx={{
-            justifySelf: "end",
-            color: "text.secondary",
-            height: 34,
-            ml: "auto",
-            width: 34,
-            "&:hover": {
-              bgcolor: "action.hover",
-              color: "text.primary",
-            },
-          }}
-        >
-          {open ? (
-            <PanelLeftClose fontSize="small" />
-          ) : (
-            <PanelLeftOpen fontSize="small" />
-          )}
+    <Stack direction={open ? "row" : "column"} gap={0.25}>
+      <Tooltip placement={open ? "bottom" : "right"} title="New chat">
+        <IconButton aria-label="New chat" onClick={onCreate} size="small">
+          <SquarePen />
         </IconButton>
       </Tooltip>
+      {toggleSidebar && (
+        <Tooltip
+          placement={open ? "bottom" : "right"}
+          title={open ? "Collapse chats" : "Expand chats"}
+        >
+          <IconButton
+            aria-label={open ? "Collapse chats" : "Expand chats"}
+            onClick={toggleSidebar}
+            size="small"
+          >
+            {open ? <PanelLeftClose /> : <PanelLeftOpen />}
+          </IconButton>
+        </Tooltip>
+      )}
     </Stack>
-  );
-};
+  </Stack>
+);

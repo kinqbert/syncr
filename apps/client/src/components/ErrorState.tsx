@@ -1,6 +1,8 @@
-import { Paper, Stack, Typography } from "@mui/material";
+import { CircleAlert } from "lucide-mui";
 
 import { getErrorMessage } from "@/utils/getErrorMessage";
+
+import { EmptyState, Page, Section } from "./ui";
 
 type ErrorStateProps = {
   error: unknown;
@@ -13,15 +15,13 @@ export const ErrorState = ({
   fallback = "Something went wrong.",
   title = "Could not load data.",
 }: ErrorStateProps) => (
-  <Stack p={{ xs: 2, sm: 3 }} width="100%">
-    <Paper
-      elevation={0}
-      sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 3 }}
-    >
-      <Typography fontWeight={700}>{title}</Typography>
-      <Typography color="text.secondary" fontSize={14}>
-        {getErrorMessage(error, fallback)}
-      </Typography>
-    </Paper>
-  </Stack>
+  <Page>
+    <Section>
+      <EmptyState
+        description={getErrorMessage(error, fallback)}
+        icon={<CircleAlert />}
+        title={title}
+      />
+    </Section>
+  </Page>
 );
