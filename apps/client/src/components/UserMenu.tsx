@@ -4,20 +4,10 @@ import {
   Menu,
   MenuItem,
   Stack,
-  ToggleButton,
-  ToggleButtonGroup,
   Tooltip,
   Typography,
-  useColorScheme,
 } from "@mui/material";
-import {
-  LogOut,
-  Monitor,
-  Moon,
-  Settings,
-  Sun,
-  UserRound,
-} from "lucide-mui";
+import { LogOut, Settings, UserRound } from "lucide-mui";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -29,14 +19,6 @@ import { useCompanyStore } from "@/store/useCompanyStore";
 import { getUserFullName } from "@/utils/getUserFullName";
 
 import { UserAvatar } from "./UserAvatar";
-
-const COLOR_MODES = [
-  { value: "light", label: "Light", icon: <Sun /> },
-  { value: "dark", label: "Dark", icon: <Moon /> },
-  { value: "system", label: "System", icon: <Monitor /> },
-] as const;
-
-type ColorMode = (typeof COLOR_MODES)[number]["value"];
 
 type UserMenuProps = {
   /** Avatar-only trigger for the collapsed sidebar. */
@@ -56,7 +38,6 @@ export const UserMenu = ({ collapsed = false, variant = "row" }: UserMenuProps) 
   );
   const { data: user } = useMe();
   const { data: companies = [] } = useGetMyCompanies();
-  const { mode, setMode } = useColorScheme();
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
   const isMenuOpen = Boolean(menuAnchorEl);
 
@@ -189,55 +170,6 @@ export const UserMenu = ({ collapsed = false, variant = "row" }: UserMenuProps) 
               {selectedCompany.roleName}
             </Typography>
           )}
-        </Stack>
-
-        <Divider sx={{ m: 0 }} />
-        <Stack
-          alignItems="center"
-          direction="row"
-          justifyContent="space-between"
-          sx={{ px: 1.75, py: 1 }}
-        >
-          <Typography color="text.secondary" variant="body2">
-            Theme
-          </Typography>
-          <ToggleButtonGroup
-            exclusive
-            aria-label="Color theme"
-            onChange={(_, value: ColorMode | null) => {
-              if (value) setMode(value);
-            }}
-            size="small"
-            value={mode ?? "system"}
-            sx={{
-              bgcolor: "surface.subtle",
-              borderRadius: 1,
-              p: 0.25,
-              "& .MuiToggleButton-root": {
-                border: 0,
-                borderRadius: 0.75,
-                color: "text.secondary",
-                p: 0.5,
-                "& .MuiSvgIcon-root": { fontSize: 15 },
-              },
-              "& .MuiToggleButton-root.Mui-selected": {
-                bgcolor: "surface.active",
-                boxShadow: "var(--mui-palette-elevation-card)",
-                color: "text.primary",
-              },
-            }}
-          >
-            {COLOR_MODES.map((item) => (
-              <ToggleButton
-                aria-label={item.label}
-                key={item.value}
-                title={item.label}
-                value={item.value}
-              >
-                {item.icon}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
         </Stack>
 
         <Divider sx={{ m: 0 }} />
