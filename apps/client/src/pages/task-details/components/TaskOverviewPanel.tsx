@@ -1,7 +1,6 @@
-import { Chip, Divider, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import {
   type Task,
-  TASK_STATUS_LABEL,
   type UpdateTaskAcceptanceCriterionBody,
   type UpdateTaskBody,
 } from "@syncr/packages";
@@ -14,7 +13,6 @@ import {
   useUpdateTaskAcceptanceCriterion,
 } from "@/api/tasks";
 import { EditableText } from "@/components/EditableText";
-import { Section } from "@/components/ui";
 import { useProject } from "@/hooks";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
@@ -101,57 +99,43 @@ export const TaskOverviewPanel = ({ task }: TaskOverviewPanelProps) => {
   };
 
   return (
-    <Section>
-      <Stack gap={2}>
-        {error && (
-          <Typography color="error" variant="body2">
-            {error}
-          </Typography>
-        )}
-        <Stack
-          direction="row"
-          gap={2}
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <EditableText
-            onSave={(name) => {
-              if (!name) {
-                throw new Error("Title is required.");
-              }
+    <Stack gap={2.5} minWidth={0}>
+      {error && (
+        <Typography color="error" variant="body2">
+          {error}
+        </Typography>
+      )}
+      <Stack gap={0.5}>
+        <EditableText
+          onSave={(name) => {
+            if (!name) {
+              throw new Error("Title is required.");
+            }
 
-              return saveTask({ name });
-            }}
-            value={task.name}
-            variant="h5"
-          />
-          <Chip
-            color="primary"
-            label={TASK_STATUS_LABEL[task.status]}
-            size="small"
-            sx={{ fontWeight: 600 }}
-          />
-        </Stack>
+            return saveTask({ name });
+          }}
+          value={task.name}
+          variant="h3"
+        />
         <EditableText
           minRows={3}
           multiline
           onSave={(description) =>
             saveTask({ description: description || null })
           }
-          placeholder="Click to add a description"
+          placeholder="Add a description…"
           value={task.description ?? ""}
         />
-        <Divider />
-        <AcceptanceCriteriaSection
-          criteria={task.acceptanceCriteria}
-          isCreating={createTaskAcceptanceCriterion.isPending}
-          isDeleting={deleteTaskAcceptanceCriterion.isPending}
-          isUpdating={updateTaskAcceptanceCriterion.isPending}
-          onCreate={addAcceptanceCriterion}
-          onDelete={removeAcceptanceCriterion}
-          onUpdate={saveAcceptanceCriterion}
-        />
       </Stack>
-    </Section>
+      <AcceptanceCriteriaSection
+        criteria={task.acceptanceCriteria}
+        isCreating={createTaskAcceptanceCriterion.isPending}
+        isDeleting={deleteTaskAcceptanceCriterion.isPending}
+        isUpdating={updateTaskAcceptanceCriterion.isPending}
+        onCreate={addAcceptanceCriterion}
+        onDelete={removeAcceptanceCriterion}
+        onUpdate={saveAcceptanceCriterion}
+      />
+    </Stack>
   );
 };

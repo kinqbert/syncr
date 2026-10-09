@@ -9,7 +9,8 @@ export type Breadcrumb = {
 };
 
 type PageHeaderProps = {
-  title: ReactNode;
+  /** Optional so a page can show only breadcrumbs above its own heading. */
+  title?: ReactNode;
   description?: ReactNode;
   breadcrumbs?: Breadcrumb[];
   /** Buttons or controls aligned to the right of the title. */
@@ -66,6 +67,7 @@ export const PageHeader = ({
       </Stack>
     )}
 
+    {(title || actions) && (
     <Stack
       alignItems={{ xs: "stretch", sm: "flex-start" }}
       direction={{ xs: "column", sm: "row" }}
@@ -93,6 +95,7 @@ export const PageHeader = ({
         </Stack>
       )}
     </Stack>
+    )}
 
     {tabs && (
       <Box

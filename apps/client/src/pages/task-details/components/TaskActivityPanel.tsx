@@ -1,15 +1,9 @@
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Stack, Typography } from "@mui/material";
 import { type TaskActivity, TaskActivityAction } from "@syncr/packages";
+import { History } from "lucide-mui";
 
 import { useGetTaskActivities } from "@/api/tasks";
-import { Section } from "@/components/ui";
+import { RowSkeleton, Section } from "@/components/ui";
 import { useProject } from "@/hooks";
 import { formatDuration } from "@/utils/formatDuration";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
@@ -87,15 +81,9 @@ export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
   const activities = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
-    <Section>
-      <Stack gap={2}>
-        <Typography variant="subtitle1">Activity</Typography>
-
-        {isPending ? (
-          <Stack alignItems="center" py={1}>
-            <CircularProgress size={24} />
-          </Stack>
-        ) : null}
+    <Section icon={<History />} title="Activity">
+      <Stack>
+        {isPending ? <RowSkeleton count={3} /> : null}
 
         {isError ? (
           <Alert severity="error">
@@ -104,61 +92,60 @@ export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
         ) : null}
 
         {!isPending && !isError && activities.length === 0 ? (
-          <Typography color="text.secondary" variant="body2">
-            No activity yet.
-          </Typography>
+          <Typography color="text.secondary">No activity yet.</Typography>
         ) : null}
 
-        {!isError && activities.map((activity) => {
-          const finalTextArr = [ACTIVITY_LABEL[activity.action]];
-          const titleChangeText = getTitleChangeText(activity);
-          const estimateChangeText = getEstimateChangeText(activity);
+        {!isError &&
+          activities.map((activity, index) => {
+            const details = [
+              getTitleChangeText(activity),
+              getEstimateChangeText(activity),
+            ].filter(Boolean);
+            const isLast = index === activities.length - 1 && !hasNextPage;
 
-          if (titleChangeText) {
-            finalTextArr.push(titleChangeText);
-          }
-
-          if (estimateChangeText) {
-            finalTextArr.push(estimateChangeText);
-          }
-
-          return (
-            <Stack direction="row" gap={1.25} key={activity.id}>
-              <Box
-                sx={{
-                  bgcolor: "primary.main",
-                  borderRadius: "50%",
-                  height: 6,
-                  mt: 0.75,
-                  width: 6,
-                  flexShrink: 0,
-                }}
-              />
-              <Stack>
-                <Typography
-                  variant="body2"
-                  sx={{ overflowWrap: "anywhere", whiteSpace: "pre-wrap" }}
-                >
-                  {finalTextArr.join(". ")}
-                </Typography>
-
-                <Typography color="text.secondary" variant="caption">
-                  {getActorName(activity)} -{" "}
-                  {formatRelativeDate(activity.createdAt)}
-                </Typography>
+            return (
+              <Stack direction="row" gap={1.25} key={activity.id}>
+                <Stack alignItems="center" sx={{ pt: 0.75, width: 8 }}>
+                  <Box
+                    sx={{
+                      bgcolor: "line.strong",
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      height: 7,
+                      width: 7,
+                    }}
+                  />
+                  {!isLast && (
+                    <Box sx={{ bgcolor: "divider", flex: 1, mt: 0.5, width: "1px" }} />
+                  )}
+                </Stack>
+                <Stack minWidth={0} sx={{ pb: 1.5 }}>
+                  <Typography sx={{ overflowWrap: "anywhere" }}>
+                    <Box component="span" sx={{ fontWeight: 600 }}>
+                      {getActorName(activity)}
+                    </Box>{" "}
+                    <Box component="span" sx={{ color: "text.secondary" }}>
+                      {ACTIVITY_LABEL[activity.action].toLowerCase()}
+                    </Box>
+                    {details.length > 0 && <> · {details.join(" · ")}</>}
+                  </Typography>
+                  <Typography color="text.secondary" variant="body2">
+                    {formatRelativeDate(activity.createdAt)}
+                  </Typography>
+                </Stack>
               </Stack>
-            </Stack>
-          );
-        })}
+            );
+          })}
 
         {!isError && hasNextPage ? (
           <Button
+            color="inherit"
             disabled={isFetchingNextPage}
             onClick={() => void fetchNextPage()}
             size="small"
-            sx={{ alignSelf: "flex-start" }}
+            sx={{ alignSelf: "flex-start", color: "text.secondary" }}
           >
-            {isFetchingNextPage ? "Loading..." : "Load more"}
+            {isFetchingNextPage ? "Loading…" : "Show more"}
           </Button>
         ) : null}
       </Stack>
