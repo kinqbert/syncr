@@ -1,0 +1,17 @@
+syncr.cc {
+	encode zstd gzip
+
+	@backend path /api /api/* /socket.io/*
+	handle @backend {
+		reverse_proxy server:3000
+	}
+
+	handle {
+		reverse_proxy client:80
+	}
+}
+
+demo.syncr.cc {
+	encode zstd gzip
+	reverse_proxy client:80
+}
