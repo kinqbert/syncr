@@ -9,20 +9,22 @@ import { Toaster } from "sonner";
 
 import { useGetMyCompanies } from "@/api/companies";
 import { SocketProvider } from "@/context/SocketContext/SocketProvider";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { useSyncSelectedCompany } from "@/hooks/useSyncSelectedCompany";
 import { isDemoView } from "@/lib/demo";
 import { AuthenticatedLayout } from "@/providers/auth";
 import { useCompanyStore } from "@/store/useCompanyStore";
 
+import { DemoBanner, MobileTopBar } from "./AppTopBars";
 import { CompanyRequiredPlaceholder } from "./CompanyRequiredPlaceholder";
 import { ConversationEventsListener } from "./ConversationEventsListener";
 import { ErrorState } from "./ErrorState";
-import { Header, HEADER_HEIGHT, MOBILE_DEMO_HEADER_HEIGHT } from "./Header";
 import { NotificationsListener } from "./NotificationsListener";
 import { Sidebar } from "./Sidebar";
 
 const CompanyContent = () => {
+  useSyncSelectedCompany();
   const selectedCompanyId = useCompanyStore((state) => state.selectedCompanyId);
-  const isDemo = isDemoView();
   const {
     data: companies = [],
     error,
@@ -32,15 +34,11 @@ const CompanyContent = () => {
 
   return (
     <Box
-      height={{
-        xs: `calc(100vh - ${
-          isDemo ? MOBILE_DEMO_HEADER_HEIGHT : HEADER_HEIGHT
-        }px)`,
-        sm: `calc(100vh - ${HEADER_HEIGHT}px)`,
-      }}
       minWidth={0}
       sx={{
+        bgcolor: "background.default",
         flex: 1,
+        minHeight: 0,
         overflow: "auto",
       }}
     >
@@ -69,8 +67,9 @@ const CompanyContent = () => {
 };
 
 export const AppLayout = () => {
-  const selectedCompanyId = useCompanyStore((state) => state.selectedCompanyId);
   const { mode } = useColorScheme();
+  const isMobile = useIsMobile();
+  const isDemo = isDemoView();
 
   return (
     <AuthenticatedLayout>
@@ -88,11 +87,16 @@ export const AppLayout = () => {
           <NotificationsListener />
           <ConversationEventsListener />
         </>
-        <Header />
-        <Box display="flex" sx={{ overflow: "hidden" }}>
-          {selectedCompanyId && <Sidebar />}
-          <CompanyContent />
-        </Box>
+        <Stack sx={{ height: "100dvh", overflow: "hidden" }}>
+          {isDemo && <DemoBanner />}
+          <Stack direction="row" sx={{ flex: 1, minHeight: 0 }}>
+            <Sidebar />
+            <Stack sx={{ flex: 1, minWidth: 0 }}>
+              {isMobile && <MobileTopBar />}
+              <CompanyContent />
+            </Stack>
+          </Stack>
+        </Stack>
       </SocketProvider>
     </AuthenticatedLayout>
   );

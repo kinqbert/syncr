@@ -1,4 +1,5 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Button } from "@mui/material";
+import { Users } from "lucide-mui";
 import { useState } from "react";
 import { useParams } from "react-router";
 
@@ -10,7 +11,8 @@ import {
   useRemoveProjectMember,
 } from "@/api/projects";
 import { ErrorState } from "@/components/ErrorState";
-import { ProjectViewNav } from "@/components/ProjectViewNav";
+import { ProjectPageHeader } from "@/components/ProjectPageHeader";
+import { Page } from "@/components/ui";
 
 import { Kanban } from "./components/Kanban";
 import { ProjectMembersDialog } from "./components/ProjectMembersDialog";
@@ -66,32 +68,27 @@ export const TasksPage = () => {
   };
 
   return (
-    <Stack
-      height="100%"
-      minWidth={0}
-      p={{ xs: 2, sm: 3 }}
-      width="100%"
-    >
-      <Stack
-        alignItems={{ xs: "stretch", lg: "center" }}
-        direction={{ xs: "column", lg: "row" }}
-        justifyContent="space-between"
-        mb={{ xs: 2, sm: 3 }}
-        gap={2}
-      >
-        <Stack minWidth={0} gap={0.5}>
-          <Typography
-            variant="h4"
-            sx={{ fontSize: { xs: 28, sm: 34 }, lineHeight: 1.2 }}
+    <Page sx={{ height: "100%" }}>
+      <ProjectPageHeader
+        actions={
+          <Button
+            onClick={() => setIsMembersDialogOpen(true)}
+            size="small"
+            startIcon={<Users />}
+            variant="outlined"
           >
-            {isProjectLoading ? "Loading project..." : project?.name}
-          </Typography>
-          <Typography color="text.secondary">
-            Drag and drop tasks to update their status
-          </Typography>
-        </Stack>
-        <ProjectViewNav projectId={numericProjectId} />
-      </Stack>
+            Members
+            {members.length > 0 && (
+              <Box component="span" sx={{ color: "text.secondary", ml: 0.75 }}>
+                {members.length}
+              </Box>
+            )}
+          </Button>
+        }
+        isLoading={isProjectLoading}
+        project={project}
+        projectId={numericProjectId}
+      />
       <Box
         minHeight={0}
         minWidth={0}
@@ -119,6 +116,6 @@ export const TasksPage = () => {
         onClose={() => setIsMembersDialogOpen(false)}
         onRemoveMember={handleRemoveProjectMember}
       />
-    </Stack>
+    </Page>
   );
 };

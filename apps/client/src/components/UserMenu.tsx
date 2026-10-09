@@ -1,11 +1,12 @@
 import {
+  Box,
   Divider,
-  IconButton,
   Menu,
   MenuItem,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
+  Tooltip,
   Typography,
   useColorScheme,
 } from "@mui/material";
@@ -38,7 +39,15 @@ const COLOR_MODES = [
 
 type ColorMode = (typeof COLOR_MODES)[number]["value"];
 
-export const UserMenu = () => {
+type UserMenuProps = {
+  /** Avatar-only trigger for the collapsed sidebar. */
+  collapsed?: boolean;
+  /** Avatar-only trigger for compact top bars. */
+  variant?: "row" | "icon";
+};
+
+export const UserMenu = ({ collapsed = false, variant = "row" }: UserMenuProps) => {
+  const iconOnly = collapsed || variant === "icon";
   const navigate = useNavigate();
   const logout = useLogout();
   const clearUser = useAuthStore((state) => state.clearUser);
@@ -84,35 +93,62 @@ export const UserMenu = () => {
 
   return (
     <>
-      <IconButton
-        aria-controls={isMenuOpen ? "user-menu" : undefined}
-        aria-expanded={isMenuOpen ? "true" : undefined}
-        aria-haspopup="menu"
-        aria-label="Open user menu"
-        onClick={(event) => setMenuAnchorEl(event.currentTarget)}
-        sx={{
-          bgcolor: isMenuOpen ? "action.selected" : "transparent",
-          border: 1,
-          borderColor: isMenuOpen ? "primary.light" : "divider",
-          height: 40,
-          width: 40,
-          "&:hover": {
-            bgcolor: "action.hover",
-            borderColor: "primary.light",
-          },
-        }}
-      >
-        <UserAvatar
-          fallback={<UserRound sx={{ fontSize: 17 }} />}
-          name={user?.name}
-          size={28}
-          surname={user?.surname}
-        />
-      </IconButton>
+      <Tooltip placement="right" title={collapsed ? fullName : ""}>
+        <Box
+          aria-controls={isMenuOpen ? "user-menu" : undefined}
+          aria-expanded={isMenuOpen ? "true" : undefined}
+          aria-haspopup="menu"
+          aria-label="Open user menu"
+          component="button"
+          onClick={(event) => setMenuAnchorEl(event.currentTarget)}
+          type="button"
+          sx={{
+            alignItems: "center",
+            bgcolor: isMenuOpen ? "surface.active" : "transparent",
+            border: 0,
+            borderRadius: 1,
+            color: "text.primary",
+            cursor: "pointer",
+            display: "flex",
+            font: "inherit",
+            gap: 1,
+            height: iconOnly ? 32 : 36,
+            justifyContent: iconOnly ? "center" : "flex-start",
+            minWidth: 0,
+            px: iconOnly ? 0.5 : 0.75,
+            textAlign: "left",
+            transition: "background-color 120ms ease",
+            width: iconOnly ? "auto" : "100%",
+            "&:hover": { bgcolor: "surface.hover" },
+            "&:focus-visible": {
+              outline: "2px solid",
+              outlineColor: "primary.main",
+            },
+          }}
+        >
+          <UserAvatar
+            fallback={<UserRound sx={{ fontSize: 14 }} />}
+            name={user?.name}
+            size={22}
+            surname={user?.surname}
+          />
+          {!iconOnly && (
+            <Stack flex={1} minWidth={0}>
+              <Typography noWrap sx={{ fontWeight: 500, lineHeight: 1.3 }}>
+                {fullName}
+              </Typography>
+            </Stack>
+          )}
+        </Box>
+      </Tooltip>
 
       <Menu
         anchorEl={menuAnchorEl}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        anchorOrigin={
+          variant === "icon"
+            ? { horizontal: "right", vertical: "bottom" }
+            : { horizontal: "left", vertical: "top" }
+        }
         id="user-menu"
         onClose={closeMenu}
         open={isMenuOpen}
@@ -131,7 +167,11 @@ export const UserMenu = () => {
             },
           },
         }}
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        transformOrigin={
+          variant === "icon"
+            ? { horizontal: "right", vertical: "top" }
+            : { horizontal: "left", vertical: "bottom" }
+        }
       >
         <Stack gap={0.25} sx={{ px: 1.75, py: 1.25 }}>
           <Typography
