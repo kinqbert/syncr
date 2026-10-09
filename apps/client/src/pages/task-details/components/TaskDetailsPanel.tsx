@@ -20,13 +20,13 @@ import {
 import { useMemo, useState } from "react";
 
 import { useUpdateTask } from "@/api/tasks";
+import { Section } from "@/components/ui";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useProject } from "@/hooks";
 import { formatDuration } from "@/utils/formatDuration";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { getUserFullName } from "@/utils/getUserFullName";
 
-import { Panel } from "../../../components/Panel";
 import { toDateInputValue } from "../utils/format";
 
 type TaskDetailsPanelProps = {
@@ -134,7 +134,7 @@ export const TaskDetailsPanel = ({
   };
 
   return (
-    <Panel>
+    <Section>
       <Stack gap={2}>
         <Typography variant="subtitle1">Details</Typography>
 
@@ -330,6 +330,6 @@ export const TaskDetailsPanel = ({
           </Button>
         )}
       </Stack>
-    </Panel>
+    </Section>
   );
 };

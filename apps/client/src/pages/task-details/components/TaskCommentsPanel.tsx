@@ -12,12 +12,11 @@ import { MessageCircle } from "lucide-mui";
 import { useState } from "react";
 
 import { useCreateTaskComment, useGetTaskComments } from "@/api/tasks";
+import { Section } from "@/components/ui";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useProject } from "@/hooks";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-
-import { Panel } from "../../../components/Panel";
 
 type TaskCommentsPanelProps = {
   taskId: number;
@@ -63,7 +62,7 @@ export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
   };
 
   return (
-    <Panel>
+    <Section>
       <Stack gap={2}>
         <Stack alignItems="center" direction="row" gap={1}>
           <MessageCircle fontSize="small" />
@@ -152,6 +151,6 @@ export const TaskCommentsPanel = ({ taskId }: TaskCommentsPanelProps) => {
           </Button>
         </Stack>
       </Stack>
-    </Panel>
+    </Section>
   );
 };

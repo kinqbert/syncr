@@ -14,7 +14,7 @@ import {
   useUpdateTaskAcceptanceCriterion,
 } from "@/api/tasks";
 import { EditableText } from "@/components/EditableText";
-import { Panel } from "@/components/Panel";
+import { Section } from "@/components/ui";
 import { useProject } from "@/hooks";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
@@ -101,7 +101,7 @@ export const TaskOverviewPanel = ({ task }: TaskOverviewPanelProps) => {
   };
 
   return (
-    <Panel>
+    <Section>
       <Stack gap={2}>
         {error && (
           <Typography color="error" variant="body2">
@@ -152,6 +152,6 @@ export const TaskOverviewPanel = ({ task }: TaskOverviewPanelProps) => {
           onUpdate={saveAcceptanceCriterion}
         />
       </Stack>
-    </Panel>
+    </Section>
   );
 };

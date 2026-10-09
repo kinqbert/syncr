@@ -9,12 +9,11 @@ import {
 import { type TaskActivity, TaskActivityAction } from "@syncr/packages";
 
 import { useGetTaskActivities } from "@/api/tasks";
+import { Section } from "@/components/ui";
 import { useProject } from "@/hooks";
 import { formatDuration } from "@/utils/formatDuration";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-
-import { Panel } from "../../../components/Panel";
 
 const ACTIVITY_PAGE_SIZE = 5;
 
@@ -88,7 +87,7 @@ export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
   const activities = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
-    <Panel>
+    <Section>
       <Stack gap={2}>
         <Typography variant="subtitle1">Activity</Typography>
 
@@ -163,6 +162,6 @@ export const TaskActivityPanel = ({ taskId }: TaskActivityPanelProps) => {
           </Button>
         ) : null}
       </Stack>
-    </Panel>
+    </Section>
   );
 };
