@@ -5,21 +5,27 @@ import {
 } from "@syncr/packages";
 import { ChartNoAxesColumn } from "lucide-mui";
 
-import { EmptyState, Section, StatusIcon } from "@/components/ui";
+import { EmptyState, Section, StatusIcon } from "./ui";
 
-type TasksByStatusChartProps = {
+type StatusDistributionProps = {
   data: DashboardTaskStatusPoint[];
+  title?: string;
+  description?: string;
 };
 
 /** One stacked bar for the whole workflow plus a compact legend. */
-export const TasksByStatusChart = ({ data }: TasksByStatusChartProps) => {
+export const StatusDistribution = ({
+  data,
+  description,
+  title = "Tasks by status",
+}: StatusDistributionProps) => {
   const totalTasks = data.reduce((sum, point) => sum + point.value, 0);
 
   return (
     <Section
-      description={`${totalTasks} tasks across active projects`}
+      description={description ?? `${totalTasks} tasks`}
       icon={<ChartNoAxesColumn />}
-      title="Tasks by status"
+      title={title}
     >
       {totalTasks === 0 ? (
         <EmptyState compact title="No tasks yet" />

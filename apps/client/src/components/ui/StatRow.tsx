@@ -49,6 +49,7 @@ const StatCell = ({ hint, icon, label, to, value }: StatItem) => (
       </Typography>
     </Stack>
     <Typography
+      component="div"
       sx={{
         fontSize: 22,
         fontVariantNumeric: "tabular-nums",
@@ -60,7 +61,7 @@ const StatCell = ({ hint, icon, label, to, value }: StatItem) => (
       {value}
     </Typography>
     {hint && (
-      <Typography color="text.secondary" noWrap variant="body2">
+      <Typography color="text.secondary" component="div" noWrap variant="body2">
         {hint}
       </Typography>
     )}

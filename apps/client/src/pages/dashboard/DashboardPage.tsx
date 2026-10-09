@@ -11,14 +11,10 @@ import { useMemo } from "react";
 
 import { useGetDashboard } from "@/api/dashboard";
 import { ErrorState } from "@/components/ErrorState";
+import { StatusDistribution } from "@/components/StatusDistribution";
 import { Page, PageHeader, PageSkeleton, StatRow } from "@/components/ui";
 
-import {
-  BirthdaysPanel,
-  MyTasksPanel,
-  RecentActivity,
-  TasksByStatusChart,
-} from "./components";
+import { BirthdaysPanel, MyTasksPanel, RecentActivity } from "./components";
 import { getTimeBasedGreeting } from "./utils/getTimeBasedGreeting";
 
 const formatToday = () =>
@@ -105,7 +101,10 @@ export const DashboardPage = () => {
       >
         <Stack gap={2} minWidth={0}>
           <MyTasksPanel />
-          <TasksByStatusChart data={data.tasksByStatus} />
+          <StatusDistribution
+            data={data.tasksByStatus}
+            description="Across active projects"
+          />
         </Stack>
         <Stack gap={2} minWidth={0}>
           <RecentActivity activities={data.recentActivity} />
