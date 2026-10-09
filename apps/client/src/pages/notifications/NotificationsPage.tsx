@@ -1,11 +1,11 @@
 import {
   Box,
   Button,
-  CircularProgress,
-  Divider,
+  IconButton,
   Stack,
   Tab,
   Tabs,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import {
@@ -15,9 +15,12 @@ import {
 } from "@syncr/packages";
 import {
   CalendarClock,
+  Check,
+  CheckCheck,
   CircleCheck,
   ClipboardCheck,
   FolderPlus,
+  Inbox,
   ListChecks,
   MessageCircle,
   UserPlus,
@@ -33,6 +36,13 @@ import {
 } from "@/api/notifications";
 import { ErrorState } from "@/components/ErrorState";
 import { Notification } from "@/components/Notification";
+import {
+  EmptyState,
+  Page,
+  PageHeader,
+  RowSkeleton,
+  Section,
+} from "@/components/ui";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
@@ -76,21 +86,21 @@ const getNotificationTitle = (notification: NotificationPayload) => {
 const getNotificationIcon = (notification: NotificationPayload) => {
   switch (notification.type) {
     case NotificationType.TaskAssigned:
-      return <ClipboardCheck fontSize="small" />;
+      return <ClipboardCheck />;
     case NotificationType.TaskCommented:
-      return <MessageCircle fontSize="small" />;
+      return <MessageCircle />;
     case NotificationType.TaskStatusChanged:
-      return <CircleCheck fontSize="small" />;
+      return <CircleCheck />;
     case NotificationType.TaskDeadlineChanged:
-      return <CalendarClock fontSize="small" />;
+      return <CalendarClock />;
     case NotificationType.TaskAcceptanceCriterionAdded:
-      return <ListChecks fontSize="small" />;
+      return <ListChecks />;
     case NotificationType.ProjectAdded:
-      return <FolderPlus fontSize="small" />;
+      return <FolderPlus />;
     case NotificationType.CompanyInvitation:
-      return <UserPlus fontSize="small" />;
+      return <UserPlus />;
     default:
-      return <CircleCheck fontSize="small" />;
+      return <CircleCheck />;
   }
 };
 
@@ -125,6 +135,39 @@ const isActiveInvitationNotification = (notification: NotificationPayload) => {
 const getInvitationId = (notification: NotificationPayload) => {
   return notification.metadata?.invitationId;
 };
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const getDayLabel = (value: string) => {
+  const date = new Date(value);
+  const today = new Date();
+  const startOf = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const diffDays = Math.round((startOf(today) - startOf(date)) / DAY_MS);
+
+  if (diffDays <= 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return "This week";
+  return "Earlier";
+};
+
+/** Groups notifications (already newest first) under relative day labels. */
+const groupByDay = (notifications: NotificationPayload[]) =>
+  notifications.reduce<{ label: string; items: NotificationPayload[] }[]>(
+    (groups, notification) => {
+      const label = getDayLabel(notification.createdAt);
+      const last = groups[groups.length - 1];
+
+      if (last?.label === label) {
+        last.items.push(notification);
+      } else {
+        groups.push({ label, items: [notification] });
+      }
+
+      return groups;
+    },
+    [],
+  );
 
 const matchesFilter = (
   notification: NotificationPayload,
@@ -211,205 +254,207 @@ export const NotificationsPage = () => {
     );
   }
 
+  const groups = groupByDay(filteredNotifications);
+
   return (
-    <Box
-      component="main"
-      sx={{ minWidth: 0, p: { xs: 2, sm: 3 }, width: "100%" }}
-    >
-      <Stack
-        alignItems={{ xs: "stretch", lg: "center" }}
-        direction={{ xs: "column", lg: "row" }}
-        gap={2}
-        justifyContent="space-between"
-        mb={{ xs: 2.5, sm: 3 }}
-      >
-        <Stack gap={0.5} minWidth={0}>
-          <Typography
-            variant="h4"
-            sx={{ fontSize: { xs: 28, sm: 34 }, lineHeight: 1.2 }}
+    <Page maxWidth={960}>
+      <PageHeader
+        actions={
+          <Button
+            disabled={unreadCount === 0 || markAllNotificationsRead.isPending}
+            onClick={handleMarkAllRead}
+            size="small"
+            startIcon={<CheckCheck />}
+            variant="outlined"
           >
-            Notifications
-          </Typography>
-          <Typography color="text.secondary">
-            You have {unreadCount} unread notification
-            {unreadCount === 1 ? "" : "s"}
-          </Typography>
-        </Stack>
-        <Button
-          disabled={unreadCount === 0 || markAllNotificationsRead.isPending}
-          onClick={handleMarkAllRead}
-          sx={{ alignSelf: { xs: "stretch", sm: "flex-start", lg: "center" } }}
-        >
-          Mark all as read
-        </Button>
-      </Stack>
+            Mark all as read
+          </Button>
+        }
+        tabs={
+          <Tabs
+            onChange={(_, value: NotificationFilter) => setFilter(value)}
+            value={filter}
+            variant="scrollable"
+          >
+            {FILTERS.map((item) => {
+              const count = notifications.filter((notification) =>
+                matchesFilter(notification, item.value),
+              ).length;
 
-      <Box
-        sx={{
-          border: 1,
-          borderColor: "divider",
-          borderRadius: 2,
-          overflow: "hidden",
-        }}
-      >
-        <Tabs
-          onChange={(_, value: NotificationFilter) => setFilter(value)}
-          sx={{
-            minHeight: { xs: 44, sm: 50 },
-            px: { xs: 1, sm: 2 },
-            "& .MuiTabs-flexContainer": {
-              gap: { xs: 0.5, sm: 0 },
-            },
-          }}
-          value={filter}
-          variant="scrollable"
-        >
-          {FILTERS.map((item) => (
-            <Tab
-              key={item.value}
-              label={item.label}
-              sx={{
-                fontSize: { xs: 13, sm: 14 },
-                minHeight: { xs: 44, sm: 50 },
-                minWidth: { xs: "auto", sm: 90 },
-                px: { xs: 1.25, sm: 2 },
-                textTransform: "none",
-              }}
-              value={item.value}
-            />
-          ))}
-        </Tabs>
-        <Divider />
-
-        {isPending ? (
-          <Stack alignItems="center" py={8}>
-            <CircularProgress />
-          </Stack>
-        ) : filteredNotifications.length === 0 ? (
-          <Stack alignItems="center" py={8}>
-            <Typography color="text.secondary">No notifications</Typography>
-          </Stack>
-        ) : (
-          filteredNotifications.map((notification, index) => {
-            const iconColors = getIconColors(notification);
-
-            return (
-              <Box key={notification.id}>
-                <Stack
-                  alignItems={{ xs: "flex-start", sm: "center" }}
-                  direction="row"
-                  gap={{ xs: 1.5, sm: 2 }}
-                  sx={{
-                    bgcolor: notification.isRead
-                      ? "background.paper"
-                      : "surface.subtle",
-                    minHeight: { xs: "auto", sm: 108 },
-                    px: { xs: 2, sm: 2.75 },
-                    py: { xs: 2, sm: 2.5 },
-                  }}
-                >
-                  <Box
-                    sx={{
-                      alignItems: "center",
-                      bgcolor: iconColors.bgcolor,
-                      borderRadius: "50%",
-                      color: iconColors.color,
-                      display: "flex",
-                      flex: "0 0 auto",
-                      height: { xs: 34, sm: 36 },
-                      justifyContent: "center",
-                      width: { xs: 34, sm: 36 },
-                    }}
-                  >
-                    {getNotificationIcon(notification)}
-                  </Box>
-
-                  <Box minWidth={0} sx={{ flex: 1 }}>
-                    <Typography fontWeight={600}>
-                      {getNotificationTitle(notification)}
-                    </Typography>
-                    <Typography color="text.secondary" mt={0.5}>
-                      <Notification notification={notification} />
-                    </Typography>
-                    <Stack
-                      alignItems={{ xs: "flex-start", sm: "center" }}
-                      direction={{ xs: "column", sm: "row" }}
-                      gap={{ xs: 0.75, sm: 2 }}
-                      mt={1}
-                    >
-                      <Typography color="text.secondary" variant="caption">
-                        {formatRelativeDate(notification.createdAt)}
-                      </Typography>
-                      {!notification.isRead && (
-                        <Button
-                          disabled={markNotificationAsRead.isPending}
-                          onClick={() => handleMarkRead(notification.id)}
-                          size="small"
-                          sx={{ minWidth: 0, p: 0, textTransform: "none" }}
-                        >
-                          Mark as read
-                        </Button>
+              return (
+                <Tab
+                  key={item.value}
+                  label={
+                    <Stack direction="row" gap={0.75}>
+                      {item.label}
+                      {count > 0 && (
+                        <Box component="span" sx={{ color: "text.disabled" }}>
+                          {count}
+                        </Box>
                       )}
                     </Stack>
-                    {isActiveInvitationNotification(notification) && (
-                      <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        gap={1}
-                        mt={1.5}
-                      >
-                        <Button
-                          disabled={acceptInvitation.isPending}
-                          onClick={() => {
-                            const invitationId = getInvitationId(notification);
+                  }
+                  value={item.value}
+                />
+              );
+            })}
+          </Tabs>
+        }
+        title="Notifications"
+      />
 
-                            if (invitationId) {
-                              handleAcceptInvitation(invitationId);
-                            }
-                          }}
-                          size="small"
-                          sx={{ width: { xs: "100%", sm: "auto" } }}
-                          variant="contained"
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          color="inherit"
-                          disabled={declineInvitation.isPending}
-                          onClick={() => {
-                            const invitationId = getInvitationId(notification);
+      {isPending ? (
+        <RowSkeleton count={6} />
+      ) : filteredNotifications.length === 0 ? (
+        <EmptyState
+          description={
+            filter === "unread"
+              ? "You've read everything. Nice."
+              : "Updates about your tasks and projects will land here."
+          }
+          icon={<Inbox />}
+          title={filter === "unread" ? "All caught up" : "Nothing here yet"}
+        />
+      ) : (
+        <Stack gap={2.5}>
+          {groups.map((group) => (
+            <Stack gap={0.5} key={group.label}>
+              <Typography color="text.secondary" sx={{ px: 1 }} variant="overline">
+                {group.label}
+              </Typography>
+              <Section padding="none">
+                {group.items.map((notification, index) => {
+                  const iconColors = getIconColors(notification);
 
-                            if (invitationId) {
-                              handleDeclineInvitation(invitationId);
-                            }
-                          }}
-                          size="small"
-                          sx={{ width: { xs: "100%", sm: "auto" } }}
-                          variant="outlined"
-                        >
-                          Decline
-                        </Button>
-                      </Stack>
-                    )}
-                  </Box>
-
-                  {!notification.isRead && (
-                    <Box
+                  return (
+                    <Stack
+                      alignItems="flex-start"
+                      direction="row"
+                      gap={1.5}
+                      key={notification.id}
                       sx={{
-                        bgcolor: "primary.main",
-                        borderRadius: "50%",
-                        flex: "0 0 auto",
-                        height: 8,
-                        width: 8,
+                        borderTop: index === 0 ? 0 : 1,
+                        borderColor: "line.subtle",
+                        px: 2,
+                        py: 1.5,
+                        "&:hover .notification-actions, &:focus-within .notification-actions":
+                          { opacity: 1 },
                       }}
-                    />
-                  )}
-                </Stack>
-                {index < filteredNotifications.length - 1 && <Divider />}
-              </Box>
-            );
-          })
-        )}
-      </Box>
-    </Box>
+                    >
+                      <Box
+                        sx={{
+                          alignItems: "center",
+                          bgcolor: iconColors.bgcolor,
+                          borderRadius: 1.5,
+                          color: iconColors.color,
+                          display: "flex",
+                          flex: "0 0 auto",
+                          height: 28,
+                          justifyContent: "center",
+                          mt: 0.25,
+                          width: 28,
+                          "& .MuiSvgIcon-root": { fontSize: 15 },
+                        }}
+                      >
+                        {getNotificationIcon(notification)}
+                      </Box>
+
+                      <Box minWidth={0} sx={{ flex: 1 }}>
+                        <Stack alignItems="baseline" direction="row" gap={1}>
+                          <Typography
+                            fontWeight={notification.isRead ? 500 : 600}
+                            noWrap
+                            sx={{ flex: 1, minWidth: 0 }}
+                          >
+                            {getNotificationTitle(notification)}
+                          </Typography>
+                          <Typography
+                            color="text.secondary"
+                            flexShrink={0}
+                            variant="body2"
+                          >
+                            {formatRelativeDate(notification.createdAt)}
+                          </Typography>
+                        </Stack>
+                        <Box sx={{ color: "text.secondary", mt: 0.25 }}>
+                          <Notification notification={notification} />
+                        </Box>
+                        {isActiveInvitationNotification(notification) && (
+                          <Stack direction="row" gap={1} mt={1.25}>
+                            <Button
+                              disabled={acceptInvitation.isPending}
+                              onClick={() => {
+                                const invitationId = getInvitationId(notification);
+
+                                if (invitationId) {
+                                  handleAcceptInvitation(invitationId);
+                                }
+                              }}
+                              size="small"
+                              variant="contained"
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              disabled={declineInvitation.isPending}
+                              onClick={() => {
+                                const invitationId = getInvitationId(notification);
+
+                                if (invitationId) {
+                                  handleDeclineInvitation(invitationId);
+                                }
+                              }}
+                              size="small"
+                              variant="outlined"
+                            >
+                              Decline
+                            </Button>
+                          </Stack>
+                        )}
+                      </Box>
+
+                      <Stack
+                        alignItems="center"
+                        direction="row"
+                        flexShrink={0}
+                        gap={0.5}
+                        justifyContent="flex-end"
+                        sx={{ minHeight: 24, width: 52 }}
+                      >
+                        {!notification.isRead && (
+                          <>
+                            <Tooltip title="Mark as read">
+                              <IconButton
+                                aria-label="Mark as read"
+                                className="notification-actions"
+                                disabled={markNotificationAsRead.isPending}
+                                onClick={() => handleMarkRead(notification.id)}
+                                size="small"
+                                sx={{ opacity: { xs: 1, md: 0 } }}
+                              >
+                                <Check />
+                              </IconButton>
+                            </Tooltip>
+                            <Box
+                              aria-label="Unread"
+                              sx={{
+                                bgcolor: "primary.main",
+                                borderRadius: "50%",
+                                height: 7,
+                                width: 7,
+                              }}
+                            />
+                          </>
+                        )}
+                      </Stack>
+                    </Stack>
+                  );
+                })}
+              </Section>
+            </Stack>
+          ))}
+        </Stack>
+      )}
+    </Page>
   );
 };
