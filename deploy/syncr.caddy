@@ -1,0 +1,18 @@
+# Installed to /etc/caddy/sites/ on the server, which the shared Caddy imports.
+syncr.cc {
+	encode zstd gzip
+
+	@backend path /api /api/* /socket.io/*
+	handle @backend {
+		reverse_proxy 127.0.0.1:3000
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:8080
+	}
+}
+
+demo.syncr.cc {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:8080
+}

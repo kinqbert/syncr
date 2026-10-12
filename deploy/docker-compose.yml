@@ -3,6 +3,8 @@ services:
     image: ${CLIENT_IMAGE}
     container_name: syncr-client
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
     depends_on:
       - server
 
@@ -10,6 +12,8 @@ services:
     image: ${SERVER_IMAGE}
     container_name: syncr-server
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
     env_file:
       - .env
     environment:
@@ -20,22 +24,6 @@ services:
         condition: service_healthy
       demo-postgres:
         condition: service_healthy
-
-  caddy:
-    image: caddy:2.8-alpine
-    container_name: syncr-caddy
-    restart: unless-stopped
-    depends_on:
-      - client
-      - server
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
 
   migrate:
     image: ${SERVER_IMAGE}
@@ -95,5 +83,3 @@ services:
 volumes:
   syncr-postgres-data:
   syncr-demo-postgres-data:
-  caddy-data:
-  caddy-config:

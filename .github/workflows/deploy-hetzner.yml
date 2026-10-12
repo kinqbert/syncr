@@ -67,15 +67,27 @@ jobs:
           cache-from: type=gha,scope=server
           cache-to: type=gha,mode=max,scope=server
 
-      - name: Copy compose file and Caddyfile to server
+      - name: Copy compose file to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HETZNER_HOST }}
           username: ${{ secrets.HETZNER_USER }}
           key: ${{ secrets.HETZNER_SSH_KEY }}
           port: ${{ secrets.HETZNER_SSH_PORT || 22 }}
-          source: deploy/docker-compose.yml,deploy/Caddyfile
+          source: deploy/docker-compose.yml
           target: ${{ secrets.HETZNER_APP_DIR }}
+          strip_components: 1
+
+      # The server's shared Caddy imports every file in /etc/caddy/sites.
+      - name: Copy Caddy site to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          port: ${{ secrets.HETZNER_SSH_PORT || 22 }}
+          source: deploy/syncr.caddy
+          target: /etc/caddy/sites
           strip_components: 1
 
       - name: Deploy on server
@@ -119,4 +131,5 @@ jobs:
             CLIENT_IMAGE="$CLIENT_IMAGE" SERVER_IMAGE="$SERVER_IMAGE" docker compose up -d postgres
             CLIENT_IMAGE="$CLIENT_IMAGE" SERVER_IMAGE="$SERVER_IMAGE" docker compose run --rm migrate
             CLIENT_IMAGE="$CLIENT_IMAGE" SERVER_IMAGE="$SERVER_IMAGE" docker compose up -d --remove-orphans
+            sudo systemctl reload-or-restart caddy
             docker image prune -f
