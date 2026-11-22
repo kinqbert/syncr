@@ -41,12 +41,6 @@ const dayOffset = (days: number) => {
   return date;
 };
 
-const addDays = (base: Date, days: number) => {
-  const date = new Date(base);
-  date.setDate(date.getDate() + days);
-  return date;
-};
-
 const DEMO_PROJECTS = [
   {
     name: "Customer Portal Relaunch",
@@ -403,7 +397,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
                   ];
 
             return {
-              name: `${name} - ${project.name}`,
+              name,
               description:
                 DEMO_TASK_DESCRIPTIONS[(index + projectIndex) % DEMO_TASK_DESCRIPTIONS.length],
               projectId: project.id,
@@ -456,7 +450,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
           "Backend and UI changes are aligned for the next review.",
           "Leaving this here so the next person has the decision context.",
         ][index % 8],
-        createdAt: addDays(dayOffset(-7), index),
+        createdAt: dayOffset(-1 - (index % 7)),
       })),
     );
 
@@ -466,7 +460,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
           taskId: task.id,
           userId: seededUsers[index % seededUsers.length].id,
           action: TaskActivityAction.TaskCreated,
-          createdAt: addDays(dayOffset(-14), index),
+          createdAt: dayOffset(-14 - (index % 7)),
         },
         {
           taskId: task.id,
@@ -474,7 +468,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
           action: TaskActivityAction.TaskStatusUpdated,
           previousValue: TaskStatus.Backlog,
           newValue: task.status,
-          createdAt: addDays(dayOffset(-10), index),
+          createdAt: dayOffset(-2 - (index % 5)),
         },
       ]),
     );
@@ -492,7 +486,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
         entityId: task.id,
         metadata: { taskName: task.name, projectId: task.projectId },
         isRead: index % 3 === 0,
-        createdAt: addDays(dayOffset(-4), index),
+        createdAt: dayOffset(-1 - Math.floor(index / 4)),
       })),
     );
 
@@ -522,7 +516,7 @@ export const seedDemoData = async (seedRoles: SeedRoles) => {
           conversationId: conversation.id,
           senderId: seededUsers[index % seededUsers.length].id,
           content,
-          createdAt: addDays(dayOffset(-2), index),
+          createdAt: dayOffset(index - 4),
         })),
       )
       .returning();
