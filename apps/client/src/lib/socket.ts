@@ -11,7 +11,7 @@ export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 export const socket: AppSocket = io(env.socketUrl, {
   autoConnect: false,
-  extraHeaders: isDemoView() ? { "X-Demo-Mode": "true" } : undefined,
+  auth: { demo: isDemoView() },
   transports: ["websocket"],
   withCredentials: true,
 });

@@ -5,15 +5,8 @@ import { NextFunction, Request, Response } from "express";
 
 import { AppModule } from "./app.module";
 import { runWithDemoContext } from "./common/demo";
-import { CONFIG } from "./config/configuration";
+import { CLIENT_ORIGINS } from "./config/configuration";
 import { seedDb } from "./config/seed";
-
-const getDemoClientUrl = () => {
-  const url = new URL(CONFIG.CLIENT_URL);
-  url.hostname = `demo.${url.hostname}`;
-
-  return url.origin;
-};
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,7 +20,7 @@ async function bootstrap() {
   app.setGlobalPrefix("api");
 
   app.enableCors({
-    origin: [CONFIG.CLIENT_URL, getDemoClientUrl()],
+    origin: CLIENT_ORIGINS,
     credentials: true,
   });
 

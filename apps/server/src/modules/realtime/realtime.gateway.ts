@@ -11,6 +11,7 @@ import type { TaskChangedPayload } from "@syncr/packages";
 import { parse as parseCookie } from "cookie";
 
 import { COOKIE_PARAM } from "../../common/constants/cookie-param";
+import { DEMO_USER_EMAIL, runInDemoContext } from "../../common/demo";
 import { verifyAccessToken } from "../../common/utils/jwt";
 import { AuthRepository } from "../../repositories/auth.repository";
 import { UsersRepository } from "../../repositories/users.repository";
@@ -18,10 +19,12 @@ import {
   type AppServer,
   type AppSocket,
   companyRoom,
-  getSocketUserId,
+  getSocketUser,
   isCompanyRoom,
-  setSocketUserId,
+  isDemoUserRoom,
+  setSocketUser,
   SOCKET_GATEWAY_OPTIONS,
+  type SocketUser,
   userRoom,
 } from "./socket";
 
@@ -39,13 +42,13 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection {
   afterInit(server: AppServer) {
     server.use((client, next) => {
       this.authenticate(client)
-        .then((userId) => {
-          if (userId === null) {
+        .then((user) => {
+          if (!user) {
             next(new Error("Unauthorized"));
             return;
           }
 
-          setSocketUserId(client, userId);
+          setSocketUser(client, user);
           next();
         })
         .catch(() => next(new Error("Unauthorized")));
@@ -53,10 +56,10 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection {
   }
 
   async handleConnection(client: AppSocket) {
-    const userId = getSocketUserId(client);
+    const user = getSocketUser(client);
 
-    if (userId !== null) {
-      await client.join(userRoom(userId));
+    if (user) {
+      await client.join(userRoom(user.userId, user.isDemo));
     }
   }
 
@@ -65,13 +68,17 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection {
     @ConnectedSocket() client: AppSocket,
     @MessageBody() payload: { companyId: number },
   ) {
-    const userId = getSocketUserId(client);
+    const user = getSocketUser(client);
 
-    if (userId === null || !Number.isInteger(payload?.companyId)) {
+    if (!user || !Number.isInteger(payload?.companyId)) {
       return;
     }
 
-    if (!(await this.usersRepository.isUserInCompany(userId, payload.companyId))) {
+    const isMember = await runInDemoContext(user.isDemo, () =>
+      this.usersRepository.isUserInCompany(user.userId, payload.companyId),
+    );
+
+    if (!isMember) {
       return;
     }
 
@@ -81,14 +88,32 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection {
       }
     }
 
-    await client.join(companyRoom(payload.companyId));
+    await client.join(companyRoom(payload.companyId, user.isDemo));
   }
 
   emitTaskChanged(companyId: number, payload: TaskChangedPayload) {
     this.server.to(companyRoom(companyId)).emit("task.changed", payload);
   }
 
-  private async authenticate(client: AppSocket) {
+  hasDemoViewers() {
+    for (const room of this.server.sockets.adapter.rooms.keys()) {
+      if (isDemoUserRoom(room)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private async authenticate(client: AppSocket): Promise<SocketUser | null> {
+    if ((client.handshake.auth as { demo?: unknown }).demo === true) {
+      const demoUser = await runInDemoContext(true, () =>
+        this.authRepository.findUserByEmail(DEMO_USER_EMAIL),
+      );
+
+      return demoUser ? { userId: demoUser.id, isDemo: true } : null;
+    }
+
     const cookies = parseCookie(client.handshake.headers.cookie ?? "");
     const accessToken = cookies[COOKIE_PARAM.accessToken];
     const sessionId = cookies[COOKIE_PARAM.sessionId];
@@ -104,6 +129,6 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection {
       return null;
     }
 
-    return payload.userId;
+    return { userId: payload.userId, isDemo: false };
   }
 }

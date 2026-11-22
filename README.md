@@ -14,7 +14,7 @@ Syncr is a full-stack project management and team collaboration app built around
 
 - **Workspace dashboard** with your open tasks, due-today work, completed tasks, active projects, team size and unread notifications, plus tasks by status, recent activity and upcoming birthdays.
 - **Projects** in a table or grid view with status filters, progress, members and due dates, and a sidebar list for jumping straight into any project.
-- **Project overview** with a task summary, status distribution, team workload and an activity timeline.
+- **Project overview** with a task summary, status distribution, team workload and a live activity timeline.
 - **Kanban board** with Backlog, Todo, In Progress, Review and Done columns, drag and drop, inline task creation, priorities, assignees and due dates.
 - **Task details** in a two-pane layout: description, acceptance criteria, comments and activity on the left, and inline-editable properties that save as you go on the right.
 - **Personal and project calendars** for task deadlines, with optional **Google Calendar** sync.
@@ -24,7 +24,7 @@ Syncr is a full-stack project management and team collaboration app built around
 - **Workspace settings** including company work hours, profile, password and calendar connections.
 - **Light, dark and system themes**, switchable under Settings → Appearance.
 - **Responsive UI** with a collapsible sidebar on desktop and a drawer on mobile.
-- **Read-only demo mode** with a seeded workspace, served on the `demo.` subdomain.
+- **Read-only demo mode** with a seeded workspace, served on the `demo.` subdomain, where simulated teammates move tasks, comment and send messages in realtime while you watch.
 
 ## Product Preview
 
@@ -58,7 +58,6 @@ Syncr is a full-stack project management and team collaboration app built around
 
 ### Pending
 
-- [ ] Add random realtime events to the demo environment
 - [ ] Improve main dashboard with more stats, activity feed, and company news
 - [ ] Implement menu for team page
 - [ ] Option to turn off notifications for specific projects or tasks
@@ -69,6 +68,7 @@ Syncr is a full-stack project management and team collaboration app built around
 
 ### Done
 
+- [x] ~~Random realtime events in the demo environment~~
 - [x] ~~Live activity feed for tasks, projects and dashboard~~
 - [x] ~~Restrict projects and tasks to project members (owners and managers see everything)~~
 - [x] ~~CI pipeline for linting, typechecking and tests~~

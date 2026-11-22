@@ -57,3 +57,12 @@ export const CONFIG = {
   GOOGLE_CALENDAR_REDIRECT_URI: envVars.GOOGLE_CALENDAR_REDIRECT_URI,
   CALENDAR_TOKEN_SECRET: envVars.CALENDAR_TOKEN_SECRET || envVars.REFRESH_TOKEN_SECRET,
 };
+
+const getDemoClientUrl = () => {
+  const url = new URL(CONFIG.CLIENT_URL);
+  url.hostname = `demo.${url.hostname}`;
+
+  return url.origin;
+};
+
+export const CLIENT_ORIGINS = [CONFIG.CLIENT_URL, getDemoClientUrl()];

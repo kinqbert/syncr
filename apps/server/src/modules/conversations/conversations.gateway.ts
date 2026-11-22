@@ -7,13 +7,15 @@ import {
 } from "@nestjs/websockets";
 import type { MessagePayload } from "@syncr/packages";
 
+import { runInDemoContext } from "../../common/demo";
 import { ConversationsRepository } from "../../repositories/conversations.repository";
 import {
   type AppServer,
   type AppSocket,
   conversationRoom,
-  getSocketUserId,
+  getSocketUser,
   SOCKET_GATEWAY_OPTIONS,
+  type SocketUser,
   userRoom,
 } from "../realtime/socket";
 
@@ -33,19 +35,13 @@ export class ConversationsGateway {
     @ConnectedSocket() client: AppSocket,
     @MessageBody() payload: ConversationEventPayload,
   ) {
-    const userId = getSocketUserId(client);
+    const user = getSocketUser(client);
 
-    if (
-      userId === null ||
-      !(await this.conversationsRepository.isConversationParticipant(
-        payload.conversationId,
-        userId,
-      ))
-    ) {
+    if (!user || !(await this.isParticipant(user, payload.conversationId))) {
       return;
     }
 
-    await client.join(conversationRoom(payload.conversationId));
+    await client.join(conversationRoom(payload.conversationId, user.isDemo));
   }
 
   @SubscribeMessage("conversation.leave")
@@ -53,7 +49,11 @@ export class ConversationsGateway {
     @ConnectedSocket() client: AppSocket,
     @MessageBody() payload: ConversationEventPayload,
   ) {
-    await client.leave(conversationRoom(payload.conversationId));
+    const user = getSocketUser(client);
+
+    if (user) {
+      await client.leave(conversationRoom(payload.conversationId, user.isDemo));
+    }
   }
 
   @SubscribeMessage("typing.started")
@@ -101,27 +101,31 @@ export class ConversationsGateway {
     conversationId: number,
     event: "typing.started" | "typing.stopped",
   ) {
-    const userId = getSocketUserId(client);
+    const user = getSocketUser(client);
 
-    if (
-      userId === null ||
-      !(await this.conversationsRepository.isConversationParticipant(conversationId, userId))
-    ) {
+    if (!user || !(await this.isParticipant(user, conversationId))) {
       return;
     }
 
-    const participantUserIds =
-      await this.conversationsRepository.getConversationParticipantIds(conversationId);
+    const participantUserIds = await runInDemoContext(user.isDemo, () =>
+      this.conversationsRepository.getConversationParticipantIds(conversationId),
+    );
 
     for (const participantUserId of participantUserIds) {
-      if (participantUserId === userId) {
+      if (participantUserId === user.userId) {
         continue;
       }
 
-      this.server.to(userRoom(participantUserId)).emit(event, {
+      this.server.to(userRoom(participantUserId, user.isDemo)).emit(event, {
         conversationId,
-        userId,
+        userId: user.userId,
       });
     }
+  }
+
+  private isParticipant(user: SocketUser, conversationId: number) {
+    return runInDemoContext(user.isDemo, () =>
+      this.conversationsRepository.isConversationParticipant(conversationId, user.userId),
+    );
   }
 }

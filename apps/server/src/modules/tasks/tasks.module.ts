@@ -30,5 +30,6 @@ import { TasksService } from "./tasks.service";
     AuthRepository,
     RoleRepository,
   ],
+  exports: [TasksService],
 })
 export class TasksModule {}

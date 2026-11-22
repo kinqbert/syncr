@@ -8,8 +8,11 @@ export const DEMO_USER_EMAIL = "demo@syncr.cc";
 
 const demoRequestContext = new AsyncLocalStorage<{ isDemo: boolean }>();
 
+export const runInDemoContext = <T>(isDemo: boolean, callback: () => T) =>
+  demoRequestContext.run({ isDemo }, callback);
+
 export const runWithDemoContext = (request: Request, next: () => void) => {
-  demoRequestContext.run({ isDemo: isDemoRequest(request) }, next);
+  runInDemoContext(isDemoRequest(request), next);
 };
 
 export const isDemo = () => demoRequestContext.getStore()?.isDemo ?? false;

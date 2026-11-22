@@ -20,5 +20,6 @@ import { ConversationsService } from "./conversations.service";
     UsersRepository,
   ],
   controllers: [ConversationsController],
+  exports: [ConversationsService],
 })
 export class ConversationsModule {}

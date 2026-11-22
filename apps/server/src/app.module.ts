@@ -9,6 +9,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { CompaniesModule } from "./modules/companies/companies.module";
 import { ConversationsModule } from "./modules/conversations/conversations.module";
 import { DashboardModule } from "./modules/dashboard/dashboard.module";
+import { DemoModule } from "./modules/demo/demo.module";
 import { InvitationsModule } from "./modules/invitations/invitations.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { ProjectsModule } from "./modules/projects/projects.module";
@@ -27,6 +28,7 @@ import { TeamModule } from "./modules/team/team.module";
     TeamModule,
     ConversationsModule,
     DashboardModule,
+    DemoModule,
   ],
   controllers: [AppController],
   providers: [
