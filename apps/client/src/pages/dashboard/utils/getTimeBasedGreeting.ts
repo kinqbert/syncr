@@ -14,7 +14,7 @@ const GREETINGS_BY_PERIOD = {
     "Evening, welcome back",
     "Good evening, let's review the day",
   ],
-  night: ["Working late?", "Good night", "Late check-in"],
+  night: ["Working late?", "Late check-in", "Still at it?"],
 } as const;
 
 const getGreetingPeriod = (date: Date): keyof typeof GREETINGS_BY_PERIOD => {

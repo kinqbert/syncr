@@ -11,6 +11,8 @@ import {
   getBirthdayCountdownLabel,
 } from "../utils/birthdayFormat";
 
+const MAX_BIRTHDAYS = 5;
+
 type BirthdaysPanelProps = {
   birthdays: DashboardBirthday[];
 };
@@ -25,8 +27,8 @@ export const BirthdaysPanel = ({ birthdays }: BirthdaysPanelProps) => {
           title="No birthdays yet"
         />
       ) : (
-        <Stack sx={{ maxHeight: 280, overflowY: "auto", p: 1 }}>
-          {birthdays.map((birthday) => (
+        <Stack sx={{ p: 1 }}>
+          {birthdays.slice(0, MAX_BIRTHDAYS).map((birthday) => (
             <ListRow
               key={birthday.userId}
               leading={

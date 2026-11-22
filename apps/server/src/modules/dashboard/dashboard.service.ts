@@ -41,6 +41,7 @@ export class DashboardService {
               }
             : null,
         task: activity.task,
+        project: activity.project,
         createdAt: activity.createdAt.toISOString(),
       })),
     };

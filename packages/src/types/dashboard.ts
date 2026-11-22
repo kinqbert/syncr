@@ -26,6 +26,10 @@ export type DashboardActivity = {
     id: number;
     name: string;
   };
+  project: {
+    id: number;
+    name: string;
+  };
   createdAt: string;
 };
 

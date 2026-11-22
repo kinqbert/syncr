@@ -160,6 +160,10 @@ export class DashboardRepository extends BaseRepository {
           id: tasks.id,
           name: tasks.name,
         },
+        project: {
+          id: projects.id,
+          name: projects.name,
+        },
       })
       .from(taskActivities)
       .innerJoin(tasks, eq(taskActivities.taskId, tasks.id))

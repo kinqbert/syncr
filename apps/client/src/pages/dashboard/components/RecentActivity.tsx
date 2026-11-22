@@ -7,6 +7,7 @@ import { UserAvatar } from "@/components/UserAvatar";
 import { TASK_ACTIVITY_LABEL } from "@/constants/taskActivityLabels";
 import { useRecentlyAddedIds } from "@/hooks";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
+import { getTaskDisplayName } from "@/utils/getTaskDisplayName";
 import { getUserFullName } from "@/utils/getUserFullName";
 
 type RecentActivityProps = {
@@ -29,7 +30,7 @@ export const RecentActivity = ({ activities }: RecentActivityProps) => {
       {activities.length === 0 ? (
         <EmptyState compact title="No recent activity yet" />
       ) : (
-        <Stack sx={{ maxHeight: 360, overflowY: "auto", p: 1 }}>
+        <Stack sx={{ p: 1 }}>
           {activities.map((activity) => (
             <ListRow
               key={activity.id}
@@ -40,7 +41,7 @@ export const RecentActivity = ({ activities }: RecentActivityProps) => {
                   surname={activity.actor?.surname}
                 />
               }
-              subtitle={formatRelativeDate(activity.createdAt)}
+              subtitle={`${activity.project.name} · ${formatRelativeDate(activity.createdAt)}`}
               sx={recentlyAddedIds.has(activity.id) ? recentlyAddedSx : undefined}
               title={
                 <>
@@ -50,9 +51,10 @@ export const RecentActivity = ({ activities }: RecentActivityProps) => {
                   <Box component="span" sx={{ color: "text.secondary" }}>
                     {TASK_ACTIVITY_LABEL[activity.action]}
                   </Box>{" "}
-                  {activity.task.name}
+                  {getTaskDisplayName(activity.task.name, activity.project.name)}
                 </>
               }
+              to={`/projects/${activity.project.id}/tasks/${activity.task.id}`}
               wrap
             />
           ))}
