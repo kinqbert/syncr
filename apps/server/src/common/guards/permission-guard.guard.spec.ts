@@ -10,7 +10,14 @@ import { PermissionKey } from "@syncr/packages";
 import { RoleRepository } from "../../repositories/role.repository";
 import { PermissionGuard } from "./permission-guard.guard";
 
-const createContext = (request: { headers: Record<string, string>; userId?: number }) =>
+type TestRequest = {
+  headers: Record<string, string>;
+  params?: Record<string, string>;
+  userId?: number;
+  permissions?: string[];
+};
+
+const createContext = (request: TestRequest) =>
   ({
     switchToHttp: () => ({ getRequest: () => request }),
     getHandler: () => undefined,
@@ -19,10 +26,11 @@ const createContext = (request: { headers: Record<string, string>; userId?: numb
 
 describe("PermissionGuard", () => {
   const getUserCompanyPermissionKeys = jest.fn<Promise<string[]>, [number, number]>();
+  const isProjectMember = jest.fn<Promise<boolean>, [number, number, number]>();
   const getAllAndOverride = jest.fn();
 
   const guard = new PermissionGuard(
-    { getUserCompanyPermissionKeys } as unknown as RoleRepository,
+    { getUserCompanyPermissionKeys, isProjectMember } as unknown as RoleRepository,
     { getAllAndOverride } as unknown as Reflector,
   );
 
@@ -79,5 +87,42 @@ describe("PermissionGuard", () => {
     const context = createContext({ headers: { "x-company-id": "7" } });
 
     await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+  });
+
+  it("stores the user's permissions on the request", async () => {
+    const request: TestRequest = { ...memberRequest };
+    getUserCompanyPermissionKeys.mockResolvedValue([PermissionKey.TaskView]);
+
+    await guard.canActivate(createContext(request));
+
+    expect(request.permissions).toEqual([PermissionKey.TaskView]);
+  });
+
+  describe("project scoped routes", () => {
+    const projectRequest = { ...memberRequest, params: { projectId: "11" } };
+
+    it("allows a project member", async () => {
+      getUserCompanyPermissionKeys.mockResolvedValue([PermissionKey.TaskView]);
+      isProjectMember.mockResolvedValue(true);
+
+      await expect(guard.canActivate(createContext(projectRequest))).resolves.toBe(true);
+      expect(isProjectMember).toHaveBeenCalledWith(3, 7, 11);
+    });
+
+    it("rejects a user outside the project", async () => {
+      getUserCompanyPermissionKeys.mockResolvedValue([PermissionKey.TaskView]);
+      isProjectMember.mockResolvedValue(false);
+
+      await expect(guard.canActivate(createContext(projectRequest))).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it("skips the membership check for roles that can view all projects", async () => {
+      getUserCompanyPermissionKeys.mockResolvedValue([PermissionKey.ProjectViewAll]);
+
+      await expect(guard.canActivate(createContext(projectRequest))).resolves.toBe(true);
+      expect(isProjectMember).not.toHaveBeenCalled();
+    });
   });
 });

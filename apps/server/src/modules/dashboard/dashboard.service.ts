@@ -1,24 +1,19 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import type { DashboardBirthday, DashboardData, DashboardTaskStatusPoint } from "@syncr/packages";
 import { TaskStatus } from "@syncr/packages";
+import type { ProjectViewer } from "src/common/decorators/project-viewer.decorator";
 import { DashboardRepository } from "src/repositories/dashboard.repository";
-import { UsersRepository } from "src/repositories/users.repository";
 
 @Injectable()
 export class DashboardService {
-  constructor(
-    private readonly dashboardRepository: DashboardRepository,
-    private readonly usersRepository: UsersRepository,
-  ) {}
+  constructor(private readonly dashboardRepository: DashboardRepository) {}
 
-  async getDashboard(companyId: number, userId: number): Promise<DashboardData> {
-    await this.userBelongsToCompany(userId, companyId);
-
+  async getDashboard(companyId: number, viewer: ProjectViewer): Promise<DashboardData> {
     const [summary, tasksByStatus, upcomingBirthdays, recentActivity] = await Promise.all([
-      this.dashboardRepository.getSummary(companyId, userId),
-      this.dashboardRepository.getTasksByStatus(companyId),
+      this.dashboardRepository.getSummary(companyId, viewer),
+      this.dashboardRepository.getTasksByStatus(companyId, viewer),
       this.dashboardRepository.getUpcomingBirthdays(companyId),
-      this.dashboardRepository.getRecentActivity(companyId),
+      this.dashboardRepository.getRecentActivity(companyId, viewer),
     ]);
 
     return {
@@ -114,13 +109,5 @@ export class DashboardService {
     const dayMs = 24 * 60 * 60 * 1000;
 
     return Math.round((nextBirthday.getTime() - today.getTime()) / dayMs);
-  }
-
-  private async userBelongsToCompany(userId: number, companyId: number) {
-    const isUserInCompany = await this.usersRepository.isUserInCompany(userId, companyId);
-
-    if (!isUserInCompany) {
-      throw new UnauthorizedException("User does not belong to the company");
-    }
   }
 }

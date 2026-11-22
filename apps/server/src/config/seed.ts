@@ -33,6 +33,10 @@ const INITIAL_PERMISSION_RECORDS: Record<PermissionKey, typeof permissions.$infe
   [PermissionKey.ProjectUpdate]: { key: PermissionKey.ProjectUpdate, name: "Update projects" },
   [PermissionKey.ProjectDelete]: { key: PermissionKey.ProjectDelete, name: "Delete projects" },
   [PermissionKey.ProjectView]: { key: PermissionKey.ProjectView, name: "View projects" },
+  [PermissionKey.ProjectViewAll]: {
+    key: PermissionKey.ProjectViewAll,
+    name: "View all company projects",
+  },
   [PermissionKey.TaskCreate]: { key: PermissionKey.TaskCreate, name: "Create tasks" },
   [PermissionKey.TaskUpdate]: { key: PermissionKey.TaskUpdate, name: "Update tasks" },
   [PermissionKey.TaskDelete]: { key: PermissionKey.TaskDelete, name: "Delete tasks" },
@@ -56,6 +60,7 @@ const ROLE_PERMISSION_RECORDS: Record<RoleKey, PermissionKey[]> = {
     PermissionKey.ProjectUpdate,
     PermissionKey.ProjectDelete,
     PermissionKey.ProjectView,
+    PermissionKey.ProjectViewAll,
     PermissionKey.TeamView,
     PermissionKey.TaskCreate,
     PermissionKey.TaskUpdate,

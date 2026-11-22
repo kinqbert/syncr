@@ -17,6 +17,7 @@ export const PermissionKey = {
   ProjectUpdate: "project:update",
   ProjectDelete: "project:delete",
   ProjectView: "project:view",
+  ProjectViewAll: "project:view_all",
 
   TaskCreate: "task:create",
   TaskUpdate: "task:update",

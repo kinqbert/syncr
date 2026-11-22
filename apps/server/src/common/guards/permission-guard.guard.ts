@@ -52,6 +52,34 @@ export class PermissionGuard implements CanActivate {
       throw new ForbiddenException("You do not have permission to perform this action");
     }
 
+    await this.ensureProjectAccess(request.params?.projectId, userId, companyId, userPermissions);
+
+    request.permissions = userPermissions;
+
     return true;
+  }
+
+  // routes scoped to a project are limited to its members unless the role can view all projects
+  private async ensureProjectAccess(
+    projectIdParam: string | undefined,
+    userId: number,
+    companyId: number,
+    userPermissions: string[],
+  ) {
+    const projectId = Number(projectIdParam);
+
+    if (!projectIdParam || !Number.isInteger(projectId)) {
+      return;
+    }
+
+    if (userPermissions.includes(PermissionKey.ProjectViewAll)) {
+      return;
+    }
+
+    const isMember = await this.roleRepository.isProjectMember(userId, companyId, projectId);
+
+    if (!isMember) {
+      throw new ForbiddenException("You are not a member of this project");
+    }
   }
 }

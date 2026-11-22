@@ -17,6 +17,7 @@ import { PermissionKey, Project, ProjectActivitiesPage } from "@syncr/packages";
 import { UserId } from "src/common/decorators/user-id.decorator";
 
 import { CompanyId } from "../../common/decorators/company-id.decorator";
+import { ProjectViewer } from "../../common/decorators/project-viewer.decorator";
 import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { PermissionGuard } from "../../common/guards/permission-guard.guard";
@@ -40,8 +41,11 @@ export class ProjectsController {
   @RequirePermission(PermissionKey.ProjectView)
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @HttpCode(HttpStatus.OK)
-  async getProjects(@CompanyId() companyId: number): Promise<ProjectDto[]> {
-    return await this.projectService.getCompanyProjects(companyId);
+  async getProjects(
+    @CompanyId() companyId: number,
+    @ProjectViewer() viewer: ProjectViewer,
+  ): Promise<ProjectDto[]> {
+    return await this.projectService.getCompanyProjects(companyId, viewer);
   }
 
   @Get("manager-candidates")

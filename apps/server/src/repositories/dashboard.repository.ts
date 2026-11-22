@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ProjectStatus, TaskActivityAction, TaskStatus } from "@syncr/packages";
 import { and, desc, eq, isNotNull, isNull, ne, or, sql } from "drizzle-orm";
 
+import type { ProjectViewer } from "../common/decorators/project-viewer.decorator";
 import { DbProvider } from "../db/db.provider";
 import {
   notifications,
@@ -19,7 +20,10 @@ export class DashboardRepository extends BaseRepository {
     super(dbProvider);
   }
 
-  async getSummary(companyId: number, userId: number) {
+  async getSummary(companyId: number, viewer: ProjectViewer) {
+    const { userId } = viewer;
+    const visibleProjects = this.visibleProjectsFilter(viewer);
+
     const [
       activeProjects,
       tasksCompleted,
@@ -33,14 +37,26 @@ export class DashboardRepository extends BaseRepository {
           value: sql<number>`count(*)::int`.mapWith(Number),
         })
         .from(projects)
-        .where(and(eq(projects.companyId, companyId), eq(projects.status, ProjectStatus.Active))),
+        .where(
+          and(
+            eq(projects.companyId, companyId),
+            eq(projects.status, ProjectStatus.Active),
+            visibleProjects,
+          ),
+        ),
       this.db
         .select({
           value: sql<number>`count(${tasks.id})::int`.mapWith(Number),
         })
         .from(tasks)
         .innerJoin(projects, eq(tasks.projectId, projects.id))
-        .where(and(eq(projects.companyId, companyId), eq(tasks.status, TaskStatus.Done))),
+        .where(
+          and(
+            eq(projects.companyId, companyId),
+            eq(tasks.status, TaskStatus.Done),
+            visibleProjects,
+          ),
+        ),
       this.db
         .select({
           value: sql<number>`count(${tasks.id})::int`.mapWith(Number),
@@ -52,6 +68,7 @@ export class DashboardRepository extends BaseRepository {
             eq(projects.companyId, companyId),
             ne(tasks.status, TaskStatus.Done),
             sql`${tasks.endDate}::date = current_date`,
+            visibleProjects,
           ),
         ),
       this.db
@@ -97,7 +114,7 @@ export class DashboardRepository extends BaseRepository {
     };
   }
 
-  async getTasksByStatus(companyId: number) {
+  async getTasksByStatus(companyId: number, viewer: ProjectViewer) {
     return await this.db
       .select({
         status: tasks.status,
@@ -105,7 +122,13 @@ export class DashboardRepository extends BaseRepository {
       })
       .from(tasks)
       .innerJoin(projects, eq(tasks.projectId, projects.id))
-      .where(and(eq(projects.companyId, companyId), eq(projects.status, ProjectStatus.Active)))
+      .where(
+        and(
+          eq(projects.companyId, companyId),
+          eq(projects.status, ProjectStatus.Active),
+          this.visibleProjectsFilter(viewer),
+        ),
+      )
       .groupBy(tasks.status);
   }
 
@@ -122,7 +145,7 @@ export class DashboardRepository extends BaseRepository {
       .where(and(eq(userCompanyRoles.companyId, companyId), isNotNull(users.birthday)));
   }
 
-  async getRecentActivity(companyId: number, limit = 5) {
+  async getRecentActivity(companyId: number, viewer: ProjectViewer, limit = 5) {
     return await this.db
       .select({
         id: taskActivities.id,
@@ -146,6 +169,7 @@ export class DashboardRepository extends BaseRepository {
         and(
           eq(projects.companyId, companyId),
           ne(taskActivities.action, TaskActivityAction.TaskUpdated),
+          this.visibleProjectsFilter(viewer),
         ),
       )
       .orderBy(desc(taskActivities.createdAt), desc(taskActivities.id))

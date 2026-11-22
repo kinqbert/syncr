@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { RoleKey, TaskStatus } from "@syncr/packages";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 
+import type { ProjectViewer } from "../common/decorators/project-viewer.decorator";
 import { DbProvider } from "../db/db.provider";
 import {
   projectLabels,
@@ -21,7 +22,7 @@ export class ProjectsRepository extends BaseRepository {
     super(dbProvider);
   }
 
-  async getCompanyProjects(companyId: number) {
+  async getCompanyProjects(companyId: number, viewer: ProjectViewer) {
     return await this.db
       .select({
         project: projects,
@@ -32,7 +33,7 @@ export class ProjectsRepository extends BaseRepository {
       .from(projects)
       .leftJoin(projectUsers, eq(projectUsers.projectId, projects.id))
       .leftJoin(tasks, eq(tasks.projectId, projects.id))
-      .where(eq(projects.companyId, companyId))
+      .where(and(eq(projects.companyId, companyId), this.visibleProjectsFilter(viewer)))
       .groupBy(projects.id)
       .orderBy(asc(projects.startDate), asc(projects.name));
   }

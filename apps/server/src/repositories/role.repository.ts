@@ -3,7 +3,14 @@ import { RoleKey } from "@syncr/packages";
 import { and, eq } from "drizzle-orm";
 
 import { DbProvider } from "../db/db.provider";
-import { permissions, rolePermissions, roles, userCompanyRoles } from "../db/schema";
+import {
+  permissions,
+  projects,
+  projectUsers,
+  rolePermissions,
+  roles,
+  userCompanyRoles,
+} from "../db/schema";
 import { BaseRepository } from "./base.repository";
 
 @Injectable()
@@ -27,5 +34,22 @@ export class RoleRepository extends BaseRepository {
       .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id));
 
     return rows.map((row) => row.key);
+  }
+
+  async isProjectMember(userId: number, companyId: number, projectId: number) {
+    const [member] = await this.db
+      .select({ userId: projectUsers.userId })
+      .from(projectUsers)
+      .innerJoin(projects, eq(projectUsers.projectId, projects.id))
+      .where(
+        and(
+          eq(projectUsers.userId, userId),
+          eq(projectUsers.projectId, projectId),
+          eq(projects.companyId, companyId),
+        ),
+      )
+      .limit(1);
+
+    return Boolean(member);
   }
 }

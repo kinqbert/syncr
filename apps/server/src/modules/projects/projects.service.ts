@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ProjectStatus } from "@syncr/packages";
 
+import type { ProjectViewer } from "../../common/decorators/project-viewer.decorator";
 import { LabelsRepository } from "../../repositories/labels.repository";
 import { ProjectsRepository } from "../../repositories/projects.repository";
 import { TaskActivitiesRepository } from "../../repositories/task-activities.repository";
@@ -18,8 +19,8 @@ export class ProjectsService {
     private readonly taskActivitiesRepository: TaskActivitiesRepository,
   ) {}
 
-  async getCompanyProjects(companyId: number) {
-    const projects = await this.projectRepository.getCompanyProjects(companyId);
+  async getCompanyProjects(companyId: number, viewer: ProjectViewer) {
+    const projects = await this.projectRepository.getCompanyProjects(companyId, viewer);
 
     return projects.map(({ project, ...stats }) => mapProjectToDto(project, stats));
   }
