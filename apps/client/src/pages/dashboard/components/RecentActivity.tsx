@@ -2,9 +2,10 @@ import { Box, Stack } from "@mui/material";
 import type { DashboardActivity } from "@syncr/packages";
 import { Activity } from "lucide-mui";
 
-import { EmptyState, ListRow, Section } from "@/components/ui";
+import { EmptyState, ListRow, recentlyAddedSx, Section } from "@/components/ui";
 import { UserAvatar } from "@/components/UserAvatar";
 import { TASK_ACTIVITY_LABEL } from "@/constants/taskActivityLabels";
+import { useRecentlyAddedIds } from "@/hooks";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
 import { getUserFullName } from "@/utils/getUserFullName";
 
@@ -19,6 +20,10 @@ const getActivityActorName = (activity: DashboardActivity) => {
 };
 
 export const RecentActivity = ({ activities }: RecentActivityProps) => {
+  const recentlyAddedIds = useRecentlyAddedIds(
+    activities.map((activity) => activity.id),
+  );
+
   return (
     <Section icon={<Activity />} padding="none" title="Recent activity">
       {activities.length === 0 ? (
@@ -36,6 +41,7 @@ export const RecentActivity = ({ activities }: RecentActivityProps) => {
                 />
               }
               subtitle={formatRelativeDate(activity.createdAt)}
+              sx={recentlyAddedIds.has(activity.id) ? recentlyAddedSx : undefined}
               title={
                 <>
                   <Box component="span" sx={{ fontWeight: 600 }}>

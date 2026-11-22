@@ -11,11 +11,12 @@ import { TasksRepository } from "../../repositories/tasks.repository";
 import { UsersRepository } from "../../repositories/users.repository";
 import { CalendarModule } from "../calendar/calendar.module";
 import { NotificationsModule } from "../notifications/notifications.module";
+import { RealtimeModule } from "../realtime/realtime.module";
 import { TasksController, UserTasksController } from "./tasks.controller";
 import { TasksService } from "./tasks.service";
 
 @Module({
-  imports: [CalendarModule, NotificationsModule],
+  imports: [CalendarModule, NotificationsModule, RealtimeModule],
   controllers: [TasksController, UserTasksController],
   providers: [
     TasksService,

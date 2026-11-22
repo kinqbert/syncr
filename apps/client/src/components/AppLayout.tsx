@@ -17,6 +17,7 @@ import { ErrorState } from "./ErrorState";
 import { NotificationsListener } from "./NotificationsListener";
 import { Sidebar } from "./Sidebar";
 import { PageSkeleton } from "./ui";
+import { WorkspaceEventsListener } from "./WorkspaceEventsListener";
 
 const CompanyContent = () => {
   useSyncSelectedCompany();
@@ -75,6 +76,7 @@ export const AppLayout = () => {
           />
           <NotificationsListener />
           <ConversationEventsListener />
+          <WorkspaceEventsListener />
         </>
         <Stack sx={{ height: "100dvh", overflow: "hidden" }}>
           {isDemo && <DemoBanner />}

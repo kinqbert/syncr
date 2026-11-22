@@ -112,6 +112,11 @@ export type ProjectActivitiesPage = {
   hasMore: boolean;
 };
 
+export type TaskChangedPayload = {
+  projectId: number;
+  taskId: number | null;
+};
+
 export type Task = {
   id: number;
   name: string;

@@ -17,6 +17,7 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 
+import { dashboardKeys } from "@/api/dashboard";
 import api from "@/lib/axios";
 import { queryClient } from "@/lib/react-query";
 import { useCompanyStore } from "@/store/useCompanyStore";
@@ -257,6 +258,13 @@ const invalidateAssignedTasks = () => {
   void queryClient.invalidateQueries({
     queryKey: taskKeys.assignedToMe(),
   });
+};
+
+export const invalidateRemoteTaskChange = (projectId: number) => {
+  void queryClient.invalidateQueries({ queryKey: taskKeys.project(projectId) });
+  void queryClient.invalidateQueries({ queryKey: dashboardKeys.dashboard });
+  invalidateAssignedTasks();
+  invalidateProjectSummaries();
 };
 
 export const useGetProjectTasks = (projectId: number, enabled = true) => {

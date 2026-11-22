@@ -1,88 +1,42 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
-import type { ClientToServerEvents, MessagePayload, ServerToClientEvents } from "@syncr/packages";
-import { parse as parseCookie } from "cookie";
-import { Server, Socket } from "socket.io";
+import type { MessagePayload } from "@syncr/packages";
 
-import { COOKIE_PARAM } from "../../common/constants/cookie-param";
-import { verifyAccessToken } from "../../common/utils/jwt";
-import { CONFIG } from "../../config/configuration";
-import { AuthRepository } from "../../repositories/auth.repository";
 import { ConversationsRepository } from "../../repositories/conversations.repository";
+import {
+  type AppServer,
+  type AppSocket,
+  conversationRoom,
+  getSocketUserId,
+  SOCKET_GATEWAY_OPTIONS,
+  userRoom,
+} from "../realtime/socket";
 
-type ConversationSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
-
-type ConversationSocketData = {
-  userId?: unknown;
+type ConversationEventPayload = {
+  conversationId: number;
 };
 
-@WebSocketGateway({
-  cors: {
-    origin: CONFIG.CLIENT_URL,
-    credentials: true,
-  },
-})
-export class ConversationsGateway implements OnGatewayConnection {
+@WebSocketGateway(SOCKET_GATEWAY_OPTIONS)
+export class ConversationsGateway {
   @WebSocketServer()
-  server: Server<ClientToServerEvents, ServerToClientEvents>;
+  server: AppServer;
 
-  constructor(
-    private readonly authRepository: AuthRepository,
-    private readonly conversationsRepository: ConversationsRepository,
-  ) {}
-
-  async handleConnection(client: ConversationSocket) {
-    try {
-      const cookies = parseCookie(client.handshake.headers.cookie ?? "");
-
-      const accessToken = cookies[COOKIE_PARAM.accessToken];
-      const sessionId = cookies[COOKIE_PARAM.sessionId];
-
-      if (!accessToken || !sessionId) {
-        client.disconnect();
-        return;
-      }
-
-      const payload = verifyAccessToken(accessToken);
-      const userSession = await this.authRepository.findSessionById(sessionId);
-
-      if (
-        !userSession ||
-        userSession.userId !== payload.userId ||
-        new Date(userSession.expiresAt) < new Date()
-      ) {
-        client.disconnect();
-        return;
-      }
-
-      this.setSocketUserId(client, payload.userId);
-
-      await client.join(this.getUserRoom(payload.userId));
-    } catch {
-      client.disconnect();
-    }
-  }
+  constructor(private readonly conversationsRepository: ConversationsRepository) {}
 
   @SubscribeMessage("conversation.join")
   async handleConversationJoin(
-    @ConnectedSocket()
-    client: ConversationSocket,
-
-    @MessageBody()
-    payload: {
-      conversationId: number;
-    },
+    @ConnectedSocket() client: AppSocket,
+    @MessageBody() payload: ConversationEventPayload,
   ) {
-    const userId = this.getSocketUserId(client);
+    const userId = getSocketUserId(client);
 
     if (
-      userId == null ||
+      userId === null ||
       !(await this.conversationsRepository.isConversationParticipant(
         payload.conversationId,
         userId,
@@ -91,75 +45,46 @@ export class ConversationsGateway implements OnGatewayConnection {
       return;
     }
 
-    const room = `conversation:${payload.conversationId}`;
-
-    await client.join(room);
+    await client.join(conversationRoom(payload.conversationId));
   }
 
   @SubscribeMessage("conversation.leave")
   async handleConversationLeave(
-    @ConnectedSocket()
-    client: ConversationSocket,
-
-    @MessageBody()
-    payload: {
-      conversationId: number;
-    },
+    @ConnectedSocket() client: AppSocket,
+    @MessageBody() payload: ConversationEventPayload,
   ) {
-    const room = `conversation:${payload.conversationId}`;
-
-    await client.leave(room);
+    await client.leave(conversationRoom(payload.conversationId));
   }
 
   @SubscribeMessage("typing.started")
   async handleTypingStarted(
-    @ConnectedSocket()
-    client: ConversationSocket,
-
-    @MessageBody()
-    payload: {
-      conversationId: number;
-    },
+    @ConnectedSocket() client: AppSocket,
+    @MessageBody() payload: ConversationEventPayload,
   ) {
     await this.emitTypingState(client, payload.conversationId, "typing.started");
   }
 
   @SubscribeMessage("typing.stopped")
   async handleTypingStopped(
-    @ConnectedSocket()
-    client: ConversationSocket,
-
-    @MessageBody()
-    payload: {
-      conversationId: number;
-    },
+    @ConnectedSocket() client: AppSocket,
+    @MessageBody() payload: ConversationEventPayload,
   ) {
     await this.emitTypingState(client, payload.conversationId, "typing.stopped");
   }
 
   emitMessageCreated(conversationId: number, message: MessagePayload) {
-    this.server.to(`conversation:${conversationId}`).emit("message.created", message);
+    this.server.to(conversationRoom(conversationId)).emit("message.created", message);
   }
 
-  emitTypingStarted(
-    conversationId: number,
-    payload: {
-      userId: number;
-    },
-  ) {
-    this.server.to(`conversation:${conversationId}`).emit("typing.started", {
+  emitTypingStarted(conversationId: number, payload: { userId: number }) {
+    this.server.to(conversationRoom(conversationId)).emit("typing.started", {
       conversationId,
       userId: payload.userId,
     });
   }
 
-  emitTypingStopped(
-    conversationId: number,
-    payload: {
-      userId: number;
-    },
-  ) {
-    this.server.to(`conversation:${conversationId}`).emit("typing.stopped", {
+  emitTypingStopped(conversationId: number, payload: { userId: number }) {
+    this.server.to(conversationRoom(conversationId)).emit("typing.stopped", {
       conversationId,
       userId: payload.userId,
     });
@@ -167,23 +92,19 @@ export class ConversationsGateway implements OnGatewayConnection {
 
   emitConversationMessageCreated(participantUserIds: number[], message: MessagePayload) {
     for (const userId of participantUserIds) {
-      this.server.to(this.getUserRoom(userId)).emit("message.created", message);
+      this.server.to(userRoom(userId)).emit("message.created", message);
     }
   }
 
-  private getUserRoom(userId: number) {
-    return `user:${userId}`;
-  }
-
   private async emitTypingState(
-    client: ConversationSocket,
+    client: AppSocket,
     conversationId: number,
     event: "typing.started" | "typing.stopped",
   ) {
-    const userId = this.getSocketUserId(client);
+    const userId = getSocketUserId(client);
 
     if (
-      userId == null ||
+      userId === null ||
       !(await this.conversationsRepository.isConversationParticipant(conversationId, userId))
     ) {
       return;
@@ -197,22 +118,10 @@ export class ConversationsGateway implements OnGatewayConnection {
         continue;
       }
 
-      this.server.to(this.getUserRoom(participantUserId)).emit(event, {
+      this.server.to(userRoom(participantUserId)).emit(event, {
         conversationId,
         userId,
       });
     }
-  }
-
-  private getSocketUserId(client: ConversationSocket) {
-    const data = client.data as ConversationSocketData;
-
-    return typeof data.userId === "number" ? data.userId : null;
-  }
-
-  private setSocketUserId(client: ConversationSocket, userId: number) {
-    const data = client.data as ConversationSocketData;
-
-    data.userId = userId;
   }
 }

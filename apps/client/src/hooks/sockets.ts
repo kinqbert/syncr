@@ -31,3 +31,17 @@ export const useNotificationEvent = (
     };
   }, [enabled, handler, socket]);
 };
+
+export const useTaskChangedEvent = (
+  handler: ServerToClientEvents["task.changed"],
+) => {
+  const socket = useSocket();
+
+  useEffect(() => {
+    socket.on("task.changed", handler);
+
+    return () => {
+      socket.off("task.changed", handler);
+    };
+  }, [handler, socket]);
+};

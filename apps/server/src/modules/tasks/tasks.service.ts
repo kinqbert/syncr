@@ -10,6 +10,7 @@ import { TasksRepository } from "../../repositories/tasks.repository";
 import { UsersRepository } from "../../repositories/users.repository";
 import { CalendarSyncService } from "../calendar/calendar-sync.service";
 import { NotificationsService } from "../notifications/notifications.service";
+import { RealtimeGateway } from "../realtime/realtime.gateway";
 import {
   CreateTaskAcceptanceCriterionDto,
   CreateTaskCommentDto,
@@ -36,6 +37,7 @@ export class TasksService {
     private readonly usersRepository: UsersRepository,
     private readonly notificationsService: NotificationsService,
     private readonly calendarSyncService: CalendarSyncService,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async getProjectTasks(companyId: number, projectId: number) {
@@ -106,6 +108,8 @@ export class TasksService {
     }
 
     await this.calendarSyncService.syncTaskDeadline(task);
+
+    this.realtimeGateway.emitTaskChanged(companyId, { projectId, taskId: task.id });
 
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
@@ -229,6 +233,8 @@ export class TasksService {
       await this.calendarSyncService.syncTaskDeadline(task);
     }
 
+    this.realtimeGateway.emitTaskChanged(companyId, { projectId, taskId });
+
     const [taskWithCriteria] = await this.withTaskRelations([task]);
 
     return mapTaskToDto(taskWithCriteria);
@@ -254,6 +260,8 @@ export class TasksService {
     if (!tasks) {
       throw new NotFoundException("One or more tasks were not found");
     }
+
+    this.realtimeGateway.emitTaskChanged(companyId, { projectId, taskId: null });
 
     const tasksWithCriteria = await this.withTaskRelations(tasks);
 
@@ -316,6 +324,8 @@ export class TasksService {
       await this.notificationsService.notifyTaskCommented(task.assignee.id, userId, taskId);
     }
 
+    this.realtimeGateway.emitTaskChanged(companyId, { projectId, taskId });
+
     return mapTaskCommentToDto(comment);
   }
 
@@ -354,6 +364,8 @@ export class TasksService {
         taskId,
       );
     }
+
+    this.realtimeGateway.emitTaskChanged(companyId, { projectId, taskId });
 
     const task = await this.taskRepository.getTask(taskId);
 
@@ -411,6 +423,8 @@ export class TasksService {
       action: TaskActivityAction.AcceptanceCriterionUpdated,
     });
 
+    this.realtimeGateway.emitTaskChanged(companyId, { projectId, taskId });
+
     const task = await this.taskRepository.getTask(taskId);
 
     if (!task) {
@@ -444,6 +458,8 @@ export class TasksService {
       action: TaskActivityAction.AcceptanceCriterionDeleted,
     });
 
+    this.realtimeGateway.emitTaskChanged(companyId, { projectId, taskId });
+
     const task = await this.taskRepository.getTask(taskId);
 
     if (!task) {
@@ -465,6 +481,8 @@ export class TasksService {
     if (!task) {
       throw new NotFoundException("Task not found");
     }
+
+    this.realtimeGateway.emitTaskChanged(companyId, { projectId, taskId });
   }
 
   private async ensureProjectExists(projectId: number, companyId: number) {

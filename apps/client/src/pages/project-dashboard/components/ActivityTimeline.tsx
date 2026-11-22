@@ -3,9 +3,16 @@ import type { ProjectActivity } from "@syncr/packages";
 import { Activity } from "lucide-mui";
 
 import { useGetProjectActivities } from "@/api/projects";
-import { EmptyState, ListRow, RowSkeleton, Section } from "@/components/ui";
+import {
+  EmptyState,
+  ListRow,
+  recentlyAddedSx,
+  RowSkeleton,
+  Section,
+} from "@/components/ui";
 import { UserAvatar } from "@/components/UserAvatar";
 import { TASK_ACTIVITY_LABEL } from "@/constants/taskActivityLabels";
+import { useRecentlyAddedIds } from "@/hooks";
 import { formatRelativeDate } from "@/utils/formatRelativeDate";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { getTaskDisplayName } from "@/utils/getTaskDisplayName";
@@ -38,6 +45,9 @@ export const ActivityTimeline = ({
     isPending: isLoading,
   } = useGetProjectActivities(projectId, ACTIVITY_PAGE_SIZE);
   const activities = data?.pages.flatMap((page) => page.items) ?? [];
+  const recentlyAddedIds = useRecentlyAddedIds(
+    data ? activities.map((activity) => activity.id) : undefined,
+  );
 
   return (
     <Section icon={<Activity />} padding="none" title="Activity">
@@ -76,6 +86,7 @@ export const ActivityTimeline = ({
                   {getTaskDisplayName(item.task.name, projectName)}
                 </>
               }
+              sx={recentlyAddedIds.has(item.id) ? recentlyAddedSx : undefined}
               to={`/projects/${projectId}/tasks/${item.task.id}`}
               trailing={formatRelativeDate(item.createdAt)}
             />
