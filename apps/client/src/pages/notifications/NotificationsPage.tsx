@@ -65,19 +65,19 @@ const TASK_NOTIFICATION_TYPES = new Set<NotificationType>([
 const getNotificationTitle = (notification: NotificationPayload) => {
   switch (notification.type) {
     case NotificationType.TaskAssigned:
-      return "Task Assigned";
+      return "Task assigned";
     case NotificationType.TaskCommented:
-      return "New Comment";
+      return "New comment";
     case NotificationType.TaskStatusChanged:
-      return "Task Status Updated";
+      return "Status changed";
     case NotificationType.TaskDeadlineChanged:
-      return "Deadline Updated";
+      return "Deadline changed";
     case NotificationType.TaskAcceptanceCriterionAdded:
-      return "Acceptance Criterion Added";
+      return "Acceptance criterion added";
     case NotificationType.ProjectAdded:
-      return "Team Update";
+      return "Added to project";
     case NotificationType.CompanyInvitation:
-      return "Company Invitation";
+      return "Company invitation";
     default:
       return "Notification";
   }

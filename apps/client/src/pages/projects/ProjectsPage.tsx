@@ -135,7 +135,7 @@ export const ProjectsPage = () => {
 
   const getManagerName = (project: Project) =>
     project.managerId
-      ? (managerById.get(project.managerId) ?? "Unknown")
+      ? (managerById.get(project.managerId) ?? "No manager")
       : "No manager";
 
   const statusCounts = projects.reduce<Record<string, number>>(

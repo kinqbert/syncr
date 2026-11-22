@@ -55,7 +55,7 @@ export const LoginForm = () => {
       {error && <Typography color="error">{error}</Typography>}
 
       <Button type="submit" variant="contained">
-        Login
+        Sign in
       </Button>
 
       <Typography color="text.secondary" textAlign="center">

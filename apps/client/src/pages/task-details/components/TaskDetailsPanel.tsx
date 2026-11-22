@@ -266,7 +266,9 @@ export const TaskDetailsPanel = ({
                     sx={{ flexShrink: 0, pr: 1 }}
                     variant="body2"
                   >
-                    {formatDuration(Number(estimate) || 0)}
+                    {Number(estimate) >= 60
+                      ? formatDuration(Number(estimate))
+                      : "min"}
                   </Typography>
                 ),
               },

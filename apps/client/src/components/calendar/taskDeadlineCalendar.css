@@ -126,7 +126,6 @@
 .syncr-calendar .fc .fc-daygrid-event {
   background: var(--mui-palette-background-paper);
   border: 1px solid var(--mui-palette-divider);
-  border-left: 3px solid var(--syncr-calendar-event-accent, var(--mui-palette-primary-main));
   border-radius: 6px;
   box-shadow: none;
   color: var(--mui-palette-text-primary);

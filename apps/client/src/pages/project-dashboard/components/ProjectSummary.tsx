@@ -73,7 +73,13 @@ export const ProjectSummary = ({ members, project, tasks }: ProjectSummaryProps)
           value: (
             <Box
               component="span"
-              sx={{ color: project.endDate ? DUE_STATE_COLOR[dueState] : "text.disabled" }}
+              sx={{
+                color: !project.endDate
+                  ? "text.disabled"
+                  : dueState === "later"
+                    ? "text.primary"
+                    : DUE_STATE_COLOR[dueState],
+              }}
             >
               {project.endDate ? formatDueDate(project.endDate) : "None"}
             </Box>
