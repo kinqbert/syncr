@@ -117,7 +117,7 @@ export class TasksController {
   }
 
   @Get(":taskId/comments")
-  @RequirePermission(PermissionKey.TaskAssign)
+  @RequirePermission(PermissionKey.CommentView)
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @HttpCode(HttpStatus.OK)
   async getTaskComments(
@@ -129,7 +129,7 @@ export class TasksController {
   }
 
   @Post(":taskId/comments")
-  @RequirePermission(PermissionKey.TaskAssign)
+  @RequirePermission(PermissionKey.CommentCreate)
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @HttpCode(HttpStatus.OK)
   async createTaskComment(

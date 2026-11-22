@@ -10,7 +10,11 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   build-and-deploy:
+    needs: ci
     runs-on: ubuntu-latest
     permissions:
       contents: read

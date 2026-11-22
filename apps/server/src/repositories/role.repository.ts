@@ -18,15 +18,14 @@ export class RoleRepository extends BaseRepository {
     return role;
   }
 
-  async getUserCompanyPermission(userId: number, companyId: number) {
-    const [permission] = await this.db
-      .select()
+  async getUserCompanyPermissionKeys(userId: number, companyId: number) {
+    const rows = await this.db
+      .select({ key: permissions.key })
       .from(userCompanyRoles)
       .where(and(eq(userCompanyRoles.userId, userId), eq(userCompanyRoles.companyId, companyId)))
-      .innerJoin(roles, eq(userCompanyRoles.roleId, roles.id))
       .innerJoin(rolePermissions, eq(userCompanyRoles.roleId, rolePermissions.roleId))
       .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id));
 
-    return permission.permissions;
+    return rows.map((row) => row.key);
   }
 }

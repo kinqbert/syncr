@@ -69,6 +69,7 @@ const ROLE_PERMISSION_RECORDS: Record<RoleKey, PermissionKey[]> = {
   ],
 
   [RoleKey.Developer]: [
+    PermissionKey.TeamView,
     PermissionKey.ProjectView,
     PermissionKey.TaskCreate,
     PermissionKey.TaskUpdate,

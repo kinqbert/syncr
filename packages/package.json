@@ -16,7 +16,9 @@
   },
   "scripts": {
     "lint": "eslint \"src/**/*.ts\"",
-    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc --emitDeclarationOnly --outDir dist && esbuild src/index.ts --bundle --format=esm --platform=neutral --outfile=dist/index.mjs && esbuild src/index.ts --bundle --format=cjs --platform=node --outfile=dist/index.js"
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc --emitDeclarationOnly --outDir dist && esbuild src/index.ts --bundle --format=esm --platform=neutral --outfile=dist/index.mjs && esbuild src/index.ts --bundle --format=cjs --platform=node --outfile=dist/index.js",
+    "lint:check": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",

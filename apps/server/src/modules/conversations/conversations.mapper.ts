@@ -58,9 +58,7 @@ export const mapConversationMessageToDto = (
     : null,
   content: message.content,
   replyTo:
-    message.replyToId != null &&
-    message.replyToContent != null &&
-    message.replyToCreatedAt != null
+    message.replyToId != null && message.replyToContent != null && message.replyToCreatedAt != null
       ? {
           id: message.replyToId,
           author:

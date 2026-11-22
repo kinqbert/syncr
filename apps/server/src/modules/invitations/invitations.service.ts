@@ -113,21 +113,19 @@ export class InvitationsService {
       recipients,
     );
 
-    await Promise.all(
-      invitations.map((invitation) => {
-        if (!invitation.userId) {
-          return;
-        }
+    const existingUserInvitations = invitations.filter((invitation) => invitation.userId);
 
-        return this.notifyCompanyInvitation(
-          invitation.userId,
+    await Promise.all(
+      existingUserInvitations.map((invitation) =>
+        this.notifyCompanyInvitation(
+          invitation.userId!,
           inviterId,
           invitation.id,
           company.id,
           company.name,
           role.name,
-        );
-      }),
+        ),
+      ),
     );
   }
 

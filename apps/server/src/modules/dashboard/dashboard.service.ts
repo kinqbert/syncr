@@ -1,9 +1,5 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import type {
-  DashboardBirthday,
-  DashboardData,
-  DashboardTaskStatusPoint,
-} from "@syncr/packages";
+import type { DashboardBirthday, DashboardData, DashboardTaskStatusPoint } from "@syncr/packages";
 import { TaskStatus } from "@syncr/packages";
 import { DashboardRepository } from "src/repositories/dashboard.repository";
 import { UsersRepository } from "src/repositories/users.repository";
@@ -18,13 +14,12 @@ export class DashboardService {
   async getDashboard(companyId: number, userId: number): Promise<DashboardData> {
     await this.userBelongsToCompany(userId, companyId);
 
-    const [summary, tasksByStatus, upcomingBirthdays, recentActivity] =
-      await Promise.all([
-        this.dashboardRepository.getSummary(companyId, userId),
-        this.dashboardRepository.getTasksByStatus(companyId),
-        this.dashboardRepository.getUpcomingBirthdays(companyId),
-        this.dashboardRepository.getRecentActivity(companyId),
-      ]);
+    const [summary, tasksByStatus, upcomingBirthdays, recentActivity] = await Promise.all([
+      this.dashboardRepository.getSummary(companyId, userId),
+      this.dashboardRepository.getTasksByStatus(companyId),
+      this.dashboardRepository.getUpcomingBirthdays(companyId),
+      this.dashboardRepository.getRecentActivity(companyId),
+    ]);
 
     return {
       summary: {
@@ -100,9 +95,7 @@ export class DashboardService {
           return first.daysRemaining - second.daysRemaining;
         }
 
-        return `${first.name} ${first.surname}`.localeCompare(
-          `${second.name} ${second.surname}`,
-        );
+        return `${first.name} ${first.surname}`.localeCompare(`${second.name} ${second.surname}`);
       });
   }
 
@@ -124,10 +117,7 @@ export class DashboardService {
   }
 
   private async userBelongsToCompany(userId: number, companyId: number) {
-    const isUserInCompany = await this.usersRepository.isUserInCompany(
-      userId,
-      companyId,
-    );
+    const isUserInCompany = await this.usersRepository.isUserInCompany(userId, companyId);
 
     if (!isUserInCompany) {
       throw new UnauthorizedException("User does not belong to the company");

@@ -142,9 +142,7 @@ export class TasksService {
     if (updateTaskDto.status !== undefined) {
       updateData.status = updateTaskDto.status;
       updateData.completedAt =
-        updateTaskDto.status === TaskStatus.Done
-          ? (existingTask.completedAt ?? new Date())
-          : null;
+        updateTaskDto.status === TaskStatus.Done ? (existingTask.completedAt ?? new Date()) : null;
     }
 
     if (updateTaskDto.priority !== undefined) {

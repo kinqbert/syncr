@@ -9,12 +9,6 @@ import { DashboardService } from "./dashboard.service";
 
 @Module({
   controllers: [DashboardController],
-  providers: [
-    DashboardService,
-    DashboardRepository,
-    UsersRepository,
-    JwtAuthGuard,
-    AuthRepository,
-  ],
+  providers: [DashboardService, DashboardRepository, UsersRepository, JwtAuthGuard, AuthRepository],
 })
 export class DashboardModule {}
